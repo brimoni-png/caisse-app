@@ -121,7 +121,7 @@ const Ic = {
 const T = {
   fr: {
     dir: "ltr", font: "'DM Sans', sans-serif",
-    greeting: "السلام عليكم !", userName: "Cheikh Brahim", subtitle: "Caisse communautaire",
+    greeting: "Trésorier", userName: "Cheikh Brahim", subtitle: "Caisse communautaire",
     balanceGlobal: "Solde Global",
     stats: { contribution: "Contributions", don: "Dons", depense: "Dépenses" },
     activity: "Activité financière", recentTx: "Transactions récentes", seeAll: "Voir tout →",
@@ -152,7 +152,7 @@ const T = {
   },
   ar: {
     dir: "rtl", font: "'DM Sans', sans-serif",
-    greeting: "السلام عليكم !", userName: "الشيخ إبراهيم", subtitle: "صندوق تعاوني",
+    greeting: "Trésorier", userName: "الشيخ إبراهيم", subtitle: "صندوق تعاوني",
     balanceGlobal: "الرصيد الإجمالي",
     stats: { contribution: "المساهمات", don: "التبرعات", depense: "المصروفات" },
     activity: "النشاط المالي", recentTx: "آخر المعاملات", seeAll: "عرض الكل ←",
@@ -326,10 +326,10 @@ function GBtn({ children, onClick, sx = {} }) {
 
 function LangSwitch({ lang, setLang }) {
   return (
-    <div style={{ display: "flex", background: "rgba(255,255,255,0.18)", borderRadius: 10, padding: 3, gap: 2, border: "1px solid rgba(255,255,255,0.22)", backdropFilter: "blur(8px)" }}>
+    <div style={{ display: "flex", background: "rgba(255,255,255,0.8)", borderRadius: 20, padding: 3, gap: 2, border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
       {["fr", "ar"].map((l) => (
         <button key={l} className="tbtn" onClick={() => setLang(l)}
-          style={{ background: lang === l ? "rgba(255,255,255,0.28)" : "transparent", border: "none", borderRadius: 7, color: lang === l ? "#fff" : "rgba(255,255,255,0.55)", fontWeight: 600, fontSize: 11, padding: "5px 12px", cursor: "pointer", fontFamily: "inherit" }}>
+          style={{ background: lang === l ? "#1A1A1A" : "transparent", border: "none", borderRadius: 16, color: lang === l ? "#fff" : "#6B7A6B", fontWeight: 600, fontSize: 11, padding: "5px 13px", cursor: "pointer", fontFamily: "inherit", transition: "all .18s" }}>
           {l === "fr" ? "FR" : "ع"}
         </button>
       ))}
@@ -511,7 +511,7 @@ function CaisseLogo() {
 }
 
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
-function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, chartReady }) {
+function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, setLang, chartReady }) {
   const t = T[lang];
   const solde   = txs.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
   const contrib = txs.filter((tx) => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
@@ -532,16 +532,16 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, c
       <div style={{ background: "transparent", padding: "16px 4px 0px", marginLeft: 0, marginRight: 0, marginTop: -20, position: "relative", overflow: "visible" }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: 0, height: 0, pointerEvents: "none" }} />
 
-        {/* Logo + greeting + icons */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 26 }}>
+        {/* Logo + greeting + lang switch */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
             <CaisseLogo />
             <div>
-              <div style={{ color: C.muted, fontSize: 11, fontWeight: 400, letterSpacing: 0 }}>{t.greeting}</div>
+              <div style={{ color: C.muted, fontSize: 11, fontWeight: 500, letterSpacing: 0.3 }}>{t.greeting}</div>
               <div style={{ color: C.text, fontSize: 15, fontWeight: 600, letterSpacing: -0.2 }}>{t.userName}</div>
             </div>
           </div>
-
+          <LangSwitch lang={lang} setLang={setLang} />
         </div>
 
         {/* Balance - Yellow card */}
@@ -964,7 +964,7 @@ export default function App() {
     <div style={{ background: "linear-gradient(160deg,#D4F0C0 0%,#E8F5E0 50%,#F0FAE8 100%)", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: t.font, color: C.text, position: "relative", paddingBottom: 90, overflowX: "hidden" }}>
       <style>{G}</style>
       <div style={{ padding: "20px 16px" }}>
-        {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} chartReady={chartReady} />}
+        {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
         {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} />}
