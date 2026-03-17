@@ -35,26 +35,26 @@ function useChartJS() {
 
 // ─── ECO-FINTECH DESIGN TOKENS ────────────────────────────────────────────────
 const C = {
-  forest:    "#1A1A2E",
-  forestMid: "#16213E",
-  forestLt:  "#C8872A",
-  mint:      "#F5C842",
-  mintLt:    "#FFE082",
-  mintPale:  "#FFF8E7",
-  lime:      "#E8A838",
-  sage:      "#D4A855",
-  bg:        "#F8F6F2",
+  forest:    "#1A1A1A",
+  forestMid: "#2A2A2A",
+  forestLt:  "#22C55E",
+  mint:      "#D4F7A0",
+  mintLt:    "#E8FFC4",
+  mintPale:  "#F0FFF0",
+  lime:      "#EEFF82",
+  sage:      "#C8E6A0",
+  bg:        "#F2FAF0",
   card:      "#FFFFFF",
-  text:      "#1A1A2E",
-  muted:     "#6B5E4E",
-  sub:       "#A89880",
-  red:       "#E05252",
-  redLt:     "#FDEAEA",
-  gold:      "#C8872A",
-  goldLt:    "#FFF3DC",
-  shadow:    "0 2px 20px rgba(26,26,46,0.08)",
-  shadowMd:  "0 8px 32px rgba(26,26,46,0.12)",
-  shadowLg:  "0 20px 56px rgba(26,26,46,0.16)",
+  text:      "#1A1A1A",
+  muted:     "#6B7A6B",
+  sub:       "#9DB09D",
+  red:       "#EF4444",
+  redLt:     "#FEE2E2",
+  gold:      "#1A1A1A",
+  goldLt:    "#F0F0F0",
+  shadow:    "0 2px 16px rgba(0,0,0,0.06)",
+  shadowMd:  "0 6px 24px rgba(0,0,0,0.08)",
+  shadowLg:  "0 16px 48px rgba(0,0,0,0.12)",
 };
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap');`;
@@ -63,8 +63,8 @@ const G = `
   ${FONTS}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html,body{height:100%;overscroll-behavior:none;}
-  body{background:#1A1A2E;-webkit-font-smoothing:antialiased;font-family:'DM Sans',sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;}
-  #root{height:100%;display:flex;justify-content:center;background:#1A1A2E;}
+  body{background:#E8F5E0;-webkit-font-smoothing:antialiased;font-family:'DM Sans',sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;}
+  #root{height:100%;display:flex;justify-content:center;background:linear-gradient(160deg,#D4F0C0 0%,#E8F5E0 50%,#F0FAE8 100%);}
   ::-webkit-scrollbar{width:2px;}
   ::-webkit-scrollbar-thumb{background:${C.sage};border-radius:4px;}
   @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -309,7 +309,7 @@ function Sel({ label, dir = "ltr", children, ...p }) {
 function PBtn({ children, onClick, sx = {}, disabled }) {
   return (
     <button className="tbtn eco-btn" disabled={disabled} onClick={onClick}
-      style={{ background: disabled ? C.sage : `linear-gradient(135deg, #C8872A, #E8A838)`, border: "none", color: disabled ? C.muted : "#fff", borderRadius: 14, padding: "14px 20px", fontSize: 14, fontWeight: 600, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginTop: 6, boxShadow: disabled ? "none" : "0 6px 20px rgba(13,59,46,0.28)", fontFamily: "inherit", ...sx }}>
+      style={{ background: disabled ? C.sage : "#1A1A1A", border: "none", color: disabled ? C.muted : "#fff", borderRadius: 14, padding: "14px 20px", fontSize: 14, fontWeight: 600, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginTop: 6, boxShadow: disabled ? "none" : "0 6px 20px rgba(13,59,46,0.28)", fontFamily: "inherit", ...sx }}>
       {children}
     </button>
   );
@@ -495,7 +495,7 @@ function Empty({ label }) {
 // ─── LOGO CAISSE ─────────────────────────────────────────────────────────────
 function CaisseLogo() {
   return (
-    <div style={{ width: 40, height: 40, borderRadius: 13, background: "linear-gradient(135deg, #C8872A, #F5C842)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 14px rgba(200,135,42,0.45)" }}>
+    <div style={{ width: 40, height: 40, borderRadius: 13, background: "#1A1A1A", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 14px rgba(0,0,0,0.2)" }}>
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
         <rect x="2" y="5" width="18" height="13" rx="3" fill="#1A1A2E" />
         <circle cx="11" cy="11.5" r="3.5" stroke="#F5C842" strokeWidth="1.4" fill="none" />
@@ -529,45 +529,42 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, c
     <div style={{ direction: t.dir }}>
 
       {/* ── HERO HEADER ─────────────────────────────────────────── */}
-      <div style={{ background: `linear-gradient(155deg, #1A1A2E 0%, #16213E 40%, #1E2A4A 100%)`, borderRadius: "0 0 36px 36px", padding: "28px 20px 30px", marginLeft: -16, marginRight: -16, marginTop: -20, position: "relative", overflow: "hidden", borderBottom: "1px solid rgba(200,135,42,0.2)" }}>
-        {/* Gold accent blobs */}
-        <div style={{ position: "absolute", top: -40, right: -30, width: 180, height: 180, borderRadius: "50%", background: "rgba(200,135,42,0.08)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: -20, left: -10, width: 120, height: 120, borderRadius: "50%", background: "rgba(245,200,66,0.05)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", top: "50%", right: 20, width: 2, height: 60, background: "linear-gradient(to bottom, transparent, rgba(200,135,42,0.3), transparent)", transform: "translateY(-50%)", pointerEvents: "none" }} />
+      <div style={{ background: "transparent", padding: "16px 4px 0px", marginLeft: 0, marginRight: 0, marginTop: -20, position: "relative", overflow: "visible" }}>
+        <div style={{ position: "absolute", top: 0, right: 0, width: 0, height: 0, pointerEvents: "none" }} />
 
         {/* Logo + greeting + icons */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 26 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
             <CaisseLogo />
             <div>
-              <div style={{ color: "rgba(200,135,42,0.85)", fontSize: 10, fontWeight: 600, letterSpacing: 0.5 }}>{t.greeting}</div>
-              <div style={{ color: "#fff", fontSize: 14, fontWeight: 600, letterSpacing: -0.1 }}>{t.userName}</div>
+              <div style={{ color: C.muted, fontSize: 11, fontWeight: 400, letterSpacing: 0 }}>{t.greeting}</div>
+              <div style={{ color: C.text, fontSize: 15, fontWeight: 600, letterSpacing: -0.2 }}>{t.userName}</div>
             </div>
           </div>
 
         </div>
 
-        {/* Balance */}
-        <div style={{ marginBottom: 22 }}>
-          <div style={{ color: "rgba(200,135,42,0.9)", fontSize: 10, fontWeight: 600, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 5 }}>{t.balanceGlobal}</div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
-            <div style={{ color: "#fff", fontSize: 36, fontWeight: 700, letterSpacing: -1.8, lineHeight: 1, fontFamily: "'DM Serif Display', serif" }}>
+        {/* Balance - Yellow card */}
+        <div style={{ background: "#EEFF82", borderRadius: 24, padding: "22px 20px 18px", marginBottom: 18, position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,0.25)", pointerEvents: "none" }} />
+          <div style={{ color: "#3A3A1A", fontSize: 11, fontWeight: 500, letterSpacing: 0.5, marginBottom: 6, opacity: 0.7 }}>{t.balanceGlobal}</div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 7, marginBottom: 4 }}>
+            <div style={{ color: "#1A1A00", fontSize: 38, fontWeight: 700, letterSpacing: -2, lineHeight: 1, fontFamily: "'DM Serif Display', serif" }}>
               {new Intl.NumberFormat("fr-FR").format(solde)}
             </div>
-            <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, fontWeight: 400 }}>MRU</span>
+            <span style={{ color: "#3A3A1A", fontSize: 14, fontWeight: 500, opacity: 0.7 }}>MRU</span>
           </div>
-          <div style={{ width: 40, height: 2, background: C.mint, borderRadius: 2, marginTop: 8, opacity: 0.65 }} />
         </div>
 
-        {/* 3 STATS PILLS — Contributions | Dons | Dépenses */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+        {/* 3 STATS PILLS */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 4 }}>
           {statsRow.map((s) => (
             <button key={s.label} className="tbtn eco-btn" onClick={s.onClick}
-              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "11px 6px 9px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, backdropFilter: "blur(6px)", transition: "all .2s" }}>
+              style={{ background: C.card, border: "none", borderRadius: 16, padding: "13px 6px 11px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 5, boxShadow: C.shadow, transition: "all .2s" }}>
               <span style={{ color: s.accentColor, fontSize: 14, fontWeight: 700, letterSpacing: -0.4 }}>
                 {s.sign}{fmtSh(s.value)}
               </span>
-              <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 9, fontWeight: 500, textTransform: "uppercase", letterSpacing: 0.5, textAlign: "center", lineHeight: 1.2 }}>
+              <span style={{ color: C.muted, fontSize: 9, fontWeight: 500, textTransform: "uppercase", letterSpacing: 0.5, textAlign: "center", lineHeight: 1.2 }}>
                 {s.label}
               </span>
             </button>
@@ -761,9 +758,9 @@ function Reports({ txs, members, lang, xlsxReady, chartReady }) {
           <div style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
         </div>
       </div>
-      <div style={{ background: `linear-gradient(135deg, #1A1A2E 0%, #16213E 60%, #1E2A4A 100%)`, borderRadius: 20, padding: "20px 22px", marginBottom: 16, boxShadow: C.shadowMd, border: "1px solid rgba(200,135,42,0.2)" }}>
-        <div style={{ color: "rgba(255,255,255,.5)", fontSize: 10, fontWeight: 500, letterSpacing: 1.1, textTransform: "uppercase", marginBottom: 5 }}>{t.balanceGlobal}</div>
-        <div style={{ color: "#fff", fontSize: 30, fontWeight: 700, letterSpacing: -1.2, fontFamily: "'DM Serif Display', serif" }}>{new Intl.NumberFormat("fr-FR").format(solde)} MRU</div>
+      <div style={{ background: "#EEFF82", borderRadius: 20, padding: "20px 22px", marginBottom: 16, boxShadow: C.shadow }}>
+        <div style={{ color: "#3A3A1A", fontSize: 10, fontWeight: 500, letterSpacing: 1.1, textTransform: "uppercase", marginBottom: 5, opacity: 0.7 }}>{t.balanceGlobal}</div>
+        <div style={{ color: "#1A1A00", fontSize: 30, fontWeight: 700, letterSpacing: -1.2, fontFamily: "'DM Serif Display', serif" }}>{new Intl.NumberFormat("fr-FR").format(solde)} MRU</div>
       </div>
       <div style={{ color: C.text, fontWeight: 600, fontSize: 14, marginBottom: 12 }}>{t.monthsFull[month - 1]} {year}</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
@@ -832,7 +829,7 @@ function Settings({ lang, setLang, t }) {
   ];
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
-      <div className="a1" style={{ background: `linear-gradient(135deg, #1A1A2E, #16213E)`, borderRadius: 22, padding: "22px 20px", marginBottom: 20, boxShadow: C.shadowMd, border: "1px solid rgba(200,135,42,0.25)" }}>
+      <div className="a1" style={{ background: "#1A1A1A", borderRadius: 22, padding: "22px 20px", marginBottom: 20, boxShadow: C.shadowMd }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <div style={{ width: 56, height: 56, borderRadius: 18, background: "rgba(168,230,207,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", border: "1.5px solid rgba(168,230,207,0.3)", fontFamily: "'DM Serif Display', serif" }}>
             {t.userName[0].toUpperCase()}
@@ -924,8 +921,8 @@ function MemberSheet({ onSave, onClose, lang }) {
 // ─── BOTTOM NAV ───────────────────────────────────────────────────────────────
 function NavItem({ label, icon, activeIcon, active, onClick }) {
   return (
-    <button className="tbtn" onClick={onClick} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "3px 4px", fontFamily: "inherit" }}>
-      <div style={{ width: 36, height: 26, borderRadius: 9, background: active ? "rgba(168,230,207,0.18)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .18s" }}>
+    <button className="tbtn" onClick={onClick} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "2px 4px", fontFamily: "inherit" }}>
+      <div style={{ width: 44, height: 32, borderRadius: 16, background: active ? "rgba(212,247,160,0.18)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .18s" }}>
         {active ? activeIcon : icon}
       </div>
       <span style={{ fontSize: 9, fontWeight: active ? 600 : 400, color: active ? C.mint : "rgba(255,255,255,0.35)", transition: "color .18s", letterSpacing: 0.2 }}>{label}</span>
@@ -957,14 +954,14 @@ export default function App() {
   ];
 
   if (loading) return (
-    <div style={{ background: C.bg, minHeight: "100vh", maxWidth: 430, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 14 }}>
+    <div style={{ background: "linear-gradient(160deg,#D4F0C0,#E8F5E0)", minHeight: "100vh", maxWidth: 430, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 14 }}>
       <div style={{ width: 36, height: 36, border: `3px solid ${C.mint}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
       <div style={{ color: C.muted, fontSize: 13, fontWeight: 500 }}>Chargement…</div>
     </div>
   );
 
   return (
-    <div style={{ background: C.bg, minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: t.font, color: C.text, position: "relative", paddingBottom: 65, boxShadow: "0 0 80px rgba(0,0,0,0.5)", overflowX: "hidden" }}>
+    <div style={{ background: "linear-gradient(160deg,#D4F0C0 0%,#E8F5E0 50%,#F0FAE8 100%)", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: t.font, color: C.text, position: "relative", paddingBottom: 90, overflowX: "hidden" }}>
       <style>{G}</style>
       <div style={{ padding: "20px 16px" }}>
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} chartReady={chartReady} />}
@@ -973,7 +970,7 @@ export default function App() {
         {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} />}
       </div>
-      <nav style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: C.forest, borderRadius: "22px 22px 0 0", display: "flex", padding: "5px 8px 10px", zIndex: 200, gap: 2, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 -6px 28px rgba(13,59,46,0.22)", borderTop: "1px solid rgba(168,230,207,0.1)" }}>
+      <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "#1A1A1A", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 32px rgba(0,0,0,0.25)" }}>
         {TABS.map((tb) => <NavItem key={tb.id} label={tb.label} icon={tb.icon} activeIcon={tb.aicon} active={tab === tb.id} onClick={() => setTab(tb.id)} />)}
       </nav>
       {modal?.kind === "tx"     && <TxSheet type={modal.txType} members={members} onSave={saveTx} onClose={() => setModal(null)} lang={lang} editTx={modal.editTx || null} />}
