@@ -143,7 +143,7 @@ const T = {
     txTypes: { contribution: "Contribution", don: "Don", depense: "Dépense" }, donorDefault: "Donateur",
     newMember: "Nouveau membre", fullName: "Nom complet", fullNamePh: "Ex : Fatima Mint Ahmed",
     phone: "Téléphone", phonePh: "Ex : 22234567890", addMemberBtn: "Ajouter",
-    exportBtn: "Exporter Excel", exportAll: "Toutes les transactions", exportMonth: "Ce mois", xlsxWait: "Chargement…", importBtn: "Importer Excel", importSuccess: (m, t) => `✅ ${m} membres et ${t} transactions importés !`, importError: "❌ Erreur: vérifiez le format du fichier.", importInfo: "Format attendu: feuilles Membres (Membre, Téléphone) et Transactions (Date, Type, Membre, Montant, Note)",
+    exportBtn: "Exporter Excel", exportAll: "Toutes les transactions", exportMonth: "Ce mois", xlsxWait: "Chargement…", resetBtn: "Réinitialiser les données", resetConfirmTitle: "Tout supprimer ?", resetConfirmMsg: "Cette action supprimera TOUS les membres et TOUTES les transactions. Impossible d'annuler.", resetSuccess: "✅ Toutes les données ont été supprimées.", importBtn: "Importer Excel", importSuccess: (m, t) => `✅ ${m} membres et ${t} transactions importés !`, importError: "❌ Erreur: vérifiez le format du fichier.", importInfo: "Format attendu: feuilles Membres (Membre, Téléphone) et Transactions (Date, Type, Membre, Montant, Note)",
     settingsTitle: "Paramètres", langLbl: "Langue", themeLbl: "Apparence", secLbl: "Sécurité",
     aboutLbl: "À propos", version: "Version 1.0.0", darkMode: "Mode sombre", changeLang: "Changer la langue",
     changePin: "Changer le PIN", aboutApp: "Caisse Coopérative · Gestion communautaire", logout: "Se déconnecter",
@@ -174,7 +174,7 @@ const T = {
     txTypes: { contribution: "مساهمة", don: "تبرع", depense: "مصروف" }, donorDefault: "متبرع",
     newMember: "عضو جديد", fullName: "الاسم الكامل", fullNamePh: "مثال: فاطمة بنت أحمد",
     phone: "الهاتف", phonePh: "مثال: 22234567890", addMemberBtn: "إضافة",
-    exportBtn: "تصدير Excel", exportAll: "كل العمليات", exportMonth: "هذا الشهر", xlsxWait: "جارٍ التحميل…", importBtn: "استيراد Excel", importSuccess: (m, t) => `✅ تم استيراد ${m} عضو و ${t} عملية !`, importError: "❌ خطأ: تحقق من تنسيق الملف.", importInfo: "الصيغة المطلوبة: أوراق Membres و Transactions",
+    exportBtn: "تصدير Excel", exportAll: "كل العمليات", exportMonth: "هذا الشهر", xlsxWait: "جارٍ التحميل…", resetBtn: "مسح جميع البيانات", resetConfirmTitle: "حذف الكل؟", resetConfirmMsg: "سيتم حذف جميع الأعضاء والمعاملات. لا يمكن التراجع.", resetSuccess: "✅ تم مسح جميع البيانات.", importBtn: "استيراد Excel", importSuccess: (m, t) => `✅ تم استيراد ${m} عضو و ${t} عملية !`, importError: "❌ خطأ: تحقق من تنسيق الملف.", importInfo: "الصيغة المطلوبة: أوراق Membres و Transactions",
     settingsTitle: "الإعدادات", langLbl: "اللغة", themeLbl: "المظهر", secLbl: "الأمان",
     aboutLbl: "حول التطبيق", version: "الإصدار 1.0.0", darkMode: "الوضع الداكن", changeLang: "تغيير اللغة",
     changePin: "تغيير رمز PIN", aboutApp: "الصندوق التعاوني · إدارة مجتمعية", logout: "تسجيل الخروج",
@@ -271,7 +271,13 @@ function useSupabaseData() {
     setMembers(p => p.filter(m => m.id !== id));
   };
 
-  return { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll };
+  const resetAll = async () => {
+    await supabase.from("transactions").delete().neq("id", 0);
+    await supabase.from("members").delete().neq("id", 0);
+    await fetchAll();
+  };
+
+  return { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll };
 }
 
 // ─── UI ATOMS ─────────────────────────────────────────────────────────────────
@@ -706,7 +712,7 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
 }
 
 // ─── REPORTS ──────────────────────────────────────────────────────────────────
-function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, onImportTxs, onRefresh }) {
+function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, onImportTxs, onRefresh, onReset }) {
   const t = T[lang];
   const years = getYrs(txs);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -744,6 +750,16 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
 
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState(null);
+  const [resetConfirm, setResetConfirm] = useState(false);
+  const [resetting, setResetting] = useState(false);
+
+  const doReset = async () => {
+    setResetting(true);
+    await onReset();
+    setResetting(false);
+    setResetConfirm(false);
+    setImportMsg(t.resetSuccess);
+  };
 
   const doImport = async (e) => {
     const file = e.target.files[0];
@@ -894,6 +910,36 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
           <div style={{ color: C.sub, fontSize: 10, marginTop: 5, textAlign: t.dir === "rtl" ? "right" : "left" }}>{t.monthsFull[month - 1]} : {fmt(m.month)}</div>
         </Card>
       ))}
+      {/* RESET SECTION */}
+      <div style={{ marginTop: 20, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: C.redLt, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🗑️</div>
+          <span style={{ color: C.red, fontWeight: 700, fontSize: 14 }}>{t.resetBtn}</span>
+        </div>
+        {!resetConfirm ? (
+          <button className="tbtn" onClick={() => setResetConfirm(true)}
+            style={{ width: "100%", background: C.redLt, border: `1.5px solid rgba(224,82,82,0.3)`, borderRadius: 14, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: "inherit" }}>
+            <span style={{ fontSize: 16 }}>⚠️</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: C.red }}>{t.resetBtn}</span>
+          </button>
+        ) : (
+          <div style={{ background: C.redLt, border: `1.5px solid rgba(224,82,82,0.3)`, borderRadius: 14, padding: "16px" }}>
+            <div style={{ color: C.red, fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{t.resetConfirmTitle}</div>
+            <div style={{ color: C.muted, fontSize: 12, marginBottom: 14, lineHeight: 1.5 }}>{t.resetConfirmMsg}</div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button className="tbtn" onClick={() => setResetConfirm(false)}
+                style={{ flex: 1, background: C.card, border: `1.5px solid ${C.mintLt}`, borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 500, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>
+                {t.cancel}
+              </button>
+              <button className="tbtn" onClick={doReset} disabled={resetting}
+                style={{ flex: 1, background: C.red, border: "none", borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 600, color: "#fff", cursor: resetting ? "not-allowed" : "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                {resetting ? <><div style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} />...</> : t.delete}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* IMPORT SECTION */}
       <div style={{ marginTop: 20, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20, marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
@@ -1059,7 +1105,7 @@ export default function App() {
   const [lang, setLang] = usePersisted("cc5_lang", "fr");
   const [tab, setTab] = useState("home");
   const [modal, setModal] = useState(null);
-  const { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll } = useSupabaseData();
+  const { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll } = useSupabaseData();
 
   const t = T[lang];
   const saveTx = (d) => { if (modal?.editTx) updateTx(d); else addTx(d); };
@@ -1088,7 +1134,7 @@ export default function App() {
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
-        {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onImportMembers={addMember} onImportTxs={addTx} onRefresh={fetchAll} />}
+        {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onImportMembers={addMember} onImportTxs={addTx} onRefresh={fetchAll} onReset={resetAll} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "#1A1A1A", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 32px rgba(0,0,0,0.25)" }}>
