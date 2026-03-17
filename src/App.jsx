@@ -1,3 +1,8 @@
+import { createClient } from "@supabase/supabase-js";
+const SUPA_URL = "https://wfbhofjowqyfxejnlcoy.supabase.co";
+const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmYmhvZmpvd3F5Znhlam5sY295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDY0NTksImV4cCI6MjA4OTI4MjQ1OX0.T2-7AfWTn40OpQSkn7OPsWv8iJ24f7iBS629bvcffKQ";
+const supabase = createClient(SUPA_URL, SUPA_KEY);
+
 import { useState, useEffect, useRef } from "react";
 
 function useSheetJS() {
@@ -218,6 +223,53 @@ function usePersisted(k, d) {
     } catch {}
   }, [k, s]);
   return [s, set];
+}
+
+// ─── SUPABASE HOOKS ───────────────────────────────────────────────────────────
+function useSupabaseData() {
+  const [members, setMembers] = useState([]);
+  const [txs, setTxs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAll = async () => {
+    setLoading(true);
+    const [{ data: mData }, { data: tData }] = await Promise.all([
+      supabase.from("members").select("*").order("created_at", { ascending: true }),
+      supabase.from("transactions").select("*").order("created_at", { ascending: false }),
+    ]);
+    if (mData) setMembers(mData.map(m => ({ id: m.id, name: m.name, phone: m.phone || "" })));
+    if (tData) setTxs(tData.map(t => ({ id: t.id, type: t.type, memberId: t.member_id, memberName: t.member_name, amount: t.amount, date: t.date, note: t.note || "" })));
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchAll(); }, []);
+
+  const addTx = async (d) => {
+    const { data } = await supabase.from("transactions").insert([{ type: d.type, member_id: d.memberId || null, member_name: d.memberName, amount: d.amount, date: d.date, note: d.note }]).select().single();
+    if (data) setTxs(p => [{ id: data.id, type: data.type, memberId: data.member_id, memberName: data.member_name, amount: data.amount, date: data.date, note: data.note || "" }, ...p]);
+  };
+
+  const updateTx = async (d) => {
+    await supabase.from("transactions").update({ type: d.type, member_id: d.memberId || null, member_name: d.memberName, amount: d.amount, date: d.date, note: d.note }).eq("id", d.id);
+    setTxs(p => p.map(tx => tx.id === d.id ? d : tx));
+  };
+
+  const deleteTx = async (id) => {
+    await supabase.from("transactions").delete().eq("id", id);
+    setTxs(p => p.filter(tx => tx.id !== id));
+  };
+
+  const addMember = async (d) => {
+    const { data } = await supabase.from("members").insert([{ name: d.name, phone: d.phone }]).select().single();
+    if (data) setMembers(p => [...p, { id: data.id, name: data.name, phone: data.phone || "" }]);
+  };
+
+  const deleteMember = async (id) => {
+    await supabase.from("members").delete().eq("id", id);
+    setMembers(p => p.filter(m => m.id !== id));
+  };
+
+  return { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember };
 }
 
 // ─── UI ATOMS ─────────────────────────────────────────────────────────────────
@@ -885,18 +937,12 @@ export default function App() {
   const chartReady = useChartJS();
   const [lang, setLang] = usePersisted("cc5_lang", "fr");
   const [tab, setTab] = useState("home");
-  const [members, setMembers] = usePersisted("cc5_members", DEF_MEMBERS);
-  const [txs, setTxs] = usePersisted("cc5_txs", DEF_TX);
   const [modal, setModal] = useState(null);
+  const { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember } = useSupabaseData();
 
   const t = T[lang];
-  const addTx    = (d) => setTxs((p) => [d, ...p]);
-  const updateTx = (d) => setTxs((p) => p.map((tx) => (tx.id === d.id ? d : tx)));
-  const deleteTx = (id) => setTxs((p) => p.filter((tx) => tx.id !== id));
-  const addMem   = (d) => setMembers((p) => [...p, { id: Date.now(), ...d }]);
-  const delMem   = (id) => setMembers((p) => p.filter((m) => m.id !== id));
-  const saveTx   = (d) => { if (modal?.editTx) updateTx(d); else addTx(d); };
-  const editTx   = (tx) => setModal({ kind: "tx", txType: tx.type, editTx: tx });
+  const saveTx = (d) => { if (modal?.editTx) updateTx(d); else addTx(d); };
+  const editTx = (tx) => setModal({ kind: "tx", txType: tx.type, editTx: tx });
 
   const nC = "rgba(255,255,255,0.35)";
   const TABS = [
@@ -907,13 +953,20 @@ export default function App() {
     { id: "settings", label: t.tabs.settings, icon: Ic.gear(nC),   aicon: Ic.gear(C.mint)  },
   ];
 
+  if (loading) return (
+    <div style={{ background: C.bg, minHeight: "100vh", maxWidth: 430, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 14 }}>
+      <div style={{ width: 36, height: 36, border: `3px solid ${C.mint}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+      <div style={{ color: C.muted, fontSize: 13, fontWeight: 500 }}>Chargement…</div>
+    </div>
+  );
+
   return (
     <div style={{ background: C.bg, minHeight: "100vh", maxWidth: 430, margin: "0 auto", fontFamily: t.font, color: C.text, position: "relative", paddingBottom: 65, boxShadow: "0 0 60px rgba(13,59,46,0.09)" }}>
       <style>{G}</style>
       <div style={{ padding: "20px 16px" }}>
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
-        {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={delMem} lang={lang} />}
+        {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
         {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} />}
       </div>
@@ -921,7 +974,7 @@ export default function App() {
         {TABS.map((tb) => <NavItem key={tb.id} label={tb.label} icon={tb.icon} activeIcon={tb.aicon} active={tab === tb.id} onClick={() => setTab(tb.id)} />)}
       </nav>
       {modal?.kind === "tx"     && <TxSheet type={modal.txType} members={members} onSave={saveTx} onClose={() => setModal(null)} lang={lang} editTx={modal.editTx || null} />}
-      {modal?.kind === "membre" && <MemberSheet onSave={addMem} onClose={() => setModal(null)} lang={lang} />}
+      {modal?.kind === "membre" && <MemberSheet onSave={addMember} onClose={() => setModal(null)} lang={lang} />}
     </div>
   );
 }
