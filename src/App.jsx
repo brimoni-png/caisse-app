@@ -271,7 +271,7 @@ function useSupabaseData() {
     setMembers(p => p.filter(m => m.id !== id));
   };
 
-  return { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember };
+  return { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll };
 }
 
 // ─── UI ATOMS ─────────────────────────────────────────────────────────────────
@@ -706,7 +706,7 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
 }
 
 // ─── REPORTS ──────────────────────────────────────────────────────────────────
-function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, onImportTxs }) {
+function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, onImportTxs, onRefresh }) {
   const t = T[lang];
   const years = getYrs(txs);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -755,21 +755,47 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
     try {
       const data = await file.arrayBuffer();
       const wb = XLSX.read(data);
-      // Import Membres
+      const typeMap = {
+        "Contribution": "contribution", "contribution": "contribution",
+        "Contributions": "contribution", "contributions": "contribution",
+        "Don": "don", "don": "don", "Dons": "don", "dons": "don",
+        "Dépense": "depense", "depense": "depense",
+        "Dépenses": "depense", "depenses": "depense",
+        "مساهمة": "contribution", "المساهمات": "contribution",
+        "تبرع": "don", "التبرعات": "don",
+        "مصروف": "depense", "المصروفات": "depense"
+      };
+
+      // ── Étape 1 : construire un index des membres existants (nom → id) ──
+      const memberIndex = {};
+      members.forEach(m => { memberIndex[m.name.trim().toLowerCase()] = m; });
+
+      // ── Étape 2 : importer les membres de la feuille Membres ──
       let membersImported = 0;
+      const newMemberIndex = { ...memberIndex };
       if (wb.SheetNames.includes("Membres")) {
         const rows = XLSX.utils.sheet_to_json(wb.Sheets["Membres"]);
         for (const row of rows) {
-          const name = row["Membre"] || row["membre"] || row["Name"] || row["name"];
-          const phone = String(row["Téléphone"] || row["telephone"] || row["Phone"] || "");
-          if (name) { await onImportMembers({ name: String(name).trim(), phone: phone.trim() }); membersImported++; }
+          const name = String(row["Membre"] || row["membre"] || row["Name"] || row["name"] || "").trim();
+          const phone = String(row["Téléphone"] || row["telephone"] || row["Phone"] || "").trim();
+          if (!name) continue;
+          const key = name.toLowerCase();
+          if (!newMemberIndex[key]) {
+            // Créer le membre dans Supabase et récupérer son ID
+            const { data: newM } = await supabase.from("members").insert([{ name, phone }]).select().single();
+            if (newM) {
+              const m = { id: newM.id, name: newM.name, phone: newM.phone || "" };
+              newMemberIndex[key] = m;
+              membersImported++;
+            }
+          }
         }
       }
-      // Import Transactions
+
+      // ── Étape 3 : importer les transactions en liant l'ID du membre ──
       let txsImported = 0;
       if (wb.SheetNames.includes("Transactions")) {
         const rows = XLSX.utils.sheet_to_json(wb.Sheets["Transactions"]);
-        const typeMap = { "Contribution": "contribution", "contribution": "contribution", "Don": "don", "don": "don", "Dépense": "depense", "depense": "depense", "مساهمة": "contribution", "تبرع": "don", "مصروف": "depense" };
         for (const row of rows) {
           const type = typeMap[row["Type"] || row["type"]] || "contribution";
           const amount = parseFloat(row["Montant"] || row["montant"] || row["Amount"] || 0);
@@ -777,13 +803,40 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
           let date = row["Date"] || row["date"];
           if (date instanceof Date) date = date.toISOString().split("T")[0];
           else if (typeof date === "number") { const d = new Date(Math.round((date - 25569)*86400*1000)); date = d.toISOString().split("T")[0]; }
-          else date = String(date || new Date().toISOString().split("T")[0]);
+          else {
+            date = String(date || "").trim();
+            // Handle formats: "01\03\2026", "01/03/2026", "2026-03-01"
+            if (date.includes("\\") || date.includes("/")) {
+              const parts = date.split(/[\\/]/);
+              if (parts.length === 3) {
+                // DD/MM/YYYY → YYYY-MM-DD
+                const [d, m, y] = parts;
+                date = `${y.padStart(4,"0")}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
+              }
+            }
+            if (!date || date === "undefined") date = new Date().toISOString().split("T")[0];
+          }
           const note = String(row["Note"] || row["note"] || "");
-          if (amount > 0) { await onImportTxs({ type, memberId: null, memberName, amount, date, note }); txsImported++; }
+          if (amount <= 0) continue;
+
+          // Chercher l'ID du membre par son nom
+          const foundMember = newMemberIndex[memberName.toLowerCase()];
+          const memberId = foundMember ? foundMember.id : null;
+          const finalMemberName = type === "depense" ? "—" : (foundMember ? foundMember.name : memberName);
+
+          const { data: newTx } = await supabase.from("transactions").insert([{
+            type, member_id: memberId, member_name: finalMemberName,
+            amount, date, note
+          }]).select().single();
+          if (newTx) txsImported++;
         }
       }
+
+      // ── Étape 4 : recharger toutes les données depuis Supabase ──
+      await onRefresh();
       setImportMsg(t.importSuccess(membersImported, txsImported));
     } catch(err) {
+      console.error(err);
       setImportMsg(t.importError);
     }
     setImporting(false);
@@ -1006,7 +1059,7 @@ export default function App() {
   const [lang, setLang] = usePersisted("cc5_lang", "fr");
   const [tab, setTab] = useState("home");
   const [modal, setModal] = useState(null);
-  const { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember } = useSupabaseData();
+  const { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll } = useSupabaseData();
 
   const t = T[lang];
   const saveTx = (d) => { if (modal?.editTx) updateTx(d); else addTx(d); };
@@ -1035,7 +1088,7 @@ export default function App() {
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
-        {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onImportMembers={addMember} onImportTxs={addTx} />}
+        {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onImportMembers={addMember} onImportTxs={addTx} onRefresh={fetchAll} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "#1A1A1A", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 32px rgba(0,0,0,0.25)" }}>
