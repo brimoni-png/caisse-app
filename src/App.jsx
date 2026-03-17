@@ -73,6 +73,7 @@ const G = `
   @keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
   @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
   @keyframes gone{to{opacity:0;max-height:0;margin:0;padding:0;overflow:hidden}}
   .a1{animation:up .4s cubic-bezier(.16,1,.3,1) .04s both}
   .a2{animation:up .4s cubic-bezier(.16,1,.3,1) .10s both}
@@ -1134,13 +1135,126 @@ function NavItem({ label, icon, activeIcon, active, onClick }) {
 }
 
 // ─── APP ROOT ─────────────────────────────────────────────────────────────────
+
+// ─── LOGIN SCREEN ─────────────────────────────────────────────────────────────
+const VALID_PIN = "2526";
+
+function LoginScreen({ onLogin }) {
+  const [name, setName] = useState("");
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+  const [shake, setShake] = useState(false);
+  const [nameFocus, setNameFocus] = useState(false);
+  const [pinFocus, setPinFocus] = useState(false);
+
+  const handleLogin = () => {
+    if (!name.trim()) { setError("Veuillez saisir votre nom."); return; }
+    if (pin !== VALID_PIN) {
+      setError("Code PIN incorrect.");
+      setShake(true);
+      setPin("");
+      setTimeout(() => setShake(false), 500);
+      return;
+    }
+    onLogin(name.trim());
+  };
+
+  return (
+    <div style={{ background: "linear-gradient(160deg,#EDE9FE 0%,#F5F0FF 50%,#FDF4FF 100%)", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 24px", fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{G}</style>
+
+      {/* Top decorative circles */}
+      <div style={{ position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: "50%", background: "rgba(167,139,250,0.15)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", top: 40, left: -40, width: 140, height: 140, borderRadius: "50%", background: "rgba(196,181,253,0.12)", pointerEvents: "none" }} />
+
+      {/* Logo + Title */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 40 }}>
+        {/* Caisse Icon */}
+        <div style={{ width: 80, height: 80, borderRadius: 24, background: "linear-gradient(135deg, #7C3AED, #A855F7)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18, boxShadow: "0 12px 32px rgba(124,58,237,0.35)" }}>
+          <svg width="44" height="44" viewBox="0 0 22 22" fill="none">
+            <rect x="2" y="5" width="18" height="13" rx="3" fill="white" opacity="0.9"/>
+            <circle cx="11" cy="11.5" r="3.5" stroke="#A855F7" strokeWidth="1.6" fill="none"/>
+            <circle cx="11" cy="11.5" r="1.3" fill="#7C3AED"/>
+            <line x1="11" y1="8.5" x2="11" y2="9.8" stroke="#7C3AED" strokeWidth="1.4" strokeLinecap="round"/>
+            <circle cx="5" cy="7.5" r="0.9" fill="#A855F7" opacity="0.7"/>
+            <circle cx="5" cy="15.5" r="0.9" fill="#A855F7" opacity="0.7"/>
+          </svg>
+        </div>
+        <div style={{ fontSize: 26, fontWeight: 700, color: "#1A1A2E", letterSpacing: -0.5, marginBottom: 6 }}>Caisse CHEBAB</div>
+        <div style={{ fontSize: 13, color: "#6B5E8A", fontWeight: 400 }}>Connectez-vous pour continuer</div>
+      </div>
+
+      {/* Login Card */}
+      <div style={{ width: "100%", background: "#fff", borderRadius: 24, padding: "28px 24px", boxShadow: "0 8px 32px rgba(124,58,237,0.12)", border: "1px solid rgba(167,139,250,0.2)" }}>
+
+        {/* Name field */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "#6B5E8A", letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 8 }}>Nom</div>
+          <input
+            value={name}
+            onChange={e => { setName(e.target.value); setError(""); }}
+            onFocus={() => setNameFocus(true)}
+            onBlur={() => setNameFocus(false)}
+            onKeyDown={e => e.key === "Enter" && handleLogin()}
+            placeholder="Votre nom..."
+            style={{ width: "100%", background: nameFocus ? "#fff" : "#F5F3FF", border: `1.5px solid ${nameFocus ? "#7C3AED" : "#EDE9FE"}`, borderRadius: 14, padding: "14px 16px", fontSize: 15, color: "#1A1A2E", outline: "none", fontFamily: "inherit", transition: "all .2s", boxShadow: nameFocus ? "0 0 0 3px rgba(124,58,237,0.12)" : "none" }}
+          />
+        </div>
+
+        {/* PIN field */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "#6B5E8A", letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 8 }}>Code PIN</div>
+          <input
+            value={pin}
+            onChange={e => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); setPin(v); setError(""); }}
+            onFocus={() => setPinFocus(true)}
+            onBlur={() => setPinFocus(false)}
+            onKeyDown={e => e.key === "Enter" && handleLogin()}
+            placeholder="● ● ● ●"
+            type="password"
+            inputMode="numeric"
+            maxLength={4}
+            style={{ width: "100%", background: pinFocus ? "#fff" : "#F5F3FF", border: `1.5px solid ${shake ? "#EF4444" : pinFocus ? "#7C3AED" : "#EDE9FE"}`, borderRadius: 14, padding: "14px 16px", fontSize: 22, color: "#1A1A2E", outline: "none", fontFamily: "inherit", transition: "all .2s", letterSpacing: 8, boxShadow: shake ? "0 0 0 3px rgba(239,68,68,0.15)" : pinFocus ? "0 0 0 3px rgba(124,58,237,0.12)" : "none", animation: shake ? "shake .4s ease" : "none" }}
+          />
+        </div>
+
+        {/* Error message */}
+        {error && (
+          <div style={{ background: "#FEE2E2", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 10, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: "#DC2626", fontWeight: 500 }}>
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* Login button */}
+        <button className="tbtn" onClick={handleLogin}
+          style={{ width: "100%", background: "linear-gradient(135deg, #7C3AED, #A855F7)", border: "none", color: "#fff", borderRadius: 14, padding: "15px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 20px rgba(124,58,237,0.35)" }}>
+          Se connecter
+        </button>
+      </div>
+
+      {/* Bottom decoration */}
+      <div style={{ position: "absolute", bottom: -40, left: -40, width: 180, height: 180, borderRadius: "50%", background: "rgba(167,139,250,0.1)", pointerEvents: "none" }} />
+    </div>
+  );
+}
+
 export default function App() {
   const xlsxReady = useSheetJS();
   const chartReady = useChartJS();
   const [lang, setLang] = usePersisted("cc5_lang", "fr");
   const [tab, setTab] = useState("home");
   const [modal, setModal] = useState(null);
+  const [loggedIn, setLoggedIn] = useState(() => {
+    try { return !!sessionStorage.getItem("cc_user"); } catch { return false; }
+  });
   const { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll } = useSupabaseData();
+
+  const handleLogin = (name) => {
+    try { sessionStorage.setItem("cc_user", name); } catch {}
+    setLoggedIn(true);
+  };
+
+  if (!loggedIn) return <LoginScreen onLogin={handleLogin} />;
 
   const t = T[lang];
   const saveTx = (d) => { if (modal?.editTx) updateTx(d); else addTx(d); };
