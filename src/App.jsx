@@ -425,20 +425,54 @@ function TxRow({ tx, onDelete, onEdit, delay = 0, lang }) {
 
 // ─── 3 CATEGORY PILLS (Contribution / Dons / Dépenses uniquement) ────────────
 function CatPills({ onAdd, lang }) {
-  const cats = [
-    { type: "contribution", emoji: "💰", color: C.forestLt, lt: "rgba(200,135,42,0.10)", border: "rgba(200,135,42,0.25)" },
-    { type: "don",          emoji: "🎁", color: C.gold,      lt: C.goldLt,              border: "rgba(232,168,56,0.28)" },
-    { type: "depense",      emoji: "💸", color: C.red,       lt: C.redLt,               border: "rgba(224,82,82,0.2)"  },
-  ];
+  const btnStyle = { background: C.card, border: "1.5px solid #EDEDF5", borderRadius: 20, padding: "20px 8px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 11, boxShadow: "0 2px 12px rgba(91,33,182,0.06)", transition: "all .22s" };
+  const iconBg = { width: 54, height: 54, borderRadius: "50%", background: "#EEEAF8", display: "flex", alignItems: "center", justifyContent: "center" };
+  const lblStyle = { fontSize: 12, fontWeight: 500, color: C.text, textAlign: "center" };
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 22 }}>
-      {cats.map(({ type, emoji, color, lt, border }) => (
-        <button key={type} className="tbtn cat-card" onClick={() => onAdd(type)}
-          style={{ background: C.card, border: `1.5px solid ${border}`, borderRadius: 18, padding: "16px 8px 13px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: C.shadow, transition: "all .22s" }}>
-          <div style={{ width: 46, height: 46, borderRadius: 14, background: lt, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{emoji}</div>
-          <span style={{ fontSize: 11, fontWeight: 600, color, textAlign: "center" }}>{T[lang].txTypes[type]}</span>
-        </button>
-      ))}
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 22 }}>
+
+      {/* Contribution - cercle avec + */}
+      <button className="tbtn cat-card" onClick={() => onAdd("contribution")} style={btnStyle}>
+        <div style={iconBg}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+        </div>
+        <span style={lblStyle}>{T[lang].txTypes.contribution}</span>
+      </button>
+
+      {/* Don - mains tendant un cœur */}
+      <button className="tbtn cat-card" onClick={() => onAdd("don")} style={btnStyle}>
+        <div style={iconBg}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            {/* Cœur */}
+            <path d="M12 7.5C12 7.5 11 5.5 9 5.5C7.5 5.5 6 6.8 6 8.5C6 10.5 8 12 12 14C16 12 18 10.5 18 8.5C18 6.8 16.5 5.5 15 5.5C13 5.5 12 7.5 12 7.5Z" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.6"/>
+            {/* Main gauche */}
+            <path d="M5 17C5 17 4 16 4 15V13C4 12.4 4.4 12 5 12H7L9 14H15L17 12H19C19.6 12 20 12.4 20 13V15C20 16 19 17 19 17H5Z" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.6"/>
+          </svg>
+        </div>
+        <span style={lblStyle}>{T[lang].txTypes.don}</span>
+      </button>
+
+      {/* Dépense - portefeuille */}
+      <button className="tbtn cat-card" onClick={() => onAdd("depense")} style={btnStyle}>
+        <div style={iconBg}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            {/* Corps portefeuille */}
+            <rect x="2" y="7" width="20" height="13" rx="3" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.7"/>
+            {/* Rabat haut */}
+            <path d="M16 7V5.5C16 4.7 15.3 4 14.5 4H6C4.9 4 4 4.9 4 6V7" stroke="#7C3AED" strokeWidth="1.7"/>
+            {/* Poche pièce */}
+            <rect x="15" y="12" width="5" height="4" rx="1.5" fill="#7C3AED" opacity="0.25" stroke="#7C3AED" strokeWidth="1.5"/>
+            {/* Pièce */}
+            <circle cx="17.5" cy="14" r="1" fill="#7C3AED"/>
+          </svg>
+        </div>
+        <span style={lblStyle}>{T[lang].txTypes.depense}</span>
+      </button>
+
     </div>
   );
 }
