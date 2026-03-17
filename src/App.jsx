@@ -143,7 +143,7 @@ const T = {
     txTypes: { contribution: "Contribution", don: "Don", depense: "Dépense" }, donorDefault: "Donateur",
     newMember: "Nouveau membre", fullName: "Nom complet", fullNamePh: "Ex : Fatima Mint Ahmed",
     phone: "Téléphone", phonePh: "Ex : 22234567890", addMemberBtn: "Ajouter",
-    exportBtn: "Exporter Excel", exportAll: "Toutes les transactions", exportMonth: "Ce mois", xlsxWait: "Chargement…",
+    exportBtn: "Exporter Excel", exportAll: "Toutes les transactions", exportMonth: "Ce mois", xlsxWait: "Chargement…", importBtn: "Importer Excel", importSuccess: (m, t) => `✅ ${m} membres et ${t} transactions importés !`, importError: "❌ Erreur: vérifiez le format du fichier.", importInfo: "Format attendu: feuilles Membres (Membre, Téléphone) et Transactions (Date, Type, Membre, Montant, Note)",
     settingsTitle: "Paramètres", langLbl: "Langue", themeLbl: "Apparence", secLbl: "Sécurité",
     aboutLbl: "À propos", version: "Version 1.0.0", darkMode: "Mode sombre", changeLang: "Changer la langue",
     changePin: "Changer le PIN", aboutApp: "Caisse Coopérative · Gestion communautaire", logout: "Se déconnecter",
@@ -174,7 +174,7 @@ const T = {
     txTypes: { contribution: "مساهمة", don: "تبرع", depense: "مصروف" }, donorDefault: "متبرع",
     newMember: "عضو جديد", fullName: "الاسم الكامل", fullNamePh: "مثال: فاطمة بنت أحمد",
     phone: "الهاتف", phonePh: "مثال: 22234567890", addMemberBtn: "إضافة",
-    exportBtn: "تصدير Excel", exportAll: "كل العمليات", exportMonth: "هذا الشهر", xlsxWait: "جارٍ التحميل…",
+    exportBtn: "تصدير Excel", exportAll: "كل العمليات", exportMonth: "هذا الشهر", xlsxWait: "جارٍ التحميل…", importBtn: "استيراد Excel", importSuccess: (m, t) => `✅ تم استيراد ${m} عضو و ${t} عملية !`, importError: "❌ خطأ: تحقق من تنسيق الملف.", importInfo: "الصيغة المطلوبة: أوراق Membres و Transactions",
     settingsTitle: "الإعدادات", langLbl: "اللغة", themeLbl: "المظهر", secLbl: "الأمان",
     aboutLbl: "حول التطبيق", version: "الإصدار 1.0.0", darkMode: "الوضع الداكن", changeLang: "تغيير اللغة",
     changePin: "تغيير رمز PIN", aboutApp: "الصندوق التعاوني · إدارة مجتمعية", logout: "تسجيل الخروج",
@@ -706,7 +706,7 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
 }
 
 // ─── REPORTS ──────────────────────────────────────────────────────────────────
-function Reports({ txs, members, lang, xlsxReady, chartReady }) {
+function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, onImportTxs }) {
   const t = T[lang];
   const years = getYrs(txs);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -741,6 +741,54 @@ function Reports({ txs, members, lang, xlsxReady, chartReady }) {
     window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.aoa_to_sheet(srows), "Résumé");
     window.XLSX.writeFile(wb, `caisse_${year}_${String(month).padStart(2,"0")}.xlsx`);
   }
+
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState(null);
+
+  const doImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const XLSX = window.XLSX;
+    if (!XLSX) return alert(t.xlsxWait);
+    setImporting(true);
+    setImportMsg(null);
+    try {
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data);
+      // Import Membres
+      let membersImported = 0;
+      if (wb.SheetNames.includes("Membres")) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets["Membres"]);
+        for (const row of rows) {
+          const name = row["Membre"] || row["membre"] || row["Name"] || row["name"];
+          const phone = String(row["Téléphone"] || row["telephone"] || row["Phone"] || "");
+          if (name) { await onImportMembers({ name: String(name).trim(), phone: phone.trim() }); membersImported++; }
+        }
+      }
+      // Import Transactions
+      let txsImported = 0;
+      if (wb.SheetNames.includes("Transactions")) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets["Transactions"]);
+        const typeMap = { "Contribution": "contribution", "contribution": "contribution", "Don": "don", "don": "don", "Dépense": "depense", "depense": "depense", "مساهمة": "contribution", "تبرع": "don", "مصروف": "depense" };
+        for (const row of rows) {
+          const type = typeMap[row["Type"] || row["type"]] || "contribution";
+          const amount = parseFloat(row["Montant"] || row["montant"] || row["Amount"] || 0);
+          const memberName = String(row["Membre"] || row["membre"] || "—").trim();
+          let date = row["Date"] || row["date"];
+          if (date instanceof Date) date = date.toISOString().split("T")[0];
+          else if (typeof date === "number") { const d = new Date(Math.round((date - 25569)*86400*1000)); date = d.toISOString().split("T")[0]; }
+          else date = String(date || new Date().toISOString().split("T")[0]);
+          const note = String(row["Note"] || row["note"] || "");
+          if (amount > 0) { await onImportTxs({ type, memberId: null, memberName, amount, date, note }); txsImported++; }
+        }
+      }
+      setImportMsg(t.importSuccess(membersImported, txsImported));
+    } catch(err) {
+      setImportMsg(t.importError);
+    }
+    setImporting(false);
+    e.target.value = "";
+  };
 
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
@@ -793,7 +841,27 @@ function Reports({ txs, members, lang, xlsxReady, chartReady }) {
           <div style={{ color: C.sub, fontSize: 10, marginTop: 5, textAlign: t.dir === "rtl" ? "right" : "left" }}>{t.monthsFull[month - 1]} : {fmt(m.month)}</div>
         </Card>
       ))}
-      <div style={{ marginTop: 26, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20 }}>
+      {/* IMPORT SECTION */}
+      <div style={{ marginTop: 20, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20, marginBottom: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: "#EFF8FF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>📂</div>
+          <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{t.importBtn}</span>
+          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.mintPale, borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
+        </div>
+        <div style={{ fontSize: 10, color: C.muted, marginBottom: 10, lineHeight: 1.5 }}>{t.importInfo}</div>
+        <label style={{ display: "block", cursor: xlsxReady ? "pointer" : "not-allowed" }}>
+          <input type="file" accept=".xlsx,.xls" onChange={doImport} disabled={!xlsxReady || importing} style={{ display: "none" }} />
+          <div style={{ background: importing ? C.mintPale : "#EFF8FF", border: `1.5px dashed ${importing ? C.mintLt : "#93C5FD"}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: xlsxReady ? 1 : 0.5 }}>
+            {importing
+              ? <><div style={{ width: 16, height: 16, border: `2px solid ${C.lime}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} /><span style={{ fontSize: 13, color: C.muted }}>Importation...</span></>
+              : <><span style={{ fontSize: 18 }}>📥</span><span style={{ fontSize: 13, fontWeight: 600, color: "#2563EB" }}>{t.importBtn}</span></>
+            }
+          </div>
+        </label>
+        {importMsg && <div style={{ marginTop: 10, padding: "10px 14px", background: importMsg.startsWith("✅") ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)", borderRadius: 10, fontSize: 12, color: importMsg.startsWith("✅") ? "#15803D" : C.red, fontWeight: 500 }}>{importMsg}</div>}
+      </div>
+
+      <div style={{ marginTop: 6, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 13, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: C.mintPale, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.dl(C.forestLt)}</div>
           <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{t.exportBtn}</span>
@@ -967,7 +1035,7 @@ export default function App() {
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
-        {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} />}
+        {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onImportMembers={addMember} onImportTxs={addTx} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "#1A1A1A", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 32px rgba(0,0,0,0.25)" }}>
