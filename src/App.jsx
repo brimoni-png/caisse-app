@@ -1021,7 +1021,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
 }
 
 // ─── SETTINGS ─────────────────────────────────────────────────────────────────
-function Settings({ lang, setLang, t }) {
+function Settings({ lang, setLang, t, onLogout }) {
   const groups = [
     { title: t.settingsTitle, items: [
       { icon: Ic.globe(C.forestLt), label: t.langLbl, value: lang === "fr" ? "Français" : "عربي", action: () => setLang(lang === "fr" ? "ar" : "fr") },
@@ -1064,7 +1064,7 @@ function Settings({ lang, setLang, t }) {
         </div>
       ))}
       <div className="a5">
-        <button className="tbtn" style={{ width: "100%", background: C.redLt, border: `1.5px solid rgba(224,82,82,0.2)`, borderRadius: 14, padding: "14px", color: C.red, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t.logout}</button>
+        <button className="tbtn" onClick={onLogout} style={{ width: "100%", background: C.redLt, border: `1.5px solid rgba(224,82,82,0.2)`, borderRadius: 14, padding: "14px", color: C.red, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t.logout}</button>
       </div>
     </div>
   );
@@ -1284,7 +1284,7 @@ export default function App() {
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
         {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onImportMembers={addMember} onImportTxs={addTx} onRefresh={fetchAll} onReset={resetAll} />}
-        {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} />}
+        {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "#1A1A2E", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 32px rgba(0,0,0,0.25)" }}>
         {TABS.map((tb) => <NavItem key={tb.id} label={tb.label} icon={tb.icon} activeIcon={tb.aicon} active={tab === tb.id} onClick={() => setTab(tb.id)} />)}
