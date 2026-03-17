@@ -35,26 +35,26 @@ function useChartJS() {
 
 // ─── ECO-FINTECH DESIGN TOKENS ────────────────────────────────────────────────
 const C = {
-  forest:    "#0D3B2E",
-  forestMid: "#155740",
-  forestLt:  "#1E7A52",
-  mint:      "#A8E6CF",
-  mintLt:    "#D4F5E9",
-  mintPale:  "#EEF9F4",
-  lime:      "#6FCF97",
-  sage:      "#B7D8C8",
-  bg:        "#F5FAF7",
+  forest:    "#1A1A2E",
+  forestMid: "#16213E",
+  forestLt:  "#C8872A",
+  mint:      "#F5C842",
+  mintLt:    "#FFE082",
+  mintPale:  "#FFF8E7",
+  lime:      "#E8A838",
+  sage:      "#D4A855",
+  bg:        "#F8F6F2",
   card:      "#FFFFFF",
-  text:      "#0A2218",
-  muted:     "#4A7A64",
-  sub:       "#8EB8A4",
+  text:      "#1A1A2E",
+  muted:     "#6B5E4E",
+  sub:       "#A89880",
   red:       "#E05252",
   redLt:     "#FDEAEA",
-  gold:      "#E8A838",
-  goldLt:    "#FEF4E0",
-  shadow:    "0 2px 20px rgba(13,59,46,0.08)",
-  shadowMd:  "0 8px 32px rgba(13,59,46,0.12)",
-  shadowLg:  "0 20px 56px rgba(13,59,46,0.16)",
+  gold:      "#C8872A",
+  goldLt:    "#FFF3DC",
+  shadow:    "0 2px 20px rgba(26,26,46,0.08)",
+  shadowMd:  "0 8px 32px rgba(26,26,46,0.12)",
+  shadowLg:  "0 20px 56px rgba(26,26,46,0.16)",
 };
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap');`;
@@ -63,8 +63,8 @@ const G = `
   ${FONTS}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html,body{height:100%;overscroll-behavior:none;}
-  body{background:${C.forest};-webkit-font-smoothing:antialiased;font-family:'DM Sans',sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;}
-  #root{height:100%;display:flex;justify-content:center;background:${C.forest};}
+  body{background:#1A1A2E;-webkit-font-smoothing:antialiased;font-family:'DM Sans',sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;}
+  #root{height:100%;display:flex;justify-content:center;background:#1A1A2E;}
   ::-webkit-scrollbar{width:2px;}
   ::-webkit-scrollbar-thumb{background:${C.sage};border-radius:4px;}
   @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -195,7 +195,7 @@ const inits = (n) => n.split(" ").slice(0, 2).map((w) => w[0] || "").join("").to
 const getYrs = (txs) => { const s = new Set(txs.map((t) => new Date(t.date).getFullYear())); s.add(new Date().getFullYear()); return [...s].sort((a, b) => b - a); };
 
 const CFG = (lang) => ({
-  contribution: { label: T[lang].txTypes.contribution, color: C.forestLt, lt: "rgba(30,122,82,0.10)", icon: () => Ic.up(C.forestLt), sign: "+" },
+  contribution: { label: T[lang].txTypes.contribution, color: C.forestLt, lt: "rgba(200,135,42,0.12)", icon: () => Ic.up(C.forestLt), sign: "+" },
   don:          { label: T[lang].txTypes.don,          color: C.gold,      lt: C.goldLt,              icon: () => Ic.heart(C.gold),   sign: "+" },
   depense:      { label: T[lang].txTypes.depense,      color: C.red,       lt: C.redLt,               icon: () => Ic.dn(C.red),       sign: "−" },
 });
@@ -203,7 +203,7 @@ const CFG = (lang) => ({
 const AVC = [
   ["rgba(168,230,207,0.35)","#0D3B2E"],["rgba(13,59,46,0.15)","#0D3B2E"],
   ["rgba(111,207,151,0.25)","#155740"],["rgba(168,230,207,0.50)","#0D3B2E"],
-  ["rgba(30,122,82,0.18)","#0D3B2E"],  ["rgba(183,216,200,0.40)","#155740"],
+  ["rgba(200,135,42,0.25)","#0D3B2E"],  ["rgba(183,216,200,0.40)","#155740"],
 ];
 
 // ─── PERSISTED STATE ──────────────────────────────────────────────────────────
@@ -309,7 +309,7 @@ function Sel({ label, dir = "ltr", children, ...p }) {
 function PBtn({ children, onClick, sx = {}, disabled }) {
   return (
     <button className="tbtn eco-btn" disabled={disabled} onClick={onClick}
-      style={{ background: disabled ? C.sage : `linear-gradient(135deg, ${C.forest}, ${C.forestMid})`, border: "none", color: disabled ? C.muted : "#fff", borderRadius: 14, padding: "14px 20px", fontSize: 14, fontWeight: 600, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginTop: 6, boxShadow: disabled ? "none" : "0 6px 20px rgba(13,59,46,0.28)", fontFamily: "inherit", ...sx }}>
+      style={{ background: disabled ? C.sage : `linear-gradient(135deg, #C8872A, #E8A838)`, border: "none", color: disabled ? C.muted : "#fff", borderRadius: 14, padding: "14px 20px", fontSize: 14, fontWeight: 600, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginTop: 6, boxShadow: disabled ? "none" : "0 6px 20px rgba(13,59,46,0.28)", fontFamily: "inherit", ...sx }}>
       {children}
     </button>
   );
@@ -419,7 +419,7 @@ function TxRow({ tx, onDelete, onEdit, delay = 0, lang }) {
 // ─── 3 CATEGORY PILLS (Contribution / Dons / Dépenses uniquement) ────────────
 function CatPills({ onAdd, lang }) {
   const cats = [
-    { type: "contribution", emoji: "💰", color: C.forestLt, lt: "rgba(30,122,82,0.08)", border: "rgba(30,122,82,0.18)" },
+    { type: "contribution", emoji: "💰", color: C.forestLt, lt: "rgba(200,135,42,0.10)", border: "rgba(200,135,42,0.25)" },
     { type: "don",          emoji: "🎁", color: C.gold,      lt: C.goldLt,              border: "rgba(232,168,56,0.28)" },
     { type: "depense",      emoji: "💸", color: C.red,       lt: C.redLt,               border: "rgba(224,82,82,0.2)"  },
   ];
@@ -451,7 +451,7 @@ function FinChart({ txs, lang, chartReady }) {
     cRef.current = new window.Chart(ref.current, {
       type: "line",
       data: { labels: ms, datasets: [
-        { label: t.stats.contribution, data: c, borderColor: C.forestLt, backgroundColor: "rgba(30,122,82,0.07)", tension: 0.45, fill: true, pointBackgroundColor: C.forestLt, pointRadius: 3, borderWidth: 2 },
+        { label: t.stats.contribution, data: c, borderColor: C.forestLt, backgroundColor: "rgba(200,135,42,0.08)", tension: 0.45, fill: true, pointBackgroundColor: "#C8872A", pointRadius: 3, borderWidth: 2 },
         { label: t.stats.don,          data: d, borderColor: C.gold,     backgroundColor: "rgba(232,168,56,0.07)", tension: 0.45, fill: true, pointBackgroundColor: C.gold,     pointRadius: 3, borderWidth: 2 },
         { label: t.stats.depense,      data: e, borderColor: C.red,      backgroundColor: "rgba(224,82,82,0.06)",  tension: 0.45, fill: true, pointBackgroundColor: C.red,      pointRadius: 3, borderWidth: 2 },
       ]},
@@ -495,16 +495,16 @@ function Empty({ label }) {
 // ─── LOGO CAISSE ─────────────────────────────────────────────────────────────
 function CaisseLogo() {
   return (
-    <div style={{ width: 36, height: 36, borderRadius: 11, background: C.mint, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 14px rgba(168,230,207,0.55)" }}>
+    <div style={{ width: 40, height: 40, borderRadius: 13, background: "linear-gradient(135deg, #C8872A, #F5C842)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 14px rgba(200,135,42,0.45)" }}>
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <rect x="2" y="5" width="18" height="13" rx="3" fill={C.forest} />
-        <circle cx="11" cy="11.5" r="3.5" stroke={C.mint} strokeWidth="1.4" fill="none" />
-        <circle cx="11" cy="11.5" r="1.3" fill={C.mint} />
-        <line x1="11" y1="8.5" x2="11" y2="9.8" stroke={C.mint} strokeWidth="1.4" strokeLinecap="round" />
-        <circle cx="5" cy="7.5" r="0.9" fill={C.mint} opacity="0.7" />
-        <circle cx="5" cy="15.5" r="0.9" fill={C.mint} opacity="0.7" />
-        <rect x="5.5" y="17.5" width="2.5" height="1.8" rx="0.9" fill={C.forest} />
-        <rect x="14" y="17.5" width="2.5" height="1.8" rx="0.9" fill={C.forest} />
+        <rect x="2" y="5" width="18" height="13" rx="3" fill="#1A1A2E" />
+        <circle cx="11" cy="11.5" r="3.5" stroke="#F5C842" strokeWidth="1.4" fill="none" />
+        <circle cx="11" cy="11.5" r="1.3" fill="#F5C842" />
+        <line x1="11" y1="8.5" x2="11" y2="9.8" stroke="#F5C842" strokeWidth="1.4" strokeLinecap="round" />
+        <circle cx="5" cy="7.5" r="0.9" fill="#F5C842" opacity="0.7" />
+        <circle cx="5" cy="15.5" r="0.9" fill="#F5C842" opacity="0.7" />
+        <rect x="5.5" y="17.5" width="2.5" height="1.8" rx="0.9" fill="#1A1A2E" />
+        <rect x="14" y="17.5" width="2.5" height="1.8" rx="0.9" fill="#1A1A2E" />
       </svg>
     </div>
   );
@@ -529,17 +529,18 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, c
     <div style={{ direction: t.dir }}>
 
       {/* ── HERO HEADER ─────────────────────────────────────────── */}
-      <div style={{ background: `linear-gradient(155deg, ${C.forest} 0%, ${C.forestMid} 55%, #1C6B47 100%)`, borderRadius: "0 0 32px 32px", padding: "28px 20px 26px", marginLeft: -16, marginRight: -16, marginTop: -20, position: "relative", overflow: "hidden" }}>
-        {/* Subtle organic blobs */}
-        <div style={{ position: "absolute", top: -55, right: -35, width: 190, height: 190, borderRadius: "50%", background: "rgba(168,230,207,0.055)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: -25, left: -15, width: 130, height: 130, borderRadius: "50%", background: "rgba(111,207,151,0.04)", pointerEvents: "none" }} />
+      <div style={{ background: `linear-gradient(155deg, #1A1A2E 0%, #16213E 40%, #1E2A4A 100%)`, borderRadius: "0 0 36px 36px", padding: "28px 20px 30px", marginLeft: -16, marginRight: -16, marginTop: -20, position: "relative", overflow: "hidden", borderBottom: "1px solid rgba(200,135,42,0.2)" }}>
+        {/* Gold accent blobs */}
+        <div style={{ position: "absolute", top: -40, right: -30, width: 180, height: 180, borderRadius: "50%", background: "rgba(200,135,42,0.08)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: -20, left: -10, width: 120, height: 120, borderRadius: "50%", background: "rgba(245,200,66,0.05)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: "50%", right: 20, width: 2, height: 60, background: "linear-gradient(to bottom, transparent, rgba(200,135,42,0.3), transparent)", transform: "translateY(-50%)", pointerEvents: "none" }} />
 
         {/* Logo + greeting + icons */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 26 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
             <CaisseLogo />
             <div>
-              <div style={{ color: "rgba(255,255,255,0.48)", fontSize: 10, fontWeight: 400, letterSpacing: 0.3 }}>{t.greeting}</div>
+              <div style={{ color: "rgba(200,135,42,0.85)", fontSize: 10, fontWeight: 600, letterSpacing: 0.5 }}>{t.greeting}</div>
               <div style={{ color: "#fff", fontSize: 14, fontWeight: 600, letterSpacing: -0.1 }}>{t.userName}</div>
             </div>
           </div>
@@ -548,7 +549,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, c
 
         {/* Balance */}
         <div style={{ marginBottom: 22 }}>
-          <div style={{ color: "rgba(255,255,255,0.42)", fontSize: 10, fontWeight: 500, letterSpacing: 1.1, textTransform: "uppercase", marginBottom: 5 }}>{t.balanceGlobal}</div>
+          <div style={{ color: "rgba(200,135,42,0.9)", fontSize: 10, fontWeight: 600, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 5 }}>{t.balanceGlobal}</div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
             <div style={{ color: "#fff", fontSize: 36, fontWeight: 700, letterSpacing: -1.8, lineHeight: 1, fontFamily: "'DM Serif Display', serif" }}>
               {new Intl.NumberFormat("fr-FR").format(solde)}
@@ -596,7 +597,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, c
               <Card key={i} sx={{ padding: "15px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 9 }}>
                   <span style={{ fontSize: 20 }}>{s.emoji}</span>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: s.pos ? C.forestLt : C.red, background: s.pos ? "rgba(30,122,82,0.09)" : "rgba(224,82,82,0.09)", borderRadius: 6, padding: "2px 7px" }}>0%</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: s.pos ? C.forestLt : C.red, background: s.pos ? "rgba(200,135,42,0.10)" : "rgba(224,82,82,0.09)", borderRadius: 6, padding: "2px 7px" }}>0%</span>
                 </div>
                 <div style={{ color: C.text, fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{s.value}</div>
                 <div style={{ color: C.muted, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.6 }}>{s.label}</div>
@@ -625,7 +626,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, c
                   return <div key={m.id} style={{ width: 38, height: 38, borderRadius: 12, background: bg, border: `2px solid ${C.card}`, marginLeft: i === 0 ? 0 : -9, display: "flex", alignItems: "center", justifyContent: "center", color: fg, fontSize: 12, fontWeight: 700, zIndex: 10 - i }}>{inits(m.name)}</div>;
                 })}
               </div>
-              <button className="tbtn" onClick={() => onTabChange("members")} style={{ fontSize: 11, fontWeight: 600, color: C.forestLt, background: C.mintPale, border: `1px solid rgba(30,122,82,0.15)`, borderRadius: 9, padding: "7px 13px", cursor: "pointer" }}>{t.seeMembers}</button>
+              <button className="tbtn" onClick={() => onTabChange("members")} style={{ fontSize: 11, fontWeight: 600, color: C.forestLt, background: C.mintPale, border: `1px solid rgba(200,135,42,0.2)`, borderRadius: 9, padding: "7px 13px", cursor: "pointer" }}>{t.seeMembers}</button>
             </div>
           </Card>
         </div>
@@ -695,7 +696,7 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
             </div>
             {total > 0 && (<>
               <div style={{ background: C.mintPale, borderRadius: 5, height: 4, overflow: "hidden" }}>
-                <div style={{ background: `linear-gradient(90deg, ${C.forest}, ${C.mint})`, width: `${pct}%`, height: "100%", borderRadius: 5, transition: "width .7s cubic-bezier(.16,1,.3,1)" }} />
+                <div style={{ background: `linear-gradient(90deg, #C8872A, #F5C842)`, width: `${pct}%`, height: "100%", borderRadius: 5, transition: "width .7s cubic-bezier(.16,1,.3,1)" }} />
               </div>
               <div style={{ color: C.sub, fontSize: 10, marginTop: 5, textAlign: t.dir === "rtl" ? "right" : "left" }}>{Math.round(pct)}% du maximum</div>
             </>)}
@@ -760,17 +761,17 @@ function Reports({ txs, members, lang, xlsxReady, chartReady }) {
           <div style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
         </div>
       </div>
-      <div style={{ background: `linear-gradient(135deg, ${C.forest}, ${C.forestMid})`, borderRadius: 20, padding: "20px 22px", marginBottom: 16, boxShadow: C.shadowMd }}>
+      <div style={{ background: `linear-gradient(135deg, #1A1A2E 0%, #16213E 60%, #1E2A4A 100%)`, borderRadius: 20, padding: "20px 22px", marginBottom: 16, boxShadow: C.shadowMd, border: "1px solid rgba(200,135,42,0.2)" }}>
         <div style={{ color: "rgba(255,255,255,.5)", fontSize: 10, fontWeight: 500, letterSpacing: 1.1, textTransform: "uppercase", marginBottom: 5 }}>{t.balanceGlobal}</div>
         <div style={{ color: "#fff", fontSize: 30, fontWeight: 700, letterSpacing: -1.2, fontFamily: "'DM Serif Display', serif" }}>{new Intl.NumberFormat("fr-FR").format(solde)} MRU</div>
       </div>
       <div style={{ color: C.text, fontWeight: 600, fontSize: 14, marginBottom: 12 }}>{t.monthsFull[month - 1]} {year}</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
         {[
-          { label: t.totalContrib, value: mC, color: C.forestLt, lt: "rgba(30,122,82,0.1)", icon: Ic.up(C.forestLt) },
+          { label: t.totalContrib, value: mC, color: C.forestLt, lt: "rgba(200,135,42,0.12)", icon: Ic.up(C.forestLt) },
           { label: t.totalDons, value: mD, color: C.gold, lt: C.goldLt, icon: Ic.heart(C.gold) },
           { label: t.totalDep, value: mE, color: C.red, lt: C.redLt, icon: Ic.dn(C.red) },
-          { label: t.monthlyEvo, value: mB, color: mB >= 0 ? C.forestLt : C.red, lt: mB >= 0 ? "rgba(30,122,82,0.1)" : C.redLt, icon: mB >= 0 ? Ic.up(C.forestLt) : Ic.dn(C.red) },
+          { label: t.monthlyEvo, value: mB, color: mB >= 0 ? C.forestLt : C.red, lt: mB >= 0 ? "rgba(200,135,42,0.12)" : C.redLt, icon: mB >= 0 ? Ic.up(C.forestLt) : Ic.dn(C.red) },
         ].map((s) => (
           <Card key={s.label} sx={{ padding: "14px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 9 }}>
@@ -790,7 +791,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady }) {
             <span style={{ color: C.forestLt, fontWeight: 700, fontSize: 13 }}>{fmt(m.total)}</span>
           </div>
           <div style={{ background: C.mintPale, borderRadius: 4, height: 4, overflow: "hidden" }}>
-            <div style={{ background: `linear-gradient(90deg, ${C.forest}, ${C.mint})`, width: `${Math.min(100, (m.total / mx) * 100)}%`, height: "100%", borderRadius: 4, transition: "width .7s" }} />
+            <div style={{ background: `linear-gradient(90deg, #C8872A, #F5C842)`, width: `${Math.min(100, (m.total / mx) * 100)}%`, height: "100%", borderRadius: 4, transition: "width .7s" }} />
           </div>
           <div style={{ color: C.sub, fontSize: 10, marginTop: 5, textAlign: t.dir === "rtl" ? "right" : "left" }}>{t.monthsFull[month - 1]} : {fmt(m.month)}</div>
         </Card>
@@ -831,7 +832,7 @@ function Settings({ lang, setLang, t }) {
   ];
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
-      <div className="a1" style={{ background: `linear-gradient(135deg, ${C.forest}, ${C.forestMid})`, borderRadius: 22, padding: "22px 20px", marginBottom: 20, boxShadow: C.shadowMd }}>
+      <div className="a1" style={{ background: `linear-gradient(135deg, #1A1A2E, #16213E)`, borderRadius: 22, padding: "22px 20px", marginBottom: 20, boxShadow: C.shadowMd, border: "1px solid rgba(200,135,42,0.25)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <div style={{ width: 56, height: 56, borderRadius: 18, background: "rgba(168,230,207,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", border: "1.5px solid rgba(168,230,207,0.3)", fontFamily: "'DM Serif Display', serif" }}>
             {t.userName[0].toUpperCase()}
@@ -928,7 +929,7 @@ function NavItem({ label, icon, activeIcon, active, onClick }) {
         {active ? activeIcon : icon}
       </div>
       <span style={{ fontSize: 9, fontWeight: active ? 600 : 400, color: active ? C.mint : "rgba(255,255,255,0.35)", transition: "color .18s", letterSpacing: 0.2 }}>{label}</span>
-      {active && <div style={{ width: 3, height: 3, borderRadius: "50%", background: C.mint, marginTop: -1 }} />}
+      {active && <div style={{ width: 3, height: 3, borderRadius: "50%", background: C.gold, marginTop: -1 }} />}
     </button>
   );
 }
