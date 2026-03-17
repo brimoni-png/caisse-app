@@ -520,6 +520,7 @@ function CaisseLogo() {
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
 function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, setLang, chartReady }) {
   const t = T[lang];
+  const [statModal, setStatModal] = useState(null);
   const solde   = txs.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
   const contrib = txs.filter((tx) => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
   const dons    = txs.filter((tx) => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
@@ -527,10 +528,11 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
   const recent  = [...txs].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 4);
 
   const statsRow = [
-    { label: t.stats.contribution, value: contrib, accentColor: C.mint,   dimColor: "rgba(168,230,207,0.5)", sign: "+", onClick: () => onAdd("contribution") },
-    { label: t.stats.don,          value: dons,    accentColor: "#F5C842", dimColor: "rgba(245,200,66,0.45)", sign: "+", onClick: () => onAdd("don") },
-    { label: t.stats.depense,      value: dep,     accentColor: "#FF9E9E", dimColor: "rgba(255,158,158,0.4)", sign: "−", onClick: () => onAdd("depense") },
+    { label: t.stats.contribution, value: contrib, accentColor: C.mint,   sign: "+", type: "contribution" },
+    { label: t.stats.don,          value: dons,    accentColor: "#F5C842", sign: "+", type: "don" },
+    { label: t.stats.depense,      value: dep,     accentColor: "#FF9E9E", sign: "−", type: "depense" },
   ];
+  const curYear = new Date().getFullYear();
 
   return (
     <div style={{ direction: t.dir }}>
@@ -592,19 +594,84 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
           </div>
         </div>
 
-        {/* 3 STATS PILLS */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 4 }}>
-          {statsRow.map((s) => (
-            <button key={s.label} className="tbtn eco-btn" onClick={s.onClick}
-              style={{ background: C.card, border: "none", borderRadius: 16, padding: "13px 6px 11px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 5, boxShadow: C.shadow, transition: "all .2s" }}>
-              <span style={{ color: s.accentColor, fontSize: 14, fontWeight: 700, letterSpacing: -0.4 }}>
-                {s.sign}{fmtSh(s.value)}
-              </span>
-              <span style={{ color: C.muted, fontSize: 9, fontWeight: 500, textTransform: "uppercase", letterSpacing: 0.5, textAlign: "center", lineHeight: 1.2 }}>
-                {s.label}
-              </span>
-            </button>
-          ))}
+        {/* 3 STATS CARDS */}
+        {statModal && (
+          <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(19,17,28,0.55)", backdropFilter: "blur(12px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+            onClick={() => setStatModal(null)}>
+            <div style={{ background: C.bg, borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 430, padding: "0 20px 40px", animation: "sheet .3s cubic-bezier(.16,1,.3,1)" }}
+              onClick={e => e.stopPropagation()}>
+              <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
+                <div style={{ width: 40, height: 4, background: "#DEDAE8", borderRadius: 4 }} />
+              </div>
+              {/* Title */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, marginTop: 8 }}>
+                <div>
+                  <div style={{ color: C.text, fontWeight: 700, fontSize: 18 }}>{statModal.label}</div>
+                  <div style={{ color: C.muted, fontSize: 13, marginTop: 2 }}>{curYear}</div>
+                </div>
+                <div style={{ background: "rgba(139,92,246,0.1)", borderRadius: 14, padding: "8px 16px" }}>
+                  <span style={{ color: "#8B5CF6", fontSize: 20, fontWeight: 700 }}>{statModal.sign}{fmt(statModal.value)}</span>
+                </div>
+              </div>
+              {/* Monthly breakdown */}
+              <div style={{ marginBottom: 8 }}>
+                {Array.from({ length: 12 }, (_, i) => {
+                  const monthVal = txs.filter(tx => tx.type === statModal.type && new Date(tx.date).getFullYear() === curYear && new Date(tx.date).getMonth() === i).reduce((a, tx) => a + tx.amount, 0);
+                  const maxVal = Math.max(...Array.from({ length: 12 }, (_, j) => txs.filter(tx => tx.type === statModal.type && new Date(tx.date).getFullYear() === curYear && new Date(tx.date).getMonth() === j).reduce((a, tx) => a + tx.amount, 0)), 1);
+                  const pct = Math.min(100, (monthVal / maxVal) * 100);
+                  const months = t.months;
+                  if (monthVal === 0) return null;
+                  return (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                      <div style={{ width: 32, color: C.muted, fontSize: 11, fontWeight: 500, flexShrink: 0 }}>{months[i]}</div>
+                      <div style={{ flex: 1, background: "#EDEDF5", borderRadius: 6, height: 8, overflow: "hidden" }}>
+                        <div style={{ width: `${pct}%`, height: "100%", background: statModal.type === "depense" ? "#EF4444" : statModal.type === "don" ? "#DB2777" : "#8B5CF6", borderRadius: 6, transition: "width .6s" }} />
+                      </div>
+                      <div style={{ width: 70, textAlign: "right", color: C.text, fontSize: 12, fontWeight: 600 }}>{fmt(monthVal)}</div>
+                    </div>
+                  );
+                })}
+                {txs.filter(tx => tx.type === statModal.type && new Date(tx.date).getFullYear() === curYear).length === 0 && (
+                  <div style={{ textAlign: "center", color: C.muted, fontSize: 13, padding: "20px 0" }}>Aucune donnée pour {curYear}</div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 4 }}>
+          {/* Contributions */}
+          <button className="tbtn" onClick={() => setStatModal(statsRow[0])}
+            style={{ background: C.card, border: "1.5px solid #EDEDF5", borderRadius: 18, padding: "16px 10px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: "0 2px 12px rgba(91,33,182,0.06)", transition: "all .2s" }}>
+            <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(139,92,246,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </div>
+            <div>
+              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.contribution}</div>
+              <div style={{ color: "#8B5CF6", fontSize: 14, fontWeight: 700, letterSpacing: -0.3 }}>+{fmtSh(contrib)}</div>
+            </div>
+          </button>
+          {/* Dons */}
+          <button className="tbtn" onClick={() => setStatModal(statsRow[1])}
+            style={{ background: C.card, border: "1.5px solid #F0C0D8", borderRadius: 18, padding: "16px 10px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: "0 2px 16px rgba(219,39,119,0.08)", transition: "all .2s" }}>
+            <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(219,39,119,0.07)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DB2777" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            </div>
+            <div>
+              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.don}</div>
+              <div style={{ color: "#DB2777", fontSize: 14, fontWeight: 700, letterSpacing: -0.3 }}>+{fmtSh(dons)}</div>
+            </div>
+          </button>
+          {/* Dépenses */}
+          <button className="tbtn" onClick={() => setStatModal(statsRow[2])}
+            style={{ background: C.card, border: "1.5px solid #EDEDF5", borderRadius: 18, padding: "16px 10px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: "0 2px 12px rgba(91,33,182,0.06)", transition: "all .2s" }}>
+            <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(91,33,182,0.07)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B21B6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            </div>
+            <div>
+              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.depense}</div>
+              <div style={{ color: "#5B21B6", fontSize: 14, fontWeight: 700, letterSpacing: -0.3 }}>-{fmtSh(dep)}</div>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -615,28 +682,6 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
         <div className="a2" style={{ marginBottom: 22 }}>
           <SHdr title={t.categories} dir={t.dir} />
           <CatPills onAdd={onAdd} lang={lang} />
-        </div>
-
-        {/* APERÇU DU MOIS */}
-        <div className="a3" style={{ marginBottom: 22 }}>
-          <SHdr title={t.apercu} dir={t.dir} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            {[
-              { emoji: "💰", label: t.stats.contribution, value: fmtSh(contrib) + " MRU", pos: true },
-              { emoji: "🎁", label: t.stats.don,          value: fmtSh(dons) + " MRU",   pos: true },
-              { emoji: "💸", label: t.stats.depense,      value: fmtSh(dep) + " MRU",    pos: false },
-              { emoji: "📋", label: "Transactions",       value: String(txs.length),      pos: true },
-            ].map((s, i) => (
-              <Card key={i} sx={{ padding: "15px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 9 }}>
-                  <span style={{ fontSize: 20 }}>{s.emoji}</span>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: s.pos ? C.forestLt : C.red, background: s.pos ? "rgba(200,135,42,0.10)" : "rgba(224,82,82,0.09)", borderRadius: 6, padding: "2px 7px" }}>0%</span>
-                </div>
-                <div style={{ color: C.text, fontWeight: 700, fontSize: 14, marginBottom: 2 }}>{s.value}</div>
-                <div style={{ color: C.muted, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.6 }}>{s.label}</div>
-              </Card>
-            ))}
-          </div>
         </div>
 
         {/* Chart */}
