@@ -1688,47 +1688,105 @@ function LoginScreen({ onLogin }) {
     onLogin(name.trim());
   };
 
+  const LOGIN_CSS = `
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap');
+    @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    .login-wrap{animation:fadeUp .5s cubic-bezier(.16,1,.3,1) both}
+    .login-input::placeholder{color:rgba(220,210,255,0.45)}
+    .login-btn:active{transform:scale(.97)}
+    .login-btn:hover{filter:brightness(1.08)}
+  `;
+
   return (
-    <div style={{ background: "#F2EFE9", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 32px", fontFamily: "'Inter', sans-serif", position: "relative", overflow: "hidden" }}>
-      <style>{G}</style>
+    <div style={{
+      position: "relative", minHeight: "100vh", minHeight: "100dvh",
+      width: "100%", maxWidth: 430, margin: "0 auto", overflow: "hidden",
+      background: "linear-gradient(160deg, #3B1A6E 0%, #5B2AA0 40%, #7B3FCC 70%, #9B5DE5 100%)",
+      display: "flex", flexDirection: "column", alignItems: "center",
+      justifyContent: "center", padding: "40px 28px",
+      fontFamily: "'Inter', sans-serif",
+    }}>
+      <style>{LOGIN_CSS}</style>
 
-      {/* Formes organiques — haut gauche */}
-      <svg style={{ position: "absolute", top: -30, left: -50, pointerEvents: "none", zIndex: 0 }} width="260" height="260" viewBox="0 0 260 260" fill="none">
-        <path d="M130 10 C200 10 250 60 250 130 C250 200 200 250 130 250 C60 250 10 200 10 130 C10 60 60 10 130 10Z" fill="#D4BFFF" opacity="0.55"/>
-        <path d="M100 20 C160 5 230 55 240 120 C250 185 200 240 135 248 C70 256 15 205 8 140 C1 75 40 35 100 20Z" fill="#C4A8FF" opacity="0.35"/>
+      {/* ── Motif géométrique — lignes polygonales ── */}
+      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }} viewBox="0 0 430 900" fill="none" preserveAspectRatio="xMidYMid slice">
+        {/* Coins haut */}
+        <polygon points="0,0 120,0 60,90" stroke="rgba(200,170,255,0.18)" strokeWidth="1" fill="none"/>
+        <polygon points="0,0 90,0 0,80" stroke="rgba(200,170,255,0.12)" strokeWidth="1" fill="none"/>
+        <polygon points="430,0 310,0 380,100" stroke="rgba(200,170,255,0.18)" strokeWidth="1" fill="none"/>
+        <polygon points="430,0 340,0 430,90" stroke="rgba(200,170,255,0.12)" strokeWidth="1" fill="none"/>
+        {/* Coins bas */}
+        <polygon points="0,900 130,900 50,800" stroke="rgba(200,170,255,0.15)" strokeWidth="1" fill="none"/>
+        <polygon points="430,900 300,900 400,800" stroke="rgba(200,170,255,0.15)" strokeWidth="1" fill="none"/>
+        <polygon points="430,900 350,900 430,820" stroke="rgba(200,170,255,0.10)" strokeWidth="1" fill="none"/>
+        {/* Lignes décoratives diagonales */}
+        <line x1="0" y1="200" x2="120" y2="80" stroke="rgba(200,170,255,0.10)" strokeWidth="1"/>
+        <line x1="430" y1="200" x2="310" y2="80" stroke="rgba(200,170,255,0.10)" strokeWidth="1"/>
+        <line x1="0" y1="700" x2="130" y2="820" stroke="rgba(200,170,255,0.08)" strokeWidth="1"/>
+        <line x1="430" y1="700" x2="300" y2="820" stroke="rgba(200,170,255,0.08)" strokeWidth="1"/>
       </svg>
 
-      {/* Formes organiques — bas droite */}
-      <svg style={{ position: "absolute", bottom: -40, right: -50, pointerEvents: "none", zIndex: 0 }} width="240" height="240" viewBox="0 0 240 240" fill="none">
-        <path d="M120 10 C190 10 230 70 230 130 C230 190 190 230 120 230 C50 230 10 190 10 130 C10 70 50 10 120 10Z" fill="#D4BFFF" opacity="0.50"/>
-        <path d="M90 15 C155 0 220 55 228 118 C236 181 190 232 127 238 C64 244 10 196 5 133 C0 70 25 30 90 15Z" fill="#C4A8FF" opacity="0.30"/>
-      </svg>
-
-      <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
-        {/* Titre */}
-        <div style={{ marginBottom: 52, textAlign: "left" }}>
-          <div style={{ fontSize: 36, fontWeight: 800, color: "#1A1429", letterSpacing: -1.2, lineHeight: 1.1, marginBottom: 10, fontFamily: "'Syne', sans-serif" }}>Caisse CHEBAB</div>
-          <div style={{ fontSize: 15, color: "#7A6E8A", fontWeight: 400 }}>Connectez-vous pour continuer</div>
+      {/* ── Titre centré ── */}
+      <div className="login-wrap" style={{ position: "relative", zIndex: 1, textAlign: "center", marginBottom: 48, animationDelay: "0ms" }}>
+        <div style={{
+          fontSize: 52, fontWeight: 900, lineHeight: 1.0, letterSpacing: -1,
+          fontFamily: "'Playfair Display', serif",
+          background: "linear-gradient(180deg, #FFFFFF 0%, #D4B8FF 100%)",
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+        }}>
+          Caisse<br/>CHEBAB
         </div>
+        <div style={{ fontSize: 15, color: "rgba(220,205,255,0.80)", fontWeight: 400, marginTop: 12, letterSpacing: 0.2 }}>
+          Connectez-vous pour continuer
+        </div>
+      </div>
+
+      {/* ── Carte glassmorphism ── */}
+      <div className="login-wrap" style={{
+        position: "relative", zIndex: 1, width: "100%",
+        background: "rgba(255,255,255,0.10)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderRadius: 22,
+        border: "1px solid rgba(255,255,255,0.22)",
+        padding: "32px 28px 28px",
+        boxShadow: "0 8px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
+        animationDelay: "80ms",
+      }}>
 
         {/* Champ NOM */}
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "#1A1429", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>NOM</div>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(220,205,255,0.75)", letterSpacing: 1.8, textTransform: "uppercase", marginBottom: 10 }}>NOM</div>
           <input
+            className="login-input"
             value={name}
             onChange={e => { setName(e.target.value); setError(""); }}
             onFocus={() => setNameFocus(true)}
             onBlur={() => setNameFocus(false)}
             onKeyDown={e => e.key === "Enter" && handleLogin()}
             placeholder="Votre nom..."
-            style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${nameFocus ? "#6B21E8" : "rgba(107,33,232,0.25)"}`, padding: "10px 0", fontSize: 16, color: "#1A1429", outline: "none", fontFamily: "inherit", transition: "border-color .2s" }}
+            style={{
+              width: "100%",
+              background: nameFocus ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.10)",
+              border: `1.5px solid ${nameFocus ? "rgba(200,170,255,0.7)" : "rgba(200,170,255,0.25)"}`,
+              borderRadius: 12,
+              padding: "14px 16px",
+              fontSize: 15,
+              color: "#fff",
+              outline: "none",
+              fontFamily: "inherit",
+              transition: "all .2s",
+              boxShadow: nameFocus ? "0 0 0 3px rgba(180,120,255,0.20)" : "none",
+            }}
           />
         </div>
 
         {/* Champ CODE PIN */}
-        <div style={{ marginBottom: 44 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "#1A1429", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>CODE PIN</div>
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(220,205,255,0.75)", letterSpacing: 1.8, textTransform: "uppercase", marginBottom: 10 }}>CODE PIN</div>
           <input
+            className="login-input"
             value={pin}
             onChange={e => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); setPin(v); setError(""); }}
             onFocus={() => setPinFocus(true)}
@@ -1738,26 +1796,55 @@ function LoginScreen({ onLogin }) {
             type="password"
             inputMode="numeric"
             maxLength={4}
-            style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${shake ? "#E53E3E" : pinFocus ? "#6B21E8" : "rgba(107,33,232,0.25)"}`, padding: "10px 0", fontSize: 24, color: "#1A1429", outline: "none", fontFamily: "inherit", transition: "border-color .2s", letterSpacing: 10, animation: shake ? "shake .4s ease" : "none" }}
+            style={{
+              width: "100%",
+              background: pinFocus ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.10)",
+              border: `1.5px solid ${shake ? "rgba(255,100,100,0.8)" : pinFocus ? "rgba(200,170,255,0.7)" : "rgba(200,170,255,0.25)"}`,
+              borderRadius: 12,
+              padding: "14px 16px",
+              fontSize: 22,
+              color: "#fff",
+              outline: "none",
+              fontFamily: "inherit",
+              transition: "all .2s",
+              letterSpacing: 10,
+              boxShadow: shake ? "0 0 0 3px rgba(255,100,100,0.20)" : pinFocus ? "0 0 0 3px rgba(180,120,255,0.20)" : "none",
+              animation: shake ? "shake .4s ease" : "none",
+            }}
           />
         </div>
 
         {/* Erreur */}
         {error && (
-          <div style={{ background: "#FEE2E2", borderRadius: 12, padding: "10px 14px", marginBottom: 20, fontSize: 13, color: "#C53030", fontWeight: 500 }}>
+          <div style={{ background: "rgba(255,80,80,0.18)", border: "1px solid rgba(255,100,100,0.35)", borderRadius: 10, padding: "10px 14px", marginBottom: 18, fontSize: 13, color: "#FFB3B3", fontWeight: 500 }}>
             ⚠️ {error}
           </div>
         )}
 
-        {/* Bouton connexion */}
-        <button className="tbtn" onClick={handleLogin}
-          style={{ width: "100%", background: "#6B21E8", border: "none", color: "#fff", borderRadius: 50, padding: "18px", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 8px 28px rgba(107,33,232,0.32)", letterSpacing: 0.3 }}>
+        {/* Bouton Se connecter */}
+        <button className="tbtn login-btn" onClick={handleLogin}
+          style={{
+            width: "100%",
+            background: "linear-gradient(135deg, #6B21E8 0%, #8B35FF 100%)",
+            border: "none",
+            color: "#fff",
+            borderRadius: 12,
+            padding: "17px",
+            fontSize: 16,
+            fontWeight: 600,
+            cursor: "pointer",
+            fontFamily: "inherit",
+            boxShadow: "0 6px 24px rgba(107,33,232,0.55), inset 0 1px 0 rgba(255,255,255,0.15)",
+            letterSpacing: 0.3,
+            transition: "all .18s",
+          }}>
           Se connecter
         </button>
       </div>
     </div>
   );
 }
+
 
 export default function App() {
   const xlsxReady = useSheetJS();
