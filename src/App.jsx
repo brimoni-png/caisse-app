@@ -780,108 +780,80 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 // ─── OPERATIONS ───────────────────────────────────────────────────────────────
 function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
   const t = T[lang];
-  const [filter, setFilter] = useState("all");
-  const [search, setSearch] = useState("");
+  const allYears = getYrs(txs);
+  const [selYear, setSelYear] = useState("all");
+  const [selMonth, setSelMonth] = useState("all");
+
   const sorted = [...txs]
-    .filter((tx) => filter === "all" || tx.type === filter)
     .filter((tx) => {
-      if (!search.trim()) return true;
-      const q = search.toLowerCase();
-      return (
-        tx.memberName?.toLowerCase().includes(q) ||
-        tx.note?.toLowerCase().includes(q) ||
-        String(tx.amount).includes(q) ||
-        tx.date?.includes(q)
-      );
+      const d = new Date(tx.date);
+      if (selYear !== "all" && d.getFullYear() !== Number(selYear)) return false;
+      if (selMonth !== "all" && d.getMonth() + 1 !== Number(selMonth)) return false;
+      return true;
     })
     .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const selStyle = { width: "100%", background: "#fff", border: `1.5px solid ${C.mintLt}`, borderRadius: 12, padding: "10px 30px 10px 13px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit", appearance: "none", cursor: "pointer", boxShadow: C.shadow };
+
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
       <CatPills onAdd={onAdd} lang={lang} />
-      <SearchBar value={search} onChange={setSearch} placeholder={lang === "ar" ? "بحث في المعاملات..." : "Rechercher une transaction…"} dir={t.dir} />
-      <div style={{ display: "flex", gap: 7, marginBottom: 18, overflowX: "auto", paddingBottom: 4, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-        {["all", "contribution", "don", "depense"].map((f) => {
-          const a = filter === f;
-          const cfg = f !== "all" ? CFG(lang)[f] : null;
-          return (
-            <button key={f} className="tbtn" onClick={() => setFilter(f)}
-              style={{ background: a ? (cfg ? cfg.color : C.forest) : C.card, border: `1.5px solid ${a ? (cfg ? cfg.color : C.forest) : C.mintLt}`, color: a ? "#fff" : C.muted, borderRadius: 20, padding: "7px 16px", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit", boxShadow: C.shadow }}>
-              {t.filters[f]}
-            </button>
-          );
-        })}
+
+      {/* Filtres Année / Mois */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 14, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+        <div style={{ flex: 1, position: "relative" }}>
+          <select value={selYear} onChange={e => { setSelYear(e.target.value); setSelMonth("all"); }} style={selStyle}>
+            <option value="all">{lang === "ar" ? "كل السنوات" : "Toutes les années"}</option>
+            {allYears.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <div style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
+        </div>
+        <div style={{ flex: 1, position: "relative" }}>
+          <select value={selMonth} onChange={e => setSelMonth(e.target.value)} disabled={selYear === "all"} style={{ ...selStyle, opacity: selYear === "all" ? 0.45 : 1, cursor: selYear === "all" ? "not-allowed" : "pointer" }}>
+            <option value="all">{lang === "ar" ? "كل الأشهر" : "Tous les mois"}</option>
+            {t.monthsFull.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+          </select>
+          <div style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
+        </div>
       </div>
-      {search && <div style={{ fontSize: 11, color: C.muted, marginBottom: 10, paddingLeft: 2 }}>{sorted.length} résultat{sorted.length !== 1 ? "s" : ""}</div>}
+
+      <div style={{ fontSize: 11, color: C.muted, marginBottom: 10, paddingLeft: 2 }}>
+        {sorted.length} {lang === "ar" ? "معاملة" : `transaction${sorted.length !== 1 ? "s" : ""}`}
+        {selYear !== "all" && <span style={{ marginLeft: 6, background: C.mintPale, borderRadius: 6, padding: "1px 7px", border: `1px solid ${C.mintLt}`, color: C.forestLt, fontWeight: 600 }}>{selYear}{selMonth !== "all" ? ` · ${t.months[Number(selMonth)-1]}` : ""}</span>}
+      </div>
+
       {sorted.length === 0 ? <Empty label={t.noTx} /> : sorted.map((tx, i) => <TxRow key={tx.id} tx={tx} onDelete={onDelete} onEdit={onEdit} delay={i * 25} lang={lang} />)}
     </div>
   );
 }
-
 // ─── MEMBERS ──────────────────────────────────────────────────────────────────
 function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
   const t = T[lang];
   const [confDel, setConfDel] = useState(null);
-  const [filter, setFilter] = useState("all");
-  const [search, setSearch] = useState("");
-  const getTotal = (id) => txs.filter((tx) => tx.memberId === id && tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
-  const mx = members.length > 0 ? Math.max(...members.map((m) => getTotal(m.id)), 1) : 1;
-  const filtered = members.filter(m => {
-    const total = getTotal(m.id);
-    if (filter === "hasContrib" && total <= 0) return false;
-    if (filter === "noPay" && total > 0) return false;
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      return m.name?.toLowerCase().includes(q) || m.phone?.includes(q);
-    }
-    return true;
-  });
+
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
       <PBtn onClick={onAddMember} sx={{ marginBottom: 14 }}>
         <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>{Ic.plus()} {t.addMember}</span>
       </PBtn>
-      <SearchBar value={search} onChange={setSearch} placeholder={lang === "ar" ? "بحث في الأعضاء..." : "Rechercher un membre…"} dir={t.dir} />
-      {/* Filter pills */}
-      <div style={{ display: "flex", gap: 7, marginBottom: 16, overflowX: "auto", paddingBottom: 4, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-        {["all", "hasContrib", "noPay"].map(f => {
-          const a = filter === f;
-          return (
-            <button key={f} className="tbtn" onClick={() => setFilter(f)}
-              style={{ background: a ? "linear-gradient(135deg,#7C3AED,#A855F7)" : C.card, border: `1.5px solid ${a ? "#7C3AED" : C.mintLt}`, color: a ? "#fff" : C.muted, borderRadius: 20, padding: "7px 16px", fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit", boxShadow: C.shadow }}>
-              {t.filterMembers[f]}
-            </button>
-          );
-        })}
+      <div style={{ fontSize: 11, color: C.muted, marginBottom: 12, paddingLeft: 2 }}>
+        {members.length} {lang === "ar" ? "عضو" : `membre${members.length !== 1 ? "s" : ""}`}
       </div>
-      {filtered.length === 0 && <Empty label={t.noMembers} />}
-      {filtered.map((m, i) => {
-        const total = getTotal(m.id);
-        const pct = Math.min(100, (total / mx) * 100);
+      {members.length === 0 && <Empty label={t.noMembers} />}
+      {members.map((m, i) => {
         const [bg, fg] = AVC[i % AVC.length];
         return (
-          <Card key={m.id} className="fin-in" sx={{ padding: "15px", marginBottom: 10, animationDelay: `${i * 55}ms` }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: total > 0 ? 13 : 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+          <Card key={m.id} className="fin-in" sx={{ padding: "14px 15px", marginBottom: 10, animationDelay: `${i * 55}ms` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
                 <div style={{ width: 46, height: 46, borderRadius: 14, background: bg, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: fg, fontSize: 15, fontWeight: 700 }}>{inits(m.name)}</div>
                 <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
                   <div style={{ color: C.text, fontWeight: 600, fontSize: 14 }}>{m.name}</div>
-                  <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{m.phone}</div>
+                  {m.phone && <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>{m.phone}</div>}
                 </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-                <div style={{ textAlign: t.dir === "rtl" ? "left" : "right" }}>
-                  <div style={{ color: C.forestLt, fontWeight: 700, fontSize: 13 }}>{fmt(total)}</div>
-                  <div style={{ color: C.muted, fontSize: 9, textTransform: "uppercase", letterSpacing: 0.4, marginTop: 2 }}>{t.totalPaid}</div>
-                </div>
-                <button className="tbtn" onClick={() => setConfDel(m)} style={{ background: C.redLt, border: "none", color: C.red, borderRadius: 10, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{Ic.trash(C.red, 14)}</button>
-              </div>
+              <button className="tbtn" onClick={() => setConfDel(m)} style={{ background: C.redLt, border: "none", color: C.red, borderRadius: 10, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{Ic.trash(C.red, 14)}</button>
             </div>
-            {total > 0 && (<>
-              <div style={{ background: C.mintPale, borderRadius: 5, height: 4, overflow: "hidden" }}>
-                <div style={{ background: `linear-gradient(90deg, #7C3AED, #C084FC)`, width: `${pct}%`, height: "100%", borderRadius: 5, transition: "width .7s cubic-bezier(.16,1,.3,1)" }} />
-              </div>
-              <div style={{ color: C.sub, fontSize: 10, marginTop: 5, textAlign: t.dir === "rtl" ? "right" : "left" }}>{Math.round(pct)}% du maximum</div>
-            </>)}
           </Card>
         );
       })}
@@ -889,8 +861,6 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
     </div>
   );
 }
-
-
 // ─── DONUT CHART ─────────────────────────────────────────────────────────────
 function DonutChart({ contrib, dons, dep, lang, chartReady }) {
   const t = T[lang];
@@ -993,35 +963,53 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
   const years = getYrs(txs);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
+
   const all = txs.filter((tx) => { const d = new Date(tx.date); return d.getMonth() + 1 === month && d.getFullYear() === year; });
-  const solde = txs.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
-  const mC = all.filter((tx) => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
-  const mD = all.filter((tx) => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
-  const mE = all.filter((tx) => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
-  const mB = mC + mD - mE;
-  const ms = members.map((m) => ({
-    ...m,
-    total: txs.filter((tx) => tx.memberId === m.id && tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0),
-    month: all.filter((tx) => tx.memberId === m.id && tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0),
-  }));
-  const mx = ms.length > 0 ? Math.max(...ms.map((m) => m.total), 1) : 1;
+
+  const YEAR_STATS = 2026;
+  const txs2026 = txs.filter(tx => new Date(tx.date).getFullYear() === YEAR_STATS);
+  const yC = txs2026.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
+  const yD = txs2026.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
+  const yE = txs2026.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
+  const yB = yC + yD - yE;
 
   function doExport(mode) {
     const XLSX = window.XLSX;
     if (!XLSX) return alert(t.xlsxWait);
-    const list = mode === "month" ? all : txs;
-    const rows = [["Date","Type","Membre","Montant","Note"], ...list.map((tx) => [tx.date, CFG(lang)[tx.type].label, tx.memberName, tx.type === "depense" ? -tx.amount : tx.amount, tx.note||""])];
-    const mrows = [["Membre","Téléphone","Total"], ...members.map((m) => [m.name, m.phone, txs.filter((tx) => tx.memberId === m.id && tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0)])];
-    const s2 = txs.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
-    const c2 = txs.filter((tx) => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
-    const d2 = txs.filter((tx) => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
-    const dep2 = txs.filter((tx) => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
-    const srows = [["Indicateur","Valeur"], ...t.exportSummaryRows(s2, c2, d2, dep2, members.length)];
     const wb = window.XLSX.utils.book_new();
-    window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.aoa_to_sheet(rows), "Transactions");
-    window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.aoa_to_sheet(mrows), "Membres");
-    window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.aoa_to_sheet(srows), "Résumé");
-    window.XLSX.writeFile(wb, `caisse_${year}_${String(month).padStart(2,"0")}.xlsx`);
+    const allYears = [...new Set(txs.map(tx => new Date(tx.date).getFullYear()))].sort((a,b) => b-a);
+    allYears.forEach(yr => {
+      const yearTxs = txs.filter(tx => new Date(tx.date).getFullYear() === yr);
+      const rows = [
+        ["Date", "Mois", "Type", "Membre", "Montant (MRU)", "Note"],
+        ...yearTxs
+          .sort((a,b) => new Date(a.date) - new Date(b.date))
+          .map(tx => {
+            const d = new Date(tx.date);
+            return [tx.date, t.monthsFull[d.getMonth()], CFG(lang)[tx.type].label, tx.memberName, tx.type === "depense" ? -tx.amount : tx.amount, tx.note || ""];
+          })
+      ];
+      const ws = window.XLSX.utils.aoa_to_sheet(rows);
+      ws["!cols"] = [{wch:12},{wch:12},{wch:14},{wch:24},{wch:14},{wch:30}];
+      window.XLSX.utils.book_append_sheet(wb, ws, String(yr));
+    });
+    const mrows = [["Membre","Téléphone","Total Contributions (MRU)"], ...members.map(m => [m.name, m.phone, txs.filter(tx => tx.memberId === m.id && tx.type === "contribution").reduce((a,tx)=>a+tx.amount,0)])];
+    const mws = window.XLSX.utils.aoa_to_sheet(mrows);
+    mws["!cols"] = [{wch:26},{wch:16},{wch:22}];
+    window.XLSX.utils.book_append_sheet(wb, mws, "Membres");
+    const srows = [["Année","Contributions","Dons","Dépenses","Solde net","Nb opérations"]];
+    allYears.forEach(yr => {
+      const yTx = txs.filter(tx => new Date(tx.date).getFullYear() === yr);
+      const c=yTx.filter(tx=>tx.type==="contribution").reduce((a,tx)=>a+tx.amount,0);
+      const d=yTx.filter(tx=>tx.type==="don").reduce((a,tx)=>a+tx.amount,0);
+      const e=yTx.filter(tx=>tx.type==="depense").reduce((a,tx)=>a+tx.amount,0);
+      srows.push([yr,c,d,e,c+d-e,yTx.length]);
+    });
+    const sws = window.XLSX.utils.aoa_to_sheet(srows);
+    sws["!cols"] = [{wch:8},{wch:18},{wch:12},{wch:14},{wch:14},{wch:14}];
+    window.XLSX.utils.book_append_sheet(wb, sws, "Résumé");
+    const filename = mode === "month" ? `caisse_${year}_${String(month).padStart(2,"0")}.xlsx` : `caisse_toutes_annees.xlsx`;
+    window.XLSX.writeFile(wb, filename);
   }
 
   const [importing, setImporting] = useState(false);
@@ -1135,8 +1123,10 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
     e.target.value = "";
   };
 
+
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
+      {/* Sélecteurs mois/année pour export */}
       <div style={{ display: "flex", gap: 10, marginBottom: 18, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
         <div style={{ flex: 1, position: "relative" }}>
           <select value={month} onChange={(e) => setMonth(+e.target.value)} style={{ width: "100%", background: C.card, border: `1.5px solid ${C.mintLt}`, borderRadius: 12, padding: "11px 36px 11px 14px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit", appearance: "none", cursor: "pointer", boxShadow: C.shadow }}>
@@ -1151,31 +1141,40 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
           <div style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
         </div>
       </div>
-      <div style={{ background: "linear-gradient(135deg, #7C3AED, #A855F7)", borderRadius: 20, padding: "20px 22px", marginBottom: 16, boxShadow: C.shadowMd }}>
-        <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 10, fontWeight: 500, letterSpacing: 1.1, textTransform: "uppercase", marginBottom: 5 }}>{t.balanceGlobal}</div>
-        <div style={{ color: "#ffffff", fontSize: 30, fontWeight: 700, letterSpacing: -1.2, fontFamily: "'DM Serif Display', serif" }}>{new Intl.NumberFormat("fr-FR").format(solde)} MRU</div>
+
+      {/* TITRE STATS */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+        <div style={{ width: 4, height: 20, background: "linear-gradient(180deg,#7C3AED,#C084FC)", borderRadius: 2 }} />
+        <span style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>{lang === "ar" ? `إحصائيات ${YEAR_STATS}` : `Statistiques ${YEAR_STATS}`}</span>
       </div>
-      <div style={{ color: C.text, fontWeight: 600, fontSize: 14, marginBottom: 12 }}>{t.monthsFull[month - 1]} {year}</div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+
+      {/* 3 CARTES STATS 2026 */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
         {[
-          { label: t.totalContrib, value: mC, color: C.forestLt, lt: "rgba(200,135,42,0.12)", icon: Ic.up(C.forestLt) },
-          { label: t.totalDons, value: mD, color: C.gold, lt: C.goldLt, icon: Ic.heart(C.gold) },
-          { label: t.totalDep, value: mE, color: C.red, lt: C.redLt, icon: Ic.dn(C.red) },
-          { label: t.monthlyEvo, value: mB, color: mB >= 0 ? C.forestLt : C.red, lt: mB >= 0 ? "rgba(200,135,42,0.12)" : C.redLt, icon: mB >= 0 ? Ic.up(C.forestLt) : Ic.dn(C.red) },
-        ].map((s) => (
-          <Card key={s.label} sx={{ padding: "14px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 9 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 10, background: s.lt, display: "flex", alignItems: "center", justifyContent: "center" }}>{s.icon}</div>
-              <div style={{ color: C.muted, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.label}</div>
-            </div>
-            <div style={{ color: s.color, fontWeight: 700, fontSize: 15 }}>{fmt(s.value)}</div>
+          { label: t.stats.contribution, value: yC, color: "#8B5CF6", bg: "rgba(139,92,246,0.08)", icon: Ic.up("#8B5CF6", 15), sign: "+" },
+          { label: t.stats.don,          value: yD, color: "#DB2777", bg: "rgba(219,39,119,0.08)", icon: Ic.heart("#DB2777", 15), sign: "+" },
+          { label: t.stats.depense,      value: yE, color: C.red,     bg: C.redLt,                icon: Ic.dn(C.red, 15), sign: "−" },
+        ].map(s => (
+          <Card key={s.label} sx={{ padding: "12px 10px" }}>
+            <div style={{ width: 30, height: 30, borderRadius: 9, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>{s.icon}</div>
+            <div style={{ color: C.muted, fontSize: 8, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 }}>{s.label}</div>
+            <div style={{ color: s.color, fontWeight: 700, fontSize: 13 }}>{s.sign}{fmtSh(s.value)}</div>
           </Card>
         ))}
       </div>
-      <DonutChart contrib={mC} dons={mD} dep={mE} lang={lang} chartReady={chartReady} />
-      <TopMembers members={members} txs={all.length > 0 ? all : txs} lang={lang} />
-      <FinChart txs={txs} lang={lang} chartReady={chartReady} />
-      {/* RESET SECTION */}
+
+      {/* Solde net 2026 */}
+      <div style={{ background: yB >= 0 ? "linear-gradient(135deg,#7C3AED,#A855F7)" : "linear-gradient(135deg,#EF4444,#F87171)", borderRadius: 16, padding: "14px 18px", marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: C.shadowMd }}>
+        <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: 500, letterSpacing: 0.8, textTransform: "uppercase" }}>{lang === "ar" ? `صافي ${YEAR_STATS}` : `Solde net ${YEAR_STATS}`}</div>
+        <div style={{ color: "#fff", fontSize: 20, fontWeight: 700, letterSpacing: -0.8, fontFamily: "'DM Serif Display', serif" }}>{yB >= 0 ? "+" : "−"}{new Intl.NumberFormat("fr-FR").format(Math.abs(yB))} MRU</div>
+      </div>
+
+      {/* DONUT + TOP 5 + LINE CHART (données 2026) */}
+      <DonutChart contrib={yC} dons={yD} dep={yE} lang={lang} chartReady={chartReady} />
+      <TopMembers members={members} txs={txs2026} lang={lang} />
+      <FinChart txs={txs2026} lang={lang} chartReady={chartReady} />
+
+      {/* RESET */}
       <div style={{ marginTop: 20, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: C.redLt, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🗑️</div>
@@ -1192,12 +1191,8 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
             <div style={{ color: C.red, fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{t.resetConfirmTitle}</div>
             <div style={{ color: C.muted, fontSize: 12, marginBottom: 14, lineHeight: 1.5 }}>{t.resetConfirmMsg}</div>
             <div style={{ display: "flex", gap: 10 }}>
-              <button className="tbtn" onClick={() => setResetConfirm(false)}
-                style={{ flex: 1, background: C.card, border: `1.5px solid ${C.mintLt}`, borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 500, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>
-                {t.cancel}
-              </button>
-              <button className="tbtn" onClick={doReset} disabled={resetting}
-                style={{ flex: 1, background: C.red, border: "none", borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 600, color: "#fff", cursor: resetting ? "not-allowed" : "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <button className="tbtn" onClick={() => setResetConfirm(false)} style={{ flex: 1, background: C.card, border: `1.5px solid ${C.mintLt}`, borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 500, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>{t.cancel}</button>
+              <button className="tbtn" onClick={doReset} disabled={resetting} style={{ flex: 1, background: C.red, border: "none", borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 600, color: "#fff", cursor: resetting ? "not-allowed" : "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                 {resetting ? <><div style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} />...</> : t.delete}
               </button>
             </div>
@@ -1205,7 +1200,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
         )}
       </div>
 
-      {/* IMPORT SECTION */}
+      {/* IMPORT */}
       <div style={{ marginTop: 20, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20, marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: "#EFF8FF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>📂</div>
@@ -1225,6 +1220,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
         {importMsg && <div style={{ marginTop: 10, padding: "10px 14px", background: importMsg.startsWith("✅") ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)", borderRadius: 10, fontSize: 12, color: importMsg.startsWith("✅") ? "#15803D" : C.red, fontWeight: 500 }}>{importMsg}</div>}
       </div>
 
+      {/* EXPORT */}
       <div style={{ marginTop: 6, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 13, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: C.mintPale, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.dl(C.forestLt)}</div>
@@ -1233,7 +1229,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
         </div>
         {[
           { mode: "month", label: t.exportMonth, sub: `${t.monthsFull[month - 1]} ${year}`, color: C.forestLt, lt: C.mintPale, icon: "📊" },
-          { mode: "all",   label: t.exportAll,   sub: `${txs.length} op · ${members.length} membres`, color: C.gold, lt: C.goldLt, icon: "📥" },
+          { mode: "all",   label: lang === "ar" ? "كل السنوات" : "Toutes les années", sub: `${txs.length} op · ${[...new Set(txs.map(tx => new Date(tx.date).getFullYear()))].length} an(s)`, color: C.gold, lt: C.goldLt, icon: "📥" },
         ].map((btn) => (
           <button key={btn.mode} className="tbtn" onClick={() => doExport(btn.mode)} disabled={!xlsxReady}
             style={{ width: "100%", background: xlsxReady ? btn.lt : C.mintPale, border: `1.5px solid ${xlsxReady ? C.mintLt : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: xlsxReady ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "inherit", marginBottom: 10, opacity: xlsxReady ? 1 : 0.5, boxShadow: xlsxReady ? C.shadow : "none" }}>
@@ -1248,7 +1244,6 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
     </div>
   );
 }
-
 // ─── SETTINGS ─────────────────────────────────────────────────────────────────
 function Settings({ lang, setLang, t, onLogout }) {
   const groups = [
