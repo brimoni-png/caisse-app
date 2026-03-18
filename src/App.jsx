@@ -116,6 +116,9 @@ const Ic = {
   globe: (c, s = 17) => (<svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>),
   info: (c, s = 17) => (<svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>),
   rcpt: (c, s = 26) => (<svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>),
+  search: (c, s = 16) => (<svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>),
+  trophy: (c, s = 16) => (<svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="8 21 12 17 16 21"/><path d="M5 3h14"/><path d="M5 3v5a7 7 0 0014 0V3"/><path d="M9 17v-4"/><path d="M15 17v-4"/></svg>),
+  xcircle: (c, s = 12) => (<svg width={s} height={s} viewBox="0 0 24 24" fill={c} stroke="none"><circle cx="12" cy="12" r="10" opacity="0.25"/><line x1="15" y1="9" x2="9" y2="15" stroke="white" strokeWidth="2" strokeLinecap="round"/><line x1="9" y1="9" x2="15" y2="15" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg>),
 };
 
 // ─── TRANSLATIONS ─────────────────────────────────────────────────────────────
@@ -386,6 +389,33 @@ function SHdr({ title, badge, action, dir = "ltr" }) {
       <span style={{ color: C.text, fontWeight: 600, fontSize: 14 }}>{title}</span>
       {badge && <span style={{ fontSize: 10, fontWeight: 600, color: C.muted, background: C.mintPale, borderRadius: 8, padding: "2px 9px", border: `1px solid ${C.mintLt}` }}>{badge}</span>}
       {action && <button className="tbtn" onClick={action.fn} style={{ fontSize: 11, fontWeight: 600, color: C.forestLt, background: "none", border: "none", cursor: "pointer", padding: 0 }}>{action.label}</button>}
+    </div>
+  );
+}
+
+
+// ─── SEARCH BAR ───────────────────────────────────────────────────────────────
+function SearchBar({ value, onChange, placeholder, dir = "ltr" }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div style={{ position: "relative", marginBottom: 14 }}>
+      <div style={{ position: "absolute", left: dir === "rtl" ? "auto" : 13, right: dir === "rtl" ? 13 : "auto", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", opacity: focused ? 1 : 0.5, transition: "opacity .2s" }}>
+        {Ic.search(focused ? C.forestLt : C.muted, 15)}
+      </div>
+      <input
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder={placeholder}
+        dir={dir}
+        style={{ width: "100%", background: focused ? C.card : C.mintPale, border: `1.5px solid ${focused ? C.forestLt : C.mintLt}`, borderRadius: 14, padding: dir === "rtl" ? "11px 42px 11px 14px" : "11px 14px 11px 38px", fontSize: 13, color: C.text, outline: "none", fontFamily: "inherit", transition: "all .2s", boxShadow: focused ? "0 0 0 3px rgba(124,58,237,0.1)" : "none" }}
+      />
+      {value && (
+        <button onClick={() => onChange("")} style={{ position: "absolute", right: dir === "rtl" ? "auto" : 11, left: dir === "rtl" ? 11 : "auto", top: "50%", transform: "translateY(-50%)", background: C.muted, border: "none", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}>
+          {Ic.xcircle(C.muted, 18)}
+        </button>
+      )}
     </div>
   );
 }
@@ -751,10 +781,24 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
   const t = T[lang];
   const [filter, setFilter] = useState("all");
-  const sorted = [...txs].filter((tx) => filter === "all" || tx.type === filter).sort((a, b) => new Date(b.date) - new Date(a.date));
+  const [search, setSearch] = useState("");
+  const sorted = [...txs]
+    .filter((tx) => filter === "all" || tx.type === filter)
+    .filter((tx) => {
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return (
+        tx.memberName?.toLowerCase().includes(q) ||
+        tx.note?.toLowerCase().includes(q) ||
+        String(tx.amount).includes(q) ||
+        tx.date?.includes(q)
+      );
+    })
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
       <CatPills onAdd={onAdd} lang={lang} />
+      <SearchBar value={search} onChange={setSearch} placeholder={lang === "ar" ? "بحث في المعاملات..." : "Rechercher une transaction…"} dir={t.dir} />
       <div style={{ display: "flex", gap: 7, marginBottom: 18, overflowX: "auto", paddingBottom: 4, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
         {["all", "contribution", "don", "depense"].map((f) => {
           const a = filter === f;
@@ -767,6 +811,7 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
           );
         })}
       </div>
+      {search && <div style={{ fontSize: 11, color: C.muted, marginBottom: 10, paddingLeft: 2 }}>{sorted.length} résultat{sorted.length !== 1 ? "s" : ""}</div>}
       {sorted.length === 0 ? <Empty label={t.noTx} /> : sorted.map((tx, i) => <TxRow key={tx.id} tx={tx} onDelete={onDelete} onEdit={onEdit} delay={i * 25} lang={lang} />)}
     </div>
   );
@@ -777,12 +822,17 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
   const t = T[lang];
   const [confDel, setConfDel] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
   const getTotal = (id) => txs.filter((tx) => tx.memberId === id && tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
   const mx = members.length > 0 ? Math.max(...members.map((m) => getTotal(m.id)), 1) : 1;
   const filtered = members.filter(m => {
     const total = getTotal(m.id);
-    if (filter === "hasContrib") return total > 0;
-    if (filter === "noPay") return total === 0;
+    if (filter === "hasContrib" && total <= 0) return false;
+    if (filter === "noPay" && total > 0) return false;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      return m.name?.toLowerCase().includes(q) || m.phone?.includes(q);
+    }
     return true;
   });
   return (
@@ -790,6 +840,7 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
       <PBtn onClick={onAddMember} sx={{ marginBottom: 14 }}>
         <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>{Ic.plus()} {t.addMember}</span>
       </PBtn>
+      <SearchBar value={search} onChange={setSearch} placeholder={lang === "ar" ? "بحث في الأعضاء..." : "Rechercher un membre…"} dir={t.dir} />
       {/* Filter pills */}
       <div style={{ display: "flex", gap: 7, marginBottom: 16, overflowX: "auto", paddingBottom: 4, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
         {["all", "hasContrib", "noPay"].map(f => {
@@ -835,6 +886,103 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
         );
       })}
       {confDel && <Confirm t={t} title={t.delMemberTitle} message={t.delMemberMsg(confDel.name)} onConfirm={() => { onDeleteMember(confDel.id); setConfDel(null); }} onCancel={() => setConfDel(null)} />}
+    </div>
+  );
+}
+
+
+// ─── DONUT CHART ─────────────────────────────────────────────────────────────
+function DonutChart({ contrib, dons, dep, lang, chartReady }) {
+  const t = T[lang];
+  const ref = useRef();
+  const cRef = useRef();
+  const total = contrib + dons + dep;
+  useEffect(() => {
+    if (!chartReady || !ref.current) return;
+    if (cRef.current) cRef.current.destroy();
+    cRef.current = new window.Chart(ref.current, {
+      type: "doughnut",
+      data: {
+        labels: [t.stats.contribution, t.stats.don, t.stats.depense],
+        datasets: [{
+          data: [contrib, dons, dep],
+          backgroundColor: ["#7C3AED", "#DB2777", "#EF4444"],
+          borderWidth: 0,
+          hoverOffset: 6,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: "70%",
+        plugins: {
+          legend: { display: true, position: "bottom", labels: { boxWidth: 8, usePointStyle: true, pointStyle: "circle", color: "#6B5E8A", font: { size: 10, family: "DM Sans" }, padding: 14 } },
+          tooltip: { backgroundColor: "#fff", titleColor: "#1A1A2E", bodyColor: "#6B5E8A", borderColor: "#EDE9FE", borderWidth: 1, padding: 10, cornerRadius: 10 },
+        },
+      },
+    });
+    return () => { if (cRef.current) cRef.current.destroy(); };
+  }, [chartReady, contrib, dons, dep, lang]);
+
+  return (
+    <div style={{ background: "#fff", borderRadius: 20, boxShadow: "0 2px 16px rgba(124,58,237,0.08)", border: "1px solid #EDE9FE", padding: "16px", marginBottom: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <span style={{ color: "#1A1A2E", fontWeight: 600, fontSize: 14 }}>{lang === "ar" ? "توزيع المالية" : "Répartition financière"}</span>
+        {total > 0 && <span style={{ fontSize: 10, fontWeight: 600, color: "#6B5E8A", background: "#F5F3FF", borderRadius: 8, padding: "2px 9px", border: "1px solid #EDE9FE" }}>{new Intl.NumberFormat("fr-FR").format(total)} MRU</span>}
+      </div>
+      <div style={{ height: 200, position: "relative" }}>
+        {!chartReady ? (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#9D8BC0", fontSize: 12 }}>
+            <div style={{ width: 18, height: 18, border: "2px solid #C4B5FD", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite", marginRight: 8 }} />Chargement…
+          </div>
+        ) : total === 0 ? (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#9D8BC0", fontSize: 13 }}>Aucune donnée</div>
+        ) : (
+          <>
+            <canvas ref={ref} />
+            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-60%)", textAlign: "center", pointerEvents: "none" }}>
+              <div style={{ fontSize: 11, color: "#9D8BC0", fontWeight: 500 }}>{lang === "ar" ? "الرصيد" : "Solde"}</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#1A1A2E", letterSpacing: -0.5 }}>{new Intl.NumberFormat("fr-FR").format(contrib + dons - dep)}</div>
+              <div style={{ fontSize: 9, color: "#9D8BC0" }}>MRU</div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── TOP MEMBERS ─────────────────────────────────────────────────────────────
+function TopMembers({ members, txs, lang }) {
+  const t = T[lang];
+  const ranked = members
+    .map(m => ({ ...m, total: txs.filter(tx => tx.memberId === m.id && tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0) }))
+    .filter(m => m.total > 0)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
+  if (ranked.length === 0) return null;
+  const medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"];
+  const maxVal = ranked[0].total;
+  const AVC2 = ["#7C3AED","#A855F7","#C084FC","#DDD6FE","#EDE9FE"];
+  return (
+    <div style={{ background: "#fff", borderRadius: 20, boxShadow: "0 2px 16px rgba(124,58,237,0.08)", border: "1px solid #EDE9FE", padding: "16px", marginBottom: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+        {Ic.trophy("#F5C842", 16)}
+        <span style={{ color: "#1A1A2E", fontWeight: 600, fontSize: 14 }}>{lang === "ar" ? "أكبر المساهمين" : "Top contributeurs"}</span>
+        <span style={{ fontSize: 10, fontWeight: 600, color: "#6B5E8A", background: "#F5F3FF", borderRadius: 8, padding: "2px 9px", border: "1px solid #EDE9FE", marginLeft: "auto" }}>Top {ranked.length}</span>
+      </div>
+      {ranked.map((m, i) => (
+        <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: i < ranked.length - 1 ? 10 : 0, direction: t.dir }}>
+          <div style={{ fontSize: 18, width: 28, textAlign: "center", flexShrink: 0 }}>{medals[i]}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+              <span style={{ color: "#1A1A2E", fontSize: 12, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60%" }}>{m.name}</span>
+              <span style={{ color: AVC2[i], fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{new Intl.NumberFormat("fr-FR").format(m.total)} MRU</span>
+            </div>
+            <div style={{ background: "#F5F3FF", borderRadius: 4, height: 5, overflow: "hidden" }}>
+              <div style={{ width: `${(m.total / maxVal) * 100}%`, height: "100%", background: `linear-gradient(90deg, ${AVC2[i]}, ${AVC2[Math.min(i+1, 4)]})`, borderRadius: 4, transition: "width .7s cubic-bezier(.16,1,.3,1)" }} />
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -1024,6 +1172,8 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
           </Card>
         ))}
       </div>
+      <DonutChart contrib={mC} dons={mD} dep={mE} lang={lang} chartReady={chartReady} />
+      <TopMembers members={members} txs={all.length > 0 ? all : txs} lang={lang} />
       <FinChart txs={txs} lang={lang} chartReady={chartReady} />
       {/* RESET SECTION */}
       <div style={{ marginTop: 20, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20 }}>
