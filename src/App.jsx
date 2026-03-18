@@ -627,27 +627,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
         <div style={{ background: "linear-gradient(135deg, #1a2b2e 0%, #1f4a4e 50%, #2d9c8f 100%)", borderRadius: 24, padding: "24px 22px 20px", marginBottom: 18, position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: -20, left: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.1)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", bottom: -30, left: 40, width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.07)", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", right: -10, bottom: -8, width: 130, height: 130, opacity: 0.92, pointerEvents: "none" }}>
-            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="55" cy="165" rx="22" ry="7" fill="#F5C842" opacity="0.9"/>
-              <ellipse cx="55" cy="158" rx="22" ry="7" fill="#E8A838"/>
-              <ellipse cx="55" cy="151" rx="22" ry="7" fill="#F5C842" opacity="0.9"/>
-              <ellipse cx="55" cy="144" rx="22" ry="7" fill="#E8A838"/>
-              <ellipse cx="42" cy="170" rx="14" ry="5" fill="#F5C842" opacity="0.8"/>
-              <ellipse cx="42" cy="165" rx="14" ry="5" fill="#E8A838"/>
-              <ellipse cx="120" cy="130" rx="52" ry="55" fill="#C084FC"/>
-              <ellipse cx="120" cy="130" rx="52" ry="55" fill="url(#bagGrad)"/>
-              <rect x="105" y="68" width="30" height="22" rx="8" fill="#7C3AED"/>
-              <ellipse cx="120" cy="66" rx="18" ry="10" fill="#6D28D9"/>
-              <text x="120" y="140" textAnchor="middle" fontSize="38" fontWeight="bold" fill="white" opacity="0.9">$</text>
-              <defs>
-                <radialGradient id="bagGrad" cx="40%" cy="35%">
-                  <stop offset="0%" stopColor="white" stopOpacity="0.25"/>
-                  <stop offset="100%" stopColor="transparent"/>
-                </radialGradient>
-              </defs>
-            </svg>
-          </div>
+
           <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, fontWeight: 500, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 8 }}>{t.balanceGlobal}</div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 }}>
             <div style={{ color: "#fff", fontSize: 44, fontWeight: 700, letterSpacing: -2.5, lineHeight: 1, fontFamily: "'DM Serif Display', serif" }}>
@@ -710,7 +690,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.contribution}</div>
-              <div style={{ color: "#2d9c8f", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>+{fmtSh(contrib)}</div>
+              <div style={{ color: "#2d9c8f", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>+{fmt(contrib)}</div>
             </div>
           </button>
           {/* Dons */}
@@ -722,7 +702,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.don}</div>
-              <div style={{ color: "#20b2aa", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>+{fmtSh(dons)}</div>
+              <div style={{ color: "#20b2aa", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>+{fmt(dons)}</div>
             </div>
           </button>
           {/* Dépenses */}
@@ -734,7 +714,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.depense}</div>
-              <div style={{ color: "#e05252", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>-{fmtSh(dep)}</div>
+              <div style={{ color: "#e05252", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>-{fmt(dep)}</div>
             </div>
           </button>
           {/* Solde année passée */}
@@ -744,7 +724,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             </div>
             <div>
               <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}</div>
-              <div style={{ color: soldePrev >= 0 ? "#7C3AED" : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>{soldePrev >= 0 ? "+" : ""}{fmtSh(soldePrev)}</div>
+              <div style={{ color: soldePrev >= 0 ? "#7C3AED" : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>{soldePrev >= 0 ? "+" : ""}{fmt(Math.abs(soldePrev))}</div>
             </div>
           </div>
         </div>
@@ -1056,7 +1036,7 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 {total > 0 && (
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ color: C.forestLt, fontWeight: 700, fontSize: 12 }}>{fmtSh(total)}</div>
+                    <div style={{ color: C.forestLt, fontWeight: 700, fontSize: 12 }}>{fmt(total)}</div>
                     <div style={{ color: C.muted, fontSize: 9, textTransform: "uppercase", letterSpacing: 0.4 }}>{YEAR}</div>
                   </div>
                 )}
@@ -1444,22 +1424,6 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
 
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
-      {/* Sélecteurs mois/année pour export */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 18, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-        <div style={{ flex: 1, position: "relative" }}>
-          <select value={month} onChange={(e) => setMonth(+e.target.value)} style={{ width: "100%", background: C.card, border: `1.5px solid ${C.mintLt}`, borderRadius: 12, padding: "11px 36px 11px 14px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit", appearance: "none", cursor: "pointer", boxShadow: C.shadow }}>
-            {t.monthsFull.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
-          </select>
-          <div style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
-        </div>
-        <div style={{ position: "relative" }}>
-          <select value={year} onChange={(e) => setYear(+e.target.value)} style={{ width: 95, background: C.card, border: `1.5px solid ${C.mintLt}`, borderRadius: 12, padding: "11px 30px 11px 13px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit", appearance: "none", cursor: "pointer", boxShadow: C.shadow }}>
-            {years.map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
-          <div style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
-        </div>
-      </div>
-
       {/* TITRE STATS */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
         <div style={{ width: 4, height: 20, background: "linear-gradient(180deg,#7C3AED,#C084FC)", borderRadius: 2 }} />
@@ -1476,7 +1440,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
           <Card key={s.label} sx={{ padding: "12px 10px" }}>
             <div style={{ width: 30, height: 30, borderRadius: 9, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>{s.icon}</div>
             <div style={{ color: C.muted, fontSize: 8, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 }}>{s.label}</div>
-            <div style={{ color: s.color, fontWeight: 700, fontSize: 13 }}>{s.sign}{fmtSh(s.value)}</div>
+            <div style={{ color: s.color, fontWeight: 700, fontSize: 13 }}>{s.sign}{fmt(s.value)}</div>
           </Card>
         ))}
       </div>
@@ -1695,76 +1659,168 @@ function LoginScreen({ onLogin }) {
     onLogin(name.trim());
   };
 
+  const LOGIN_CSS = `
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    .l-card{animation:fadeUp .5s cubic-bezier(.16,1,.3,1) .1s both}
+    .l-logo{animation:fadeUp .5s cubic-bezier(.16,1,.3,1) both}
+    .l-title{animation:fadeUp .5s cubic-bezier(.16,1,.3,1) .07s both}
+    .l-inp::placeholder{color:rgba(255,255,255,0.35)}
+    .l-btn:active{transform:scale(.97)}
+  `;
+
   return (
-    <div style={{ background: "#F2EFE9", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 32px", fontFamily: "'Inter', sans-serif", position: "relative", overflow: "hidden" }}>
-      <style>{G}</style>
+    <div style={{
+      position: "relative", minHeight: "100vh", minHeight: "100dvh",
+      width: "100%", maxWidth: 430, margin: "0 auto", overflow: "hidden",
+      background: "linear-gradient(160deg, #0d2b2a 0%, #163e3b 35%, #1a5450 65%, #20b2aa 100%)",
+      display: "flex", flexDirection: "column", alignItems: "center",
+      justifyContent: "center", padding: "40px 28px",
+      fontFamily: "'Plus Jakarta Sans', sans-serif",
+    }}>
+      <style>{LOGIN_CSS}</style>
 
-      {/* Formes organiques — haut gauche */}
-      <svg style={{ position: "absolute", top: -30, left: -50, pointerEvents: "none", zIndex: 0 }} width="260" height="260" viewBox="0 0 260 260" fill="none">
-        <path d="M130 10 C200 10 250 60 250 130 C250 200 200 250 130 250 C60 250 10 200 10 130 C10 60 60 10 130 10Z" fill="#D4BFFF" opacity="0.55"/>
-        <path d="M100 20 C160 5 230 55 240 120 C250 185 200 240 135 248 C70 256 15 205 8 140 C1 75 40 35 100 20Z" fill="#C4A8FF" opacity="0.35"/>
-      </svg>
+      {/* Cercles décoratifs */}
+      <div style={{ position:"absolute", top:-80, right:-80, width:280, height:280, borderRadius:"50%", background:"rgba(45,156,143,0.18)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", top:60, left:-60, width:180, height:180, borderRadius:"50%", background:"rgba(32,178,170,0.12)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", bottom:-100, right:-60, width:320, height:320, borderRadius:"50%", background:"rgba(45,156,143,0.14)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", bottom:80, left:-40, width:140, height:140, borderRadius:"50%", background:"rgba(32,178,170,0.10)", pointerEvents:"none" }} />
 
-      {/* Formes organiques — bas droite */}
-      <svg style={{ position: "absolute", bottom: -40, right: -50, pointerEvents: "none", zIndex: 0 }} width="240" height="240" viewBox="0 0 240 240" fill="none">
-        <path d="M120 10 C190 10 230 70 230 130 C230 190 190 230 120 230 C50 230 10 190 10 130 C10 70 50 10 120 10Z" fill="#D4BFFF" opacity="0.50"/>
-        <path d="M90 15 C155 0 220 55 228 118 C236 181 190 232 127 238 C64 244 10 196 5 133 C0 70 25 30 90 15Z" fill="#C4A8FF" opacity="0.30"/>
-      </svg>
+      <div style={{ position:"relative", zIndex:1, width:"100%", display:"flex", flexDirection:"column", alignItems:"center" }}>
 
-      <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
-        {/* Titre */}
-        <div style={{ marginBottom: 52, textAlign: "left" }}>
-          <div style={{ fontSize: 36, fontWeight: 800, color: "#1A1429", letterSpacing: -1.2, lineHeight: 1.1, marginBottom: 10, fontFamily: "'Syne', sans-serif" }}>Caisse CHEBAB</div>
-          <div style={{ fontSize: 15, color: "#7A6E8A", fontWeight: 400 }}>Connectez-vous pour continuer</div>
-        </div>
-
-        {/* Champ NOM */}
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "#1A1429", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>NOM</div>
-          <input
-            value={name}
-            onChange={e => { setName(e.target.value); setError(""); }}
-            onFocus={() => setNameFocus(true)}
-            onBlur={() => setNameFocus(false)}
-            onKeyDown={e => e.key === "Enter" && handleLogin()}
-            placeholder="Votre nom..."
-            style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${nameFocus ? "#6B21E8" : "rgba(107,33,232,0.25)"}`, padding: "10px 0", fontSize: 16, color: "#1A1429", outline: "none", fontFamily: "inherit", transition: "border-color .2s" }}
-          />
-        </div>
-
-        {/* Champ CODE PIN */}
-        <div style={{ marginBottom: 44 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "#1A1429", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>CODE PIN</div>
-          <input
-            value={pin}
-            onChange={e => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); setPin(v); setError(""); }}
-            onFocus={() => setPinFocus(true)}
-            onBlur={() => setPinFocus(false)}
-            onKeyDown={e => e.key === "Enter" && handleLogin()}
-            placeholder="● ● ● ●"
-            type="password"
-            inputMode="numeric"
-            maxLength={4}
-            style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${shake ? "#E53E3E" : pinFocus ? "#6B21E8" : "rgba(107,33,232,0.25)"}`, padding: "10px 0", fontSize: 24, color: "#1A1429", outline: "none", fontFamily: "inherit", transition: "border-color .2s", letterSpacing: 10, animation: shake ? "shake .4s ease" : "none" }}
-          />
-        </div>
-
-        {/* Erreur */}
-        {error && (
-          <div style={{ background: "#FEE2E2", borderRadius: 12, padding: "10px 14px", marginBottom: 20, fontSize: 13, color: "#C53030", fontWeight: 500 }}>
-            ⚠️ {error}
+        {/* ── LOGO CAISSE ── */}
+        <div className="l-logo" style={{ marginBottom: 24 }}>
+          <div style={{
+            width: 90, height: 90, borderRadius: 28,
+            background: "linear-gradient(135deg, #2d9c8f 0%, #20b2aa 100%)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 12px 40px rgba(32,178,170,0.45), 0 4px 16px rgba(0,0,0,0.3)",
+            border: "2px solid rgba(255,255,255,0.15)",
+          }}>
+            <svg width="50" height="50" viewBox="0 0 48 48" fill="none">
+              {/* Bâtiment caisse */}
+              <rect x="6" y="18" width="36" height="24" rx="3" fill="rgba(255,255,255,0.15)" stroke="white" strokeWidth="1.8"/>
+              {/* Toit / fronton */}
+              <path d="M4 20 L24 6 L44 20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              {/* Porte */}
+              <rect x="19" y="30" width="10" height="12" rx="2" fill="white" opacity="0.9"/>
+              {/* Fenêtres */}
+              <rect x="9" y="24" width="8" height="6" rx="1.5" fill="white" opacity="0.7"/>
+              <rect x="31" y="24" width="8" height="6" rx="1.5" fill="white" opacity="0.7"/>
+              {/* Colonne centrale */}
+              <line x1="24" y1="18" x2="24" y2="42" stroke="white" strokeWidth="1.5" opacity="0.4"/>
+              {/* Pièce de monnaie */}
+              <circle cx="37" cy="12" r="6" fill="#20b2aa" stroke="white" strokeWidth="1.8"/>
+              <text x="37" y="16" textAnchor="middle" fontSize="8" fontWeight="bold" fill="white">$</text>
+            </svg>
           </div>
-        )}
+        </div>
 
-        {/* Bouton connexion */}
-        <button className="tbtn" onClick={handleLogin}
-          style={{ width: "100%", background: "#6B21E8", border: "none", color: "#fff", borderRadius: 50, padding: "18px", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 8px 28px rgba(107,33,232,0.32)", letterSpacing: 0.3 }}>
-          Se connecter
-        </button>
+        {/* ── TITRE ── */}
+        <div className="l-title" style={{ textAlign: "center", marginBottom: 36 }}>
+          <div style={{
+            fontSize: 34, fontWeight: 900, lineHeight: 1.05, letterSpacing: -0.5,
+            fontFamily: "'Playfair Display', serif",
+            color: "#ffffff",
+            textShadow: "0 2px 12px rgba(0,0,0,0.3)",
+            marginBottom: 10,
+          }}>
+            Caisse EL CHEBAB
+          </div>
+          <div style={{ fontSize: 14, color: "rgba(178,237,233,0.85)", fontWeight: 400, letterSpacing: 0.3 }}>
+            Connectez-vous pour continuer
+          </div>
+        </div>
+
+        {/* ── CARTE ── */}
+        <div className="l-card" style={{
+          width: "100%",
+          background: "rgba(255,255,255,0.08)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderRadius: 24,
+          border: "1px solid rgba(255,255,255,0.18)",
+          padding: "32px 26px 28px",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12)",
+        }}>
+
+          {/* Champ NOM */}
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(178,237,233,0.85)", letterSpacing: 1.8, textTransform: "uppercase", marginBottom: 10 }}>NOM</div>
+            <input
+              className="l-inp"
+              value={name}
+              onChange={e => { setName(e.target.value); setError(""); }}
+              onFocus={() => setNameFocus(true)}
+              onBlur={() => setNameFocus(false)}
+              onKeyDown={e => e.key === "Enter" && handleLogin()}
+              placeholder="Votre nom..."
+              style={{
+                width: "100%",
+                background: nameFocus ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)",
+                border: `1.5px solid ${nameFocus ? "rgba(45,156,143,0.9)" : "rgba(255,255,255,0.18)"}`,
+                borderRadius: 14, padding: "13px 16px", fontSize: 15, color: "#fff",
+                outline: "none", fontFamily: "inherit", transition: "all .2s",
+                boxShadow: nameFocus ? "0 0 0 3px rgba(45,156,143,0.25)" : "none",
+              }}
+            />
+          </div>
+
+          {/* Champ CODE PIN */}
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(178,237,233,0.85)", letterSpacing: 1.8, textTransform: "uppercase", marginBottom: 10 }}>CODE PIN</div>
+            <input
+              className="l-inp"
+              value={pin}
+              onChange={e => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); setPin(v); setError(""); }}
+              onFocus={() => setPinFocus(true)}
+              onBlur={() => setPinFocus(false)}
+              onKeyDown={e => e.key === "Enter" && handleLogin()}
+              placeholder="● ● ● ●"
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              style={{
+                width: "100%",
+                background: pinFocus ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)",
+                border: `1.5px solid ${shake ? "rgba(239,68,68,0.9)" : pinFocus ? "rgba(45,156,143,0.9)" : "rgba(255,255,255,0.18)"}`,
+                borderRadius: 14, padding: "13px 16px", fontSize: 22, color: "#fff",
+                outline: "none", fontFamily: "inherit", transition: "all .2s",
+                letterSpacing: 10,
+                boxShadow: shake ? "0 0 0 3px rgba(239,68,68,0.25)" : pinFocus ? "0 0 0 3px rgba(45,156,143,0.25)" : "none",
+                animation: shake ? "shake .4s ease" : "none",
+              }}
+            />
+          </div>
+
+          {/* Erreur */}
+          {error && (
+            <div style={{ background: "rgba(239,68,68,0.2)", border: "1px solid rgba(239,68,68,0.4)", borderRadius: 12, padding: "10px 14px", marginBottom: 20, fontSize: 13, color: "#fca5a5", fontWeight: 500 }}>
+              ⚠️ {error}
+            </div>
+          )}
+
+          {/* Bouton */}
+          <button className="tbtn l-btn" onClick={handleLogin}
+            style={{
+              width: "100%",
+              background: "linear-gradient(135deg, #2d9c8f 0%, #20b2aa 100%)",
+              border: "none", color: "#fff", borderRadius: 14,
+              padding: "16px", fontSize: 15, fontWeight: 700,
+              cursor: "pointer", fontFamily: "inherit",
+              boxShadow: "0 6px 24px rgba(32,178,170,0.50), inset 0 1px 0 rgba(255,255,255,0.15)",
+              letterSpacing: 0.3, transition: "all .18s",
+            }}>
+            Se connecter
+          </button>
+        </div>
       </div>
     </div>
   );
 }
+
 
 export default function App() {
   const xlsxReady = useSheetJS();
