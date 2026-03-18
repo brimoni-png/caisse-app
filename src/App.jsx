@@ -33,38 +33,38 @@ function useChartJS() {
   return ready;
 }
 
-// ─── ECO-FINTECH DESIGN TOKENS ────────────────────────────────────────────────
+// ─── DESIGN TOKENS — Crème & Violet ──────────────────────────────────────────
 const C = {
-  forest:    "#1A1A2E",
-  forestMid: "#4C1D95",
-  forestLt:  "#7C3AED",
-  mint:      "#DDD6FE",
-  mintLt:    "#EDE9FE",
-  mintPale:  "#F5F3FF",
+  forest:    "#1A1429",
+  forestMid: "#5B21B6",
+  forestLt:  "#6B21E8",
+  mint:      "#E9E0FF",
+  mintLt:    "#EDE5F5",
+  mintPale:  "#F5F0FA",
   lime:      "#C4B5FD",
   sage:      "#A78BFA",
-  bg:        "#F5F0FF",
+  bg:        "#F2EFE9",
   card:      "#FFFFFF",
-  text:      "#1A1A2E",
-  muted:     "#6B5E8A",
-  sub:       "#9D8BC0",
-  red:       "#EF4444",
+  text:      "#1A1429",
+  muted:     "#7A6E8A",
+  sub:       "#A899BC",
+  red:       "#E53E3E",
   redLt:     "#FEE2E2",
-  gold:      "#7C3AED",
-  goldLt:    "#F5F3FF",
-  shadow:    "0 2px 16px rgba(124,58,237,0.08)",
-  shadowMd:  "0 6px 24px rgba(124,58,237,0.12)",
-  shadowLg:  "0 16px 48px rgba(124,58,237,0.16)",
+  gold:      "#6B21E8",
+  goldLt:    "#F0EBFF",
+  shadow:    "0 2px 12px rgba(107,33,232,0.07)",
+  shadowMd:  "0 6px 24px rgba(107,33,232,0.10)",
+  shadowLg:  "0 16px 48px rgba(107,33,232,0.14)",
 };
 
-const FONTS = `@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap');`;
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap');`;
 
 const G = `
   ${FONTS}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html,body{height:100%;overscroll-behavior:none;}
-  body{background:#F5F0FF;-webkit-font-smoothing:antialiased;font-family:'DM Sans',sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;font-size:15px;}
-  #root{height:100%;display:flex;justify-content:center;background:linear-gradient(160deg,#EDE9FE 0%,#F5F0FF 50%,#FDF4FF 100%);}
+  body{background:#F2EFE9;-webkit-font-smoothing:antialiased;font-family:'Inter',sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;font-size:15px;}
+  #root{height:100%;display:flex;justify-content:center;background:#F2EFE9;}
   ::-webkit-scrollbar{width:2px;}
   ::-webkit-scrollbar-thumb{background:${C.sage};border-radius:4px;}
   @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -286,31 +286,31 @@ function useSupabaseData() {
 
 // ─── UI ATOMS ─────────────────────────────────────────────────────────────────
 function Card({ children, sx = {}, className = "" }) {
-  return <div className={className} style={{ background: C.card, borderRadius: 20, boxShadow: C.shadow, border: `1px solid ${C.mintLt}`, ...sx }}>{children}</div>;
+  return <div className={className} style={{ background: C.card, borderRadius: 22, boxShadow: "0 2px 16px rgba(107,33,232,0.06)", border: "1px solid rgba(107,33,232,0.08)", ...sx }}>{children}</div>;
 }
 
 function Lbl({ c }) {
-  return <div style={{ fontSize: 10, fontWeight: 600, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 6 }}>{c}</div>;
+  return <div style={{ fontSize: 10, fontWeight: 700, color: "#1A1429", letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 8 }}>{c}</div>;
 }
 
 function Inp({ label, dir = "ltr", sx = {}, ...p }) {
   const [f, sf] = useState(false);
   return (
-    <div style={{ marginBottom: 14 }}>
+    <div style={{ marginBottom: 20 }}>
       {label && <Lbl c={label} />}
       <input {...p} onFocus={(e) => { sf(true); p.onFocus?.(e); }} onBlur={(e) => { sf(false); p.onBlur?.(e); }}
-        style={{ width: "100%", background: f ? C.card : C.bg, border: `1.5px solid ${f ? C.lime : C.mintLt}`, borderRadius: 12, padding: "12px 15px", color: C.text, fontSize: 14, outline: "none", direction: dir, fontFamily: "inherit", transition: "all .2s", boxShadow: f ? "0 0 0 3px rgba(111,207,151,0.2)" : "none", ...sx }} />
+        style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${f ? "#6B21E8" : "rgba(107,33,232,0.2)"}`, borderRadius: 0, padding: "10px 2px", color: "#1A1429", fontSize: 15, outline: "none", direction: dir, fontFamily: "inherit", transition: "border-color .2s", ...sx }} />
     </div>
   );
 }
 
 function Sel({ label, dir = "ltr", children, ...p }) {
   return (
-    <div style={{ marginBottom: 14 }}>
+    <div style={{ marginBottom: 20 }}>
       {label && <Lbl c={label} />}
       <div style={{ position: "relative" }}>
-        <select {...p} style={{ width: "100%", background: C.bg, border: `1.5px solid ${C.mintLt}`, borderRadius: 12, padding: "12px 38px 12px 15px", color: C.text, fontSize: 14, outline: "none", direction: dir, fontFamily: "inherit", appearance: "none", cursor: "pointer" }}>{children}</select>
-        <div style={{ position: "absolute", right: 11, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
+        <select {...p} style={{ width: "100%", background: "transparent", border: "none", borderBottom: "2px solid rgba(107,33,232,0.2)", borderRadius: 0, padding: "10px 28px 10px 2px", color: "#1A1429", fontSize: 15, outline: "none", direction: dir, fontFamily: "inherit", appearance: "none", cursor: "pointer" }}>{children}</select>
+        <div style={{ position: "absolute", right: 2, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev("#6B21E8")}</div>
       </div>
     </div>
   );
@@ -319,7 +319,7 @@ function Sel({ label, dir = "ltr", children, ...p }) {
 function PBtn({ children, onClick, sx = {}, disabled }) {
   return (
     <button className="tbtn eco-btn" disabled={disabled} onClick={onClick}
-      style={{ background: disabled ? C.sage : "linear-gradient(135deg, #7C3AED, #A855F7)", border: "none", color: disabled ? C.muted : "#fff", borderRadius: 14, padding: "14px 20px", fontSize: 14, fontWeight: 600, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginTop: 6, boxShadow: disabled ? "none" : "0 6px 20px rgba(13,59,46,0.28)", fontFamily: "inherit", ...sx }}>
+      style={{ background: disabled ? "#C4B5FD" : "#6B21E8", border: "none", color: "#fff", borderRadius: 50, padding: "16px 20px", fontSize: 15, fontWeight: 700, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginTop: 8, boxShadow: disabled ? "none" : "0 8px 24px rgba(107,33,232,0.30)", fontFamily: "inherit", letterSpacing: 0.2, ...sx }}>
       {children}
     </button>
   );
@@ -328,7 +328,7 @@ function PBtn({ children, onClick, sx = {}, disabled }) {
 function GBtn({ children, onClick, sx = {} }) {
   return (
     <button className="tbtn" onClick={onClick}
-      style={{ background: C.bg, border: `1.5px solid ${C.mintLt}`, color: C.muted, borderRadius: 12, padding: "12px 18px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "inherit", ...sx }}>
+      style={{ background: "#F2EFE9", border: "1.5px solid rgba(107,33,232,0.15)", color: "#7A6E8A", borderRadius: 50, padding: "12px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", ...sx }}>
       {children}
     </button>
   );
@@ -349,9 +349,9 @@ function LangSwitch({ lang, setLang }) {
 
 function Sheet({ title, onClose, children, dir = "ltr" }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(13,59,46,.5)", backdropFilter: "blur(14px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(26,20,41,0.5)", backdropFilter: "blur(14px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
       onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: C.bg, borderRadius: "26px 26px 0 0", width: "100%", maxWidth: 430, maxHeight: "93vh", overflowY: "auto", padding: "0 20px 44px", animation: "sheet .32s cubic-bezier(.16,1,.3,1)", direction: dir, boxShadow: "0 -12px 50px rgba(13,59,46,0.22)" }}>
+      <div style={{ background: "#F2EFE9", borderRadius: "26px 26px 0 0", width: "100%", maxWidth: 430, maxHeight: "93vh", overflowY: "auto", padding: "0 20px 44px", animation: "sheet .32s cubic-bezier(.16,1,.3,1)", direction: dir, boxShadow: "0 -12px 50px rgba(26,20,41,0.18)" }}>
         <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
           <div style={{ width: 40, height: 4, background: C.sage, borderRadius: 4 }} />
         </div>
@@ -367,7 +367,7 @@ function Sheet({ title, onClose, children, dir = "ltr" }) {
 
 function Confirm({ title, message, onConfirm, onCancel, t }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(13,59,46,.55)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(26,20,41,0.55)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ background: C.card, borderRadius: 22, padding: "28px 22px", width: "100%", maxWidth: 310, direction: t.dir, fontFamily: t.font, boxShadow: C.shadowLg, animation: "pop .2s ease both", border: `1px solid ${C.mintLt}` }}>
         <div style={{ textAlign: "center", marginBottom: 22 }}>
           <div style={{ width: 54, height: 54, borderRadius: 16, background: C.redLt, margin: "0 auto 14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.trash(C.red, 22)}</div>
@@ -620,7 +620,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
         </div>
 
         {/* Balance card */}
-        <div style={{ background: "linear-gradient(135deg, #C084FC 0%, #A855F7 60%, #9333EA 100%)", borderRadius: 24, padding: "24px 22px 20px", marginBottom: 18, position: "relative", overflow: "hidden" }}>
+        <div style={{ background: "linear-gradient(135deg, #7B2FE8 0%, #5B16CC 100%)", borderRadius: 24, padding: "24px 22px 20px", marginBottom: 18, position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: -20, left: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.1)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", bottom: -30, left: 40, width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.07)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", right: -10, bottom: -8, width: 130, height: 130, opacity: 0.92, pointerEvents: "none" }}>
@@ -1654,11 +1654,11 @@ function MemberSheet({ onSave, onClose, lang }) {
 function NavItem({ label, icon, activeIcon, active, onClick }) {
   return (
     <button className="tbtn" onClick={onClick} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "2px 4px", fontFamily: "inherit" }}>
-      <div style={{ width: 44, height: 32, borderRadius: 16, background: active ? "rgba(212,247,160,0.18)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .18s" }}>
+      <div style={{ width: 44, height: 32, borderRadius: 16, background: active ? "rgba(107,33,232,0.22)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .18s" }}>
         {active ? activeIcon : icon}
       </div>
-      <span style={{ fontSize: 9, fontWeight: active ? 600 : 400, color: active ? C.mint : "rgba(255,255,255,0.35)", transition: "color .18s", letterSpacing: 0.2 }}>{label}</span>
-      {active && <div style={{ width: 3, height: 3, borderRadius: "50%", background: C.gold, marginTop: -1 }} />}
+      <span style={{ fontSize: 9, fontWeight: active ? 700 : 400, color: active ? "#D4BFFF" : "rgba(255,255,255,0.30)", transition: "color .18s", letterSpacing: 0.3 }}>{label}</span>
+      {active && <div style={{ width: 16, height: 2.5, borderRadius: 4, background: "#6B21E8", marginTop: 1 }} />}
     </button>
   );
 }
@@ -1689,36 +1689,31 @@ function LoginScreen({ onLogin }) {
   };
 
   return (
-    <div style={{ background: "linear-gradient(160deg,#EDE9FE 0%,#F5F0FF 50%,#FDF4FF 100%)", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 24px", fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: "#F2EFE9", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 32px", fontFamily: "'Inter', sans-serif", position: "relative", overflow: "hidden" }}>
       <style>{G}</style>
 
-      {/* Top decorative circles */}
-      <div style={{ position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: "50%", background: "rgba(167,139,250,0.15)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", top: 40, left: -40, width: 140, height: 140, borderRadius: "50%", background: "rgba(196,181,253,0.12)", pointerEvents: "none" }} />
+      {/* Formes organiques — haut gauche */}
+      <svg style={{ position: "absolute", top: -30, left: -50, pointerEvents: "none", zIndex: 0 }} width="260" height="260" viewBox="0 0 260 260" fill="none">
+        <path d="M130 10 C200 10 250 60 250 130 C250 200 200 250 130 250 C60 250 10 200 10 130 C10 60 60 10 130 10Z" fill="#D4BFFF" opacity="0.55"/>
+        <path d="M100 20 C160 5 230 55 240 120 C250 185 200 240 135 248 C70 256 15 205 8 140 C1 75 40 35 100 20Z" fill="#C4A8FF" opacity="0.35"/>
+      </svg>
 
-      {/* Logo + Title */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 40 }}>
-        {/* Caisse Icon */}
-        <div style={{ width: 80, height: 80, borderRadius: 24, background: "linear-gradient(135deg, #7C3AED, #A855F7)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18, boxShadow: "0 12px 32px rgba(124,58,237,0.35)" }}>
-          <svg width="44" height="44" viewBox="0 0 22 22" fill="none">
-            <rect x="2" y="5" width="18" height="13" rx="3" fill="white" opacity="0.9"/>
-            <circle cx="11" cy="11.5" r="3.5" stroke="#A855F7" strokeWidth="1.6" fill="none"/>
-            <circle cx="11" cy="11.5" r="1.3" fill="#7C3AED"/>
-            <line x1="11" y1="8.5" x2="11" y2="9.8" stroke="#7C3AED" strokeWidth="1.4" strokeLinecap="round"/>
-            <circle cx="5" cy="7.5" r="0.9" fill="#A855F7" opacity="0.7"/>
-            <circle cx="5" cy="15.5" r="0.9" fill="#A855F7" opacity="0.7"/>
-          </svg>
+      {/* Formes organiques — bas droite */}
+      <svg style={{ position: "absolute", bottom: -40, right: -50, pointerEvents: "none", zIndex: 0 }} width="240" height="240" viewBox="0 0 240 240" fill="none">
+        <path d="M120 10 C190 10 230 70 230 130 C230 190 190 230 120 230 C50 230 10 190 10 130 C10 70 50 10 120 10Z" fill="#D4BFFF" opacity="0.50"/>
+        <path d="M90 15 C155 0 220 55 228 118 C236 181 190 232 127 238 C64 244 10 196 5 133 C0 70 25 30 90 15Z" fill="#C4A8FF" opacity="0.30"/>
+      </svg>
+
+      <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
+        {/* Titre */}
+        <div style={{ marginBottom: 52, textAlign: "left" }}>
+          <div style={{ fontSize: 36, fontWeight: 800, color: "#1A1429", letterSpacing: -1.2, lineHeight: 1.1, marginBottom: 10, fontFamily: "'Syne', sans-serif" }}>Caisse CHEBAB</div>
+          <div style={{ fontSize: 15, color: "#7A6E8A", fontWeight: 400 }}>Connectez-vous pour continuer</div>
         </div>
-        <div style={{ fontSize: 26, fontWeight: 700, color: "#1A1A2E", letterSpacing: -0.5, marginBottom: 6 }}>Caisse CHEBAB</div>
-        <div style={{ fontSize: 13, color: "#6B5E8A", fontWeight: 400 }}>Connectez-vous pour continuer</div>
-      </div>
 
-      {/* Login Card */}
-      <div style={{ width: "100%", background: "#fff", borderRadius: 24, padding: "28px 24px", boxShadow: "0 8px 32px rgba(124,58,237,0.12)", border: "1px solid rgba(167,139,250,0.2)" }}>
-
-        {/* Name field */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#6B5E8A", letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 8 }}>Nom</div>
+        {/* Champ NOM */}
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#1A1429", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>NOM</div>
           <input
             value={name}
             onChange={e => { setName(e.target.value); setError(""); }}
@@ -1726,13 +1721,13 @@ function LoginScreen({ onLogin }) {
             onBlur={() => setNameFocus(false)}
             onKeyDown={e => e.key === "Enter" && handleLogin()}
             placeholder="Votre nom..."
-            style={{ width: "100%", background: nameFocus ? "#fff" : "#F5F3FF", border: `1.5px solid ${nameFocus ? "#7C3AED" : "#EDE9FE"}`, borderRadius: 14, padding: "14px 16px", fontSize: 15, color: "#1A1A2E", outline: "none", fontFamily: "inherit", transition: "all .2s", boxShadow: nameFocus ? "0 0 0 3px rgba(124,58,237,0.12)" : "none" }}
+            style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${nameFocus ? "#6B21E8" : "rgba(107,33,232,0.25)"}`, padding: "10px 0", fontSize: 16, color: "#1A1429", outline: "none", fontFamily: "inherit", transition: "border-color .2s" }}
           />
         </div>
 
-        {/* PIN field */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#6B5E8A", letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 8 }}>Code PIN</div>
+        {/* Champ CODE PIN */}
+        <div style={{ marginBottom: 44 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#1A1429", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>CODE PIN</div>
           <input
             value={pin}
             onChange={e => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); setPin(v); setError(""); }}
@@ -1743,26 +1738,23 @@ function LoginScreen({ onLogin }) {
             type="password"
             inputMode="numeric"
             maxLength={4}
-            style={{ width: "100%", background: pinFocus ? "#fff" : "#F5F3FF", border: `1.5px solid ${shake ? "#EF4444" : pinFocus ? "#7C3AED" : "#EDE9FE"}`, borderRadius: 14, padding: "14px 16px", fontSize: 22, color: "#1A1A2E", outline: "none", fontFamily: "inherit", transition: "all .2s", letterSpacing: 8, boxShadow: shake ? "0 0 0 3px rgba(239,68,68,0.15)" : pinFocus ? "0 0 0 3px rgba(124,58,237,0.12)" : "none", animation: shake ? "shake .4s ease" : "none" }}
+            style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${shake ? "#E53E3E" : pinFocus ? "#6B21E8" : "rgba(107,33,232,0.25)"}`, padding: "10px 0", fontSize: 24, color: "#1A1429", outline: "none", fontFamily: "inherit", transition: "border-color .2s", letterSpacing: 10, animation: shake ? "shake .4s ease" : "none" }}
           />
         </div>
 
-        {/* Error message */}
+        {/* Erreur */}
         {error && (
-          <div style={{ background: "#FEE2E2", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 10, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: "#DC2626", fontWeight: 500 }}>
+          <div style={{ background: "#FEE2E2", borderRadius: 12, padding: "10px 14px", marginBottom: 20, fontSize: 13, color: "#C53030", fontWeight: 500 }}>
             ⚠️ {error}
           </div>
         )}
 
-        {/* Login button */}
+        {/* Bouton connexion */}
         <button className="tbtn" onClick={handleLogin}
-          style={{ width: "100%", background: "linear-gradient(135deg, #7C3AED, #A855F7)", border: "none", color: "#fff", borderRadius: 14, padding: "15px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 20px rgba(124,58,237,0.35)" }}>
+          style={{ width: "100%", background: "#6B21E8", border: "none", color: "#fff", borderRadius: 50, padding: "18px", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 8px 28px rgba(107,33,232,0.32)", letterSpacing: 0.3 }}>
           Se connecter
         </button>
       </div>
-
-      {/* Bottom decoration */}
-      <div style={{ position: "absolute", bottom: -40, left: -40, width: 180, height: 180, borderRadius: "50%", background: "rgba(167,139,250,0.1)", pointerEvents: "none" }} />
     </div>
   );
 }
@@ -1799,14 +1791,14 @@ export default function App() {
   ];
 
   if (loading) return (
-    <div style={{ background: "linear-gradient(160deg,#EDE9FE,#F5F0FF)", minHeight: "100vh", maxWidth: 430, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 14 }}>
+    <div style={{ background: "#F2EFE9", minHeight: "100vh", maxWidth: 430, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 14 }}>
       <div style={{ width: 36, height: 36, border: `3px solid ${C.mint}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
       <div style={{ color: C.muted, fontSize: 13, fontWeight: 500 }}>Chargement…</div>
     </div>
   );
 
   return (
-    <div style={{ background: "linear-gradient(160deg,#EDE9FE 0%,#F5F0FF 50%,#FDF4FF 100%)", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: t.font, color: C.text, position: "relative", paddingBottom: 90, overflowX: "hidden" }}>
+    <div style={{ background: "#F2EFE9", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: "'Inter',sans-serif", color: C.text, position: "relative", paddingBottom: 90, overflowX: "hidden" }}>
       <style>{G}</style>
       <div style={{ padding: "20px 16px" }}>
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
@@ -1815,7 +1807,7 @@ export default function App() {
         {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onImportMembers={addMember} onImportTxs={addTx} onRefresh={fetchAll} onReset={resetAll} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
-      <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "#1A1A2E", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 32px rgba(0,0,0,0.25)" }}>
+      <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "#1A1429", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 32px rgba(26,20,41,0.28)" }}>
         {TABS.map((tb) => <NavItem key={tb.id} label={tb.label} icon={tb.icon} activeIcon={tb.aicon} active={tab === tb.id} onClick={() => setTab(tb.id)} />)}
       </nav>
       {modal?.kind === "tx"     && <TxSheet type={modal.txType} members={members} onSave={saveTx} onClose={() => setModal(null)} lang={lang} editTx={modal.editTx || null} />}
