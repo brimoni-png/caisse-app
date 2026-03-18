@@ -585,10 +585,15 @@ function CaisseLogo() {
 function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, setLang, chartReady }) {
   const t = T[lang];
   const [statModal, setStatModal] = useState(null);
+  const [editPrevModal, setEditPrevModal] = useState(false);
+  const [editPrevVal, setEditPrevVal] = useState("");
   const curYear  = new Date().getFullYear();
   const prevYear = curYear - 1;
-  const txsPrev   = txs.filter(tx => new Date(tx.date).getFullYear() === prevYear);
-  const soldePrev = txsPrev.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
+  // Solde année passée : calculé depuis txs OU saisi manuellement
+  const txsPrev      = txs.filter(tx => new Date(tx.date).getFullYear() === prevYear);
+  const soldePrevAuto = txsPrev.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
+  const [soldePrevManual, setSoldePrevManual] = usePersisted(`cc_soldeprev_${prevYear}`, null);
+  const soldePrev = soldePrevManual !== null ? Number(soldePrevManual) : soldePrevAuto;
   const solde   = txs.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
   const contrib = txs.filter((tx) => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
   const dons    = txs.filter((tx) => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
@@ -730,17 +735,66 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
               <div style={{ color: "#5B21B6", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>-{fmtSh(dep)}</div>
             </div>
           </button>
-          {/* Solde année passée */}
-          <div style={{ background: soldePrev >= 0 ? "linear-gradient(135deg,rgba(124,58,237,0.07),rgba(196,181,253,0.14))" : "rgba(254,226,226,0.6)", border: `1.5px solid ${soldePrev >= 0 ? "#EDE9FE" : "#FECACA"}`, borderRadius: 18, padding: "16px 14px 14px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
+          {/* Solde année passée — cliquable pour modifier */}
+          <button className="tbtn" onClick={() => { setEditPrevVal(String(soldePrev)); setEditPrevModal(true); }}
+            style={{ background: soldePrev >= 0 ? "linear-gradient(135deg,rgba(124,58,237,0.07),rgba(196,181,253,0.14))" : "rgba(254,226,226,0.6)", border: `1.5px solid ${soldePrev >= 0 ? "#EDE9FE" : "#FECACA"}`, borderRadius: 18, padding: "16px 14px 14px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, cursor: "pointer", position: "relative" }}>
             <div style={{ width: 34, height: 34, borderRadius: 10, background: soldePrev >= 0 ? "rgba(124,58,237,0.08)" : "rgba(239,68,68,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={soldePrev >= 0 ? "#7C3AED" : "#EF4444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
             </div>
-            <div>
-              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}</div>
+            <div style={{ width: "100%" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+                <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8 }}>{lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}</div>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={soldePrev >= 0 ? "#7C3AED" : "#EF4444"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </div>
               <div style={{ color: soldePrev >= 0 ? "#7C3AED" : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>{soldePrev >= 0 ? "+" : ""}{fmtSh(soldePrev)}</div>
+              {soldePrevManual !== null && <div style={{ fontSize: 8, color: "#A0A0B8", marginTop: 2 }}>{lang === "ar" ? "✏️ معدّل" : "✏️ modifié"}</div>}
+            </div>
+          </button>
+        </div>
+
+        {/* Modal modification solde année passée */}
+        {editPrevModal && (
+          <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(19,17,28,0.6)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
+            onClick={e => e.target === e.currentTarget && setEditPrevModal(false)}>
+            <div style={{ background: C.card, borderRadius: 22, padding: "28px 22px", width: "100%", maxWidth: 320, boxShadow: C.shadowLg, animation: "pop .2s ease both", border: `1px solid ${C.mintLt}` }}>
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <div style={{ width: 50, height: 50, borderRadius: 15, background: C.mintPale, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.forestLt} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <div style={{ color: C.text, fontWeight: 700, fontSize: 16, marginBottom: 4 }}>
+                  {lang === "ar" ? `تعديل رصيد ${prevYear}` : `Modifier le solde ${prevYear}`}
+                </div>
+                <div style={{ color: C.muted, fontSize: 12 }}>
+                  {lang === "ar" ? "أدخل المبلغ (MRU)" : "Entrez le montant en MRU"}
+                </div>
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7 }}>
+                  {lang === "ar" ? `رصيد ${prevYear} (MRU)` : `Solde ${prevYear} (MRU)`}
+                </div>
+                <input
+                  type="number"
+                  value={editPrevVal}
+                  onChange={e => setEditPrevVal(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") { setSoldePrevManual(Number(editPrevVal)); setEditPrevModal(false); } }}
+                  placeholder="0"
+                  autoFocus
+                  style={{ width: "100%", background: C.bg, border: `1.5px solid ${C.mintLt}`, borderRadius: 12, padding: "13px 15px", fontSize: 18, color: C.text, outline: "none", fontFamily: "inherit", textAlign: "center", fontWeight: 700 }}
+                />
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button className="tbtn" onClick={() => { setSoldePrevManual(null); setEditPrevModal(false); }}
+                  style={{ flex: 1, background: C.bg, border: `1.5px solid ${C.mintLt}`, borderRadius: 12, padding: "11px", fontSize: 12, fontWeight: 500, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>
+                  {lang === "ar" ? "إعادة تعيين" : "Réinitialiser"}
+                </button>
+                <button className="tbtn" onClick={() => { setSoldePrevManual(Number(editPrevVal)); setEditPrevModal(false); }}
+                  style={{ flex: 2, background: "linear-gradient(135deg,#7C3AED,#A855F7)", border: "none", borderRadius: 12, padding: "11px", fontSize: 13, fontWeight: 600, color: "#fff", cursor: "pointer", fontFamily: "inherit", boxShadow: "0 4px 14px rgba(124,58,237,0.35)" }}>
+                  {lang === "ar" ? "حفظ" : "Enregistrer"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── BODY */}
@@ -1114,14 +1168,7 @@ function DonutChart({ contrib, dons, dep, lang, chartReady }) {
         ) : total === 0 ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#9D8BC0", fontSize: 13 }}>Aucune donnée</div>
         ) : (
-          <>
-            <canvas ref={ref} />
-            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-60%)", textAlign: "center", pointerEvents: "none" }}>
-              <div style={{ fontSize: 11, color: "#9D8BC0", fontWeight: 500 }}>{lang === "ar" ? "الرصيد" : "Solde"}</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#1A1A2E", letterSpacing: -0.5 }}>{new Intl.NumberFormat("fr-FR").format(contrib + dons - dep)}</div>
-              <div style={{ fontSize: 9, color: "#9D8BC0" }}>MRU</div>
-            </div>
-          </>
+          <canvas ref={ref} />
         )}
       </div>
     </div>
@@ -1465,13 +1512,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
         ))}
       </div>
 
-      {/* Solde net 2026 */}
-      <div style={{ background: yB >= 0 ? "linear-gradient(135deg,#7C3AED,#A855F7)" : "linear-gradient(135deg,#EF4444,#F87171)", borderRadius: 16, padding: "14px 18px", marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: C.shadowMd }}>
-        <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: 500, letterSpacing: 0.8, textTransform: "uppercase" }}>{lang === "ar" ? `صافي ${YEAR_STATS}` : `Solde net ${YEAR_STATS}`}</div>
-        <div style={{ color: "#fff", fontSize: 20, fontWeight: 700, letterSpacing: -0.8, fontFamily: "'DM Serif Display', serif" }}>{yB >= 0 ? "+" : "−"}{new Intl.NumberFormat("fr-FR").format(Math.abs(yB))} MRU</div>
-      </div>
-
-      {/* DONUT + TOP 5 + LINE CHART (données 2026) */}
+      {/* DONUT + TOP 5 + LINE CHART (données année sélectionnée) */}
       <DonutChart contrib={yC} dons={yD} dep={yE} lang={lang} chartReady={chartReady} />
       <TopMembers members={members} txs={txs2026} lang={lang} />
       <FinChart txs={txs2026} lang={lang} chartReady={chartReady} />
