@@ -33,38 +33,38 @@ function useChartJS() {
   return ready;
 }
 
-// ─── DESIGN TOKENS — Crème & Violet ──────────────────────────────────────────
+// ─── DESIGN TOKENS — #1a2b2e Teal Dark ──────────────────────────────────────
 const C = {
-  forest:    "#1A1429",
-  forestMid: "#5B21B6",
-  forestLt:  "#6B21E8",
-  mint:      "#E9E0FF",
-  mintLt:    "#EDE5F5",
-  mintPale:  "#F5F0FA",
-  lime:      "#C4B5FD",
-  sage:      "#A78BFA",
-  bg:        "#F2EFE9",
-  card:      "#FFFFFF",
-  text:      "#1A1429",
-  muted:     "#7A6E8A",
-  sub:       "#A899BC",
-  red:       "#E53E3E",
-  redLt:     "#FEE2E2",
-  gold:      "#6B21E8",
-  goldLt:    "#F0EBFF",
-  shadow:    "0 2px 12px rgba(107,33,232,0.07)",
-  shadowMd:  "0 6px 24px rgba(107,33,232,0.10)",
-  shadowLg:  "0 16px 48px rgba(107,33,232,0.14)",
+  forest:    "#1a2b2e",
+  forestMid: "#1f3a3e",
+  forestLt:  "#2d9c8f",
+  mint:      "#b2ede7",
+  mintLt:    "#e0f5f3",
+  mintPale:  "#f0faf9",
+  lime:      "#6dcfc4",
+  sage:      "#4db8ab",
+  bg:        "#f0f4f5",
+  card:      "#ffffff",
+  text:      "#1a2b2e",
+  muted:     "#4a6568",
+  sub:       "#7a9ea2",
+  red:       "#e05252",
+  redLt:     "#fde8e8",
+  gold:      "#2d9c8f",
+  goldLt:    "#e6faf8",
+  shadow:    "0 2px 14px rgba(26,43,46,0.08)",
+  shadowMd:  "0 6px 24px rgba(26,43,46,0.12)",
+  shadowLg:  "0 16px 48px rgba(26,43,46,0.16)",
 };
 
-const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap');`;
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Nunito+Sans:wght@300;400;500;600&display=swap');`;
 
 const G = `
   ${FONTS}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html,body{height:100%;overscroll-behavior:none;}
-  body{background:#F2EFE9;-webkit-font-smoothing:antialiased;font-family:'Inter',sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;font-size:15px;}
-  #root{height:100%;display:flex;justify-content:center;background:#F2EFE9;}
+  body{background:#f0f4f5;-webkit-font-smoothing:antialiased;font-family:'Nunito Sans',sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;font-size:15px;}
+  #root{height:100%;display:flex;justify-content:center;background:#f0f4f5;}
   ::-webkit-scrollbar{width:2px;}
   ::-webkit-scrollbar-thumb{background:${C.sage};border-radius:4px;}
   @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -91,7 +91,7 @@ const G = `
   .eco-btn:hover{filter:brightness(1.06);}
   input,select{color-scheme:light;}
   input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
-  button{font-family:'DM Sans',sans-serif;}
+  button{font-family:'Nunito Sans',sans-serif;}
 `;
 
 // ─── ICONS ────────────────────────────────────────────────────────────────────
@@ -286,7 +286,7 @@ function useSupabaseData() {
 
 // ─── UI ATOMS ─────────────────────────────────────────────────────────────────
 function Card({ children, sx = {}, className = "" }) {
-  return <div className={className} style={{ background: C.card, borderRadius: 22, boxShadow: "0 2px 16px rgba(107,33,232,0.06)", border: "1px solid rgba(107,33,232,0.08)", ...sx }}>{children}</div>;
+  return <div className={className} style={{ background: C.card, borderRadius: 20, boxShadow: "0 2px 16px rgba(26,43,46,0.07)", border: "1px solid rgba(26,43,46,0.06)", ...sx }}>{children}</div>;
 }
 
 function Lbl({ c }) {
@@ -299,7 +299,7 @@ function Inp({ label, dir = "ltr", sx = {}, ...p }) {
     <div style={{ marginBottom: 20 }}>
       {label && <Lbl c={label} />}
       <input {...p} onFocus={(e) => { sf(true); p.onFocus?.(e); }} onBlur={(e) => { sf(false); p.onBlur?.(e); }}
-        style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${f ? "#6B21E8" : "rgba(107,33,232,0.2)"}`, borderRadius: 0, padding: "10px 2px", color: "#1A1429", fontSize: 15, outline: "none", direction: dir, fontFamily: "inherit", transition: "border-color .2s", ...sx }} />
+        style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${f ? "#2d9c8f" : "rgba(26,43,46,0.18)"}`, borderRadius: 0, padding: "10px 2px", color: "#1A1429", fontSize: 15, outline: "none", direction: dir, fontFamily: "inherit", transition: "border-color .2s", ...sx }} />
     </div>
   );
 }
@@ -319,7 +319,7 @@ function Sel({ label, dir = "ltr", children, ...p }) {
 function PBtn({ children, onClick, sx = {}, disabled }) {
   return (
     <button className="tbtn eco-btn" disabled={disabled} onClick={onClick}
-      style={{ background: disabled ? "#C4B5FD" : "#6B21E8", border: "none", color: "#fff", borderRadius: 50, padding: "16px 20px", fontSize: 15, fontWeight: 700, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginTop: 8, boxShadow: disabled ? "none" : "0 8px 24px rgba(107,33,232,0.30)", fontFamily: "inherit", letterSpacing: 0.2, ...sx }}>
+      style={{ background: disabled ? "#7ab5b0" : "#1a2b2e", border: "none", color: "#fff", borderRadius: 50, padding: "16px 20px", fontSize: 15, fontWeight: 700, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginTop: 8, boxShadow: disabled ? "none" : "0 8px 24px rgba(26,43,46,0.28)", fontFamily: "inherit", letterSpacing: 0.2, ...sx }}>
       {children}
     </button>
   );
@@ -349,9 +349,9 @@ function LangSwitch({ lang, setLang }) {
 
 function Sheet({ title, onClose, children, dir = "ltr" }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(26,20,41,0.5)", backdropFilter: "blur(14px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(26,43,46,0.5)", backdropFilter: "blur(14px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
       onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: "#F2EFE9", borderRadius: "26px 26px 0 0", width: "100%", maxWidth: 430, maxHeight: "93vh", overflowY: "auto", padding: "0 20px 44px", animation: "sheet .32s cubic-bezier(.16,1,.3,1)", direction: dir, boxShadow: "0 -12px 50px rgba(26,20,41,0.18)" }}>
+      <div style={{ background: "#f0f4f5", borderRadius: "26px 26px 0 0", width: "100%", maxWidth: 430, maxHeight: "93vh", overflowY: "auto", padding: "0 20px 44px", animation: "sheet .32s cubic-bezier(.16,1,.3,1)", direction: dir, boxShadow: "0 -12px 50px rgba(26,20,41,0.18)" }}>
         <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
           <div style={{ width: 40, height: 4, background: C.sage, borderRadius: 4 }} />
         </div>
@@ -367,7 +367,7 @@ function Sheet({ title, onClose, children, dir = "ltr" }) {
 
 function Confirm({ title, message, onConfirm, onCancel, t }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(26,20,41,0.55)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(26,43,46,0.55)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ background: C.card, borderRadius: 22, padding: "28px 22px", width: "100%", maxWidth: 310, direction: t.dir, fontFamily: t.font, boxShadow: C.shadowLg, animation: "pop .2s ease both", border: `1px solid ${C.mintLt}` }}>
         <div style={{ textAlign: "center", marginBottom: 22 }}>
           <div style={{ width: 54, height: 54, borderRadius: 16, background: C.redLt, margin: "0 auto 14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.trash(C.red, 22)}</div>
@@ -455,54 +455,58 @@ function TxRow({ tx, onDelete, onEdit, delay = 0, lang }) {
 
 // ─── 3 CATEGORY PILLS (Contribution / Dons / Dépenses uniquement) ────────────
 function CatPills({ onAdd, lang }) {
-  const btnStyle = { background: C.card, border: "1.5px solid #EDEDF5", borderRadius: 20, padding: "20px 8px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 11, boxShadow: "0 2px 12px rgba(91,33,182,0.06)", transition: "all .22s" };
-  const iconBg = { width: 54, height: 54, borderRadius: "50%", background: "#EEEAF8", display: "flex", alignItems: "center", justifyContent: "center" };
-  const lblStyle = { fontSize: 12, fontWeight: 500, color: C.text, textAlign: "center" };
+  const cats = [
+    {
+      type: "contribution",
+      color: "#2d9c8f",
+      bg: "rgba(45,156,143,0.10)",
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          {/* Pièce de monnaie avec $ */}
+          <circle cx="12" cy="12" r="9" fill="rgba(45,156,143,0.15)" stroke="#2d9c8f" strokeWidth="1.7"/>
+          <path d="M12 7v10M9.5 9.5a2.5 2.5 0 015 0c0 1.4-1.2 2.2-2.5 2.5-1.3.3-2.5 1.1-2.5 2.5a2.5 2.5 0 005 0" stroke="#2d9c8f" strokeWidth="1.6"/>
+        </svg>
+      ),
+    },
+    {
+      type: "don",
+      color: "#20b2aa",
+      bg: "rgba(32,178,170,0.10)",
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          {/* Mains ouvertes tendant un cœur */}
+          <path d="M12 6c0 0-1.5-2-3-2C7.5 4 6 5.3 6 6.8 6 8.6 8 10 12 12c4-2 6-3.4 6-5.2C18 5.3 16.5 4 15 4c-1.5 0-3 2-3 2z" fill="rgba(32,178,170,0.18)" stroke="#20b2aa" strokeWidth="1.7"/>
+          <path d="M5 15c0-1 .7-1.5 1.5-1.5S8 14 8 15l.5 1h7l.5-1c0-1 .7-1.5 1.5-1.5S19 14 19 15v1.5c0 .8-.7 1.5-1.5 1.5h-11C5.7 18 5 17.3 5 16.5V15z" fill="rgba(32,178,170,0.18)" stroke="#20b2aa" strokeWidth="1.7"/>
+        </svg>
+      ),
+    },
+    {
+      type: "depense",
+      color: "#e05252",
+      bg: "rgba(224,82,82,0.10)",
+      icon: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          {/* Reçu / facture */}
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(224,82,82,0.15)" stroke="#e05252" strokeWidth="1.7"/>
+          <polyline points="14 2 14 8 20 8" stroke="#e05252" strokeWidth="1.7"/>
+          <line x1="16" y1="13" x2="8" y2="13" stroke="#e05252" strokeWidth="1.5"/>
+          <line x1="16" y1="17" x2="8" y2="17" stroke="#e05252" strokeWidth="1.5"/>
+          <line x1="10" y1="9" x2="8" y2="9" stroke="#e05252" strokeWidth="1.5"/>
+        </svg>
+      ),
+    },
+  ];
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 22 }}>
-
-      {/* Contribution - cercle avec + */}
-      <button className="tbtn cat-card" onClick={() => onAdd("contribution")} style={btnStyle}>
-        <div style={iconBg}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="9"/>
-            <line x1="12" y1="8" x2="12" y2="16"/>
-            <line x1="8" y1="12" x2="16" y2="12"/>
-          </svg>
-        </div>
-        <span style={lblStyle}>{T[lang].txTypes.contribution}</span>
-      </button>
-
-      {/* Don - mains tendant un cœur */}
-      <button className="tbtn cat-card" onClick={() => onAdd("don")} style={btnStyle}>
-        <div style={iconBg}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            {/* Cœur */}
-            <path d="M12 7.5C12 7.5 11 5.5 9 5.5C7.5 5.5 6 6.8 6 8.5C6 10.5 8 12 12 14C16 12 18 10.5 18 8.5C18 6.8 16.5 5.5 15 5.5C13 5.5 12 7.5 12 7.5Z" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.6"/>
-            {/* Main gauche */}
-            <path d="M5 17C5 17 4 16 4 15V13C4 12.4 4.4 12 5 12H7L9 14H15L17 12H19C19.6 12 20 12.4 20 13V15C20 16 19 17 19 17H5Z" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.6"/>
-          </svg>
-        </div>
-        <span style={lblStyle}>{T[lang].txTypes.don}</span>
-      </button>
-
-      {/* Dépense - portefeuille */}
-      <button className="tbtn cat-card" onClick={() => onAdd("depense")} style={btnStyle}>
-        <div style={iconBg}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            {/* Corps portefeuille */}
-            <rect x="2" y="7" width="20" height="13" rx="3" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.7"/>
-            {/* Rabat haut */}
-            <path d="M16 7V5.5C16 4.7 15.3 4 14.5 4H6C4.9 4 4 4.9 4 6V7" stroke="#7C3AED" strokeWidth="1.7"/>
-            {/* Poche pièce */}
-            <rect x="15" y="12" width="5" height="4" rx="1.5" fill="#7C3AED" opacity="0.25" stroke="#7C3AED" strokeWidth="1.5"/>
-            {/* Pièce */}
-            <circle cx="17.5" cy="14" r="1" fill="#7C3AED"/>
-          </svg>
-        </div>
-        <span style={lblStyle}>{T[lang].txTypes.depense}</span>
-      </button>
-
+      {cats.map(cat => (
+        <button key={cat.type} className="tbtn cat-card" onClick={() => onAdd(cat.type)}
+          style={{ background: C.card, border: "none", borderRadius: 20, padding: "18px 8px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, boxShadow: C.shadow, transition: "all .22s" }}>
+          <div style={{ width: 54, height: 54, borderRadius: 16, background: cat.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {cat.icon}
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 700, color: cat.color, textAlign: "center", letterSpacing: 0.2 }}>{T[lang].txTypes[cat.type]}</span>
+        </button>
+      ))}
     </div>
   );
 }
@@ -522,9 +526,9 @@ function FinChart({ txs, lang, chartReady }) {
     cRef.current = new window.Chart(ref.current, {
       type: "line",
       data: { labels: ms, datasets: [
-        { label: t.stats.contribution, data: c, borderColor: C.forestLt, backgroundColor: "rgba(200,135,42,0.08)", tension: 0.45, fill: true, pointBackgroundColor: "#C8872A", pointRadius: 3, borderWidth: 2 },
-        { label: t.stats.don,          data: d, borderColor: C.gold,     backgroundColor: "rgba(232,168,56,0.07)", tension: 0.45, fill: true, pointBackgroundColor: C.gold,     pointRadius: 3, borderWidth: 2 },
-        { label: t.stats.depense,      data: e, borderColor: C.red,      backgroundColor: "rgba(224,82,82,0.06)",  tension: 0.45, fill: true, pointBackgroundColor: C.red,      pointRadius: 3, borderWidth: 2 },
+        { label: t.stats.contribution, data: c, borderColor: "#2d9c8f", backgroundColor: "rgba(45,156,143,0.08)", tension: 0.45, fill: true, pointBackgroundColor: "#2d9c8f", pointRadius: 3, borderWidth: 2 },
+        { label: t.stats.don,          data: d, borderColor: "#20b2aa", backgroundColor: "rgba(32,178,170,0.07)", tension: 0.45, fill: true, pointBackgroundColor: "#20b2aa", pointRadius: 3, borderWidth: 2 },
+        { label: t.stats.depense,      data: e, borderColor: "#e05252", backgroundColor: "rgba(224,82,82,0.06)", tension: 0.45, fill: true, pointBackgroundColor: "#e05252", pointRadius: 3, borderWidth: 2 },
       ]},
       options: {
         responsive: true, maintainAspectRatio: false,
@@ -620,7 +624,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
         </div>
 
         {/* Balance card */}
-        <div style={{ background: "linear-gradient(135deg, #7B2FE8 0%, #5B16CC 100%)", borderRadius: 24, padding: "24px 22px 20px", marginBottom: 18, position: "relative", overflow: "hidden" }}>
+        <div style={{ background: "linear-gradient(135deg, #1a2b2e 0%, #1f4a4e 50%, #2d9c8f 100%)", borderRadius: 24, padding: "24px 22px 20px", marginBottom: 18, position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: -20, left: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.1)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", bottom: -30, left: 40, width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.07)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", right: -10, bottom: -8, width: 130, height: 130, opacity: 0.92, pointerEvents: "none" }}>
@@ -657,7 +661,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
         {statModal && (
           <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(19,17,28,0.55)", backdropFilter: "blur(12px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
             onClick={() => setStatModal(null)}>
-            <div style={{ background: C.bg, borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 430, padding: "0 20px 40px", animation: "sheet .3s cubic-bezier(.16,1,.3,1)" }}
+            <div style={{ background: "#f0f4f5", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 430, padding: "0 20px 40px", animation: "sheet .3s cubic-bezier(.16,1,.3,1)" }}
               onClick={e => e.stopPropagation()}>
               <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
                 <div style={{ width: 40, height: 4, background: "#DEDAE8", borderRadius: 4 }} />
@@ -699,35 +703,38 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 4 }}>
           {/* Contributions */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[0])}
-            style={{ background: C.card, border: "1.5px solid #EDEDF5", borderRadius: 18, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: "0 2px 12px rgba(91,33,182,0.06)", transition: "all .2s" }}>
-            <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(139,92,246,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(45,156,143,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {/* Icône pièce/contribution */}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2d9c8f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M9.5 10.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5c0 1.5-2.5 3-2.5 3s-2.5-1.5-2.5-3z" fill="rgba(45,156,143,0.18)"/><path d="M9.5 13.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5"/></svg>
             </div>
             <div>
-              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.contribution}</div>
-              <div style={{ color: "#8B5CF6", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>+{fmtSh(contrib)}</div>
+              <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.contribution}</div>
+              <div style={{ color: "#2d9c8f", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>+{fmtSh(contrib)}</div>
             </div>
           </button>
           {/* Dons */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[1])}
-            style={{ background: C.card, border: "1.5px solid #F0C0D8", borderRadius: 18, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: "0 2px 16px rgba(219,39,119,0.08)", transition: "all .2s" }}>
-            <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(219,39,119,0.07)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DB2777" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(32,178,170,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {/* Icône mains offrantes / don */}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#20b2aa" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 4.02 3.268 2 6 2c1.657 0 3.15.817 4 2.07C10.85 2.817 12.343 2 14 2c2.732 0 5 2.02 5 5.191 0 4.105-5.37 8.863-11 14.402z" fill="rgba(32,178,170,0.18)"/></svg>
             </div>
             <div>
-              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.don}</div>
-              <div style={{ color: "#DB2777", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>+{fmtSh(dons)}</div>
+              <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.don}</div>
+              <div style={{ color: "#20b2aa", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>+{fmtSh(dons)}</div>
             </div>
           </button>
           {/* Dépenses */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[2])}
-            style={{ background: C.card, border: "1.5px solid #EDEDF5", borderRadius: 18, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: "0 2px 12px rgba(91,33,182,0.06)", transition: "all .2s" }}>
-            <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(91,33,182,0.07)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B21B6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(224,82,82,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {/* Icône facture / dépense */}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e05252" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(224,82,82,0.12)"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
             </div>
             <div>
-              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.depense}</div>
-              <div style={{ color: "#5B21B6", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>-{fmtSh(dep)}</div>
+              <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.depense}</div>
+              <div style={{ color: "#e05252", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>-{fmtSh(dep)}</div>
             </div>
           </button>
           {/* Solde année passée */}
@@ -1654,11 +1661,11 @@ function MemberSheet({ onSave, onClose, lang }) {
 function NavItem({ label, icon, activeIcon, active, onClick }) {
   return (
     <button className="tbtn" onClick={onClick} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "2px 4px", fontFamily: "inherit" }}>
-      <div style={{ width: 44, height: 32, borderRadius: 16, background: active ? "rgba(107,33,232,0.22)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .18s" }}>
+      <div style={{ width: 44, height: 32, borderRadius: 16, background: active ? "rgba(45,156,143,0.22)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .18s" }}>
         {active ? activeIcon : icon}
       </div>
-      <span style={{ fontSize: 9, fontWeight: active ? 700 : 400, color: active ? "#D4BFFF" : "rgba(255,255,255,0.30)", transition: "color .18s", letterSpacing: 0.3 }}>{label}</span>
-      {active && <div style={{ width: 16, height: 2.5, borderRadius: 4, background: "#6B21E8", marginTop: 1 }} />}
+      <span style={{ fontSize: 9, fontWeight: active ? 700 : 400, color: active ? "#6dcfc4" : "rgba(255,255,255,0.35)", transition: "color .18s", letterSpacing: 0.3 }}>{label}</span>
+      {active && <div style={{ width: 16, height: 2.5, borderRadius: 4, background: "#2d9c8f", marginTop: 1 }} />}
     </button>
   );
 }
@@ -1688,105 +1695,47 @@ function LoginScreen({ onLogin }) {
     onLogin(name.trim());
   };
 
-  const LOGIN_CSS = `
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap');
-    @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-    .login-wrap{animation:fadeUp .5s cubic-bezier(.16,1,.3,1) both}
-    .login-input::placeholder{color:rgba(220,210,255,0.45)}
-    .login-btn:active{transform:scale(.97)}
-    .login-btn:hover{filter:brightness(1.08)}
-  `;
-
   return (
-    <div style={{
-      position: "relative", minHeight: "100vh", minHeight: "100dvh",
-      width: "100%", maxWidth: 430, margin: "0 auto", overflow: "hidden",
-      background: "linear-gradient(160deg, #3B1A6E 0%, #5B2AA0 40%, #7B3FCC 70%, #9B5DE5 100%)",
-      display: "flex", flexDirection: "column", alignItems: "center",
-      justifyContent: "center", padding: "40px 28px",
-      fontFamily: "'Inter', sans-serif",
-    }}>
-      <style>{LOGIN_CSS}</style>
+    <div style={{ background: "#F2EFE9", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 32px", fontFamily: "'Inter', sans-serif", position: "relative", overflow: "hidden" }}>
+      <style>{G}</style>
 
-      {/* ── Motif géométrique — lignes polygonales ── */}
-      <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }} viewBox="0 0 430 900" fill="none" preserveAspectRatio="xMidYMid slice">
-        {/* Coins haut */}
-        <polygon points="0,0 120,0 60,90" stroke="rgba(200,170,255,0.18)" strokeWidth="1" fill="none"/>
-        <polygon points="0,0 90,0 0,80" stroke="rgba(200,170,255,0.12)" strokeWidth="1" fill="none"/>
-        <polygon points="430,0 310,0 380,100" stroke="rgba(200,170,255,0.18)" strokeWidth="1" fill="none"/>
-        <polygon points="430,0 340,0 430,90" stroke="rgba(200,170,255,0.12)" strokeWidth="1" fill="none"/>
-        {/* Coins bas */}
-        <polygon points="0,900 130,900 50,800" stroke="rgba(200,170,255,0.15)" strokeWidth="1" fill="none"/>
-        <polygon points="430,900 300,900 400,800" stroke="rgba(200,170,255,0.15)" strokeWidth="1" fill="none"/>
-        <polygon points="430,900 350,900 430,820" stroke="rgba(200,170,255,0.10)" strokeWidth="1" fill="none"/>
-        {/* Lignes décoratives diagonales */}
-        <line x1="0" y1="200" x2="120" y2="80" stroke="rgba(200,170,255,0.10)" strokeWidth="1"/>
-        <line x1="430" y1="200" x2="310" y2="80" stroke="rgba(200,170,255,0.10)" strokeWidth="1"/>
-        <line x1="0" y1="700" x2="130" y2="820" stroke="rgba(200,170,255,0.08)" strokeWidth="1"/>
-        <line x1="430" y1="700" x2="300" y2="820" stroke="rgba(200,170,255,0.08)" strokeWidth="1"/>
+      {/* Formes organiques — haut gauche */}
+      <svg style={{ position: "absolute", top: -30, left: -50, pointerEvents: "none", zIndex: 0 }} width="260" height="260" viewBox="0 0 260 260" fill="none">
+        <path d="M130 10 C200 10 250 60 250 130 C250 200 200 250 130 250 C60 250 10 200 10 130 C10 60 60 10 130 10Z" fill="#D4BFFF" opacity="0.55"/>
+        <path d="M100 20 C160 5 230 55 240 120 C250 185 200 240 135 248 C70 256 15 205 8 140 C1 75 40 35 100 20Z" fill="#C4A8FF" opacity="0.35"/>
       </svg>
 
-      {/* ── Titre centré ── */}
-      <div className="login-wrap" style={{ position: "relative", zIndex: 1, textAlign: "center", marginBottom: 48, animationDelay: "0ms" }}>
-        <div style={{
-          fontSize: 52, fontWeight: 900, lineHeight: 1.0, letterSpacing: -1,
-          fontFamily: "'Playfair Display', serif",
-          background: "linear-gradient(180deg, #FFFFFF 0%, #D4B8FF 100%)",
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-        }}>
-          Caisse<br/>CHEBAB
-        </div>
-        <div style={{ fontSize: 15, color: "rgba(220,205,255,0.80)", fontWeight: 400, marginTop: 12, letterSpacing: 0.2 }}>
-          Connectez-vous pour continuer
-        </div>
-      </div>
+      {/* Formes organiques — bas droite */}
+      <svg style={{ position: "absolute", bottom: -40, right: -50, pointerEvents: "none", zIndex: 0 }} width="240" height="240" viewBox="0 0 240 240" fill="none">
+        <path d="M120 10 C190 10 230 70 230 130 C230 190 190 230 120 230 C50 230 10 190 10 130 C10 70 50 10 120 10Z" fill="#D4BFFF" opacity="0.50"/>
+        <path d="M90 15 C155 0 220 55 228 118 C236 181 190 232 127 238 C64 244 10 196 5 133 C0 70 25 30 90 15Z" fill="#C4A8FF" opacity="0.30"/>
+      </svg>
 
-      {/* ── Carte glassmorphism ── */}
-      <div className="login-wrap" style={{
-        position: "relative", zIndex: 1, width: "100%",
-        background: "rgba(255,255,255,0.10)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderRadius: 22,
-        border: "1px solid rgba(255,255,255,0.22)",
-        padding: "32px 28px 28px",
-        boxShadow: "0 8px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
-        animationDelay: "80ms",
-      }}>
+      <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
+        {/* Titre */}
+        <div style={{ marginBottom: 52, textAlign: "left" }}>
+          <div style={{ fontSize: 36, fontWeight: 800, color: "#1A1429", letterSpacing: -1.2, lineHeight: 1.1, marginBottom: 10, fontFamily: "'Syne', sans-serif" }}>Caisse CHEBAB</div>
+          <div style={{ fontSize: 15, color: "#7A6E8A", fontWeight: 400 }}>Connectez-vous pour continuer</div>
+        </div>
 
         {/* Champ NOM */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(220,205,255,0.75)", letterSpacing: 1.8, textTransform: "uppercase", marginBottom: 10 }}>NOM</div>
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#1A1429", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>NOM</div>
           <input
-            className="login-input"
             value={name}
             onChange={e => { setName(e.target.value); setError(""); }}
             onFocus={() => setNameFocus(true)}
             onBlur={() => setNameFocus(false)}
             onKeyDown={e => e.key === "Enter" && handleLogin()}
             placeholder="Votre nom..."
-            style={{
-              width: "100%",
-              background: nameFocus ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.10)",
-              border: `1.5px solid ${nameFocus ? "rgba(200,170,255,0.7)" : "rgba(200,170,255,0.25)"}`,
-              borderRadius: 12,
-              padding: "14px 16px",
-              fontSize: 15,
-              color: "#fff",
-              outline: "none",
-              fontFamily: "inherit",
-              transition: "all .2s",
-              boxShadow: nameFocus ? "0 0 0 3px rgba(180,120,255,0.20)" : "none",
-            }}
+            style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${nameFocus ? "#6B21E8" : "rgba(107,33,232,0.25)"}`, padding: "10px 0", fontSize: 16, color: "#1A1429", outline: "none", fontFamily: "inherit", transition: "border-color .2s" }}
           />
         </div>
 
         {/* Champ CODE PIN */}
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(220,205,255,0.75)", letterSpacing: 1.8, textTransform: "uppercase", marginBottom: 10 }}>CODE PIN</div>
+        <div style={{ marginBottom: 44 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#1A1429", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>CODE PIN</div>
           <input
-            className="login-input"
             value={pin}
             onChange={e => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); setPin(v); setError(""); }}
             onFocus={() => setPinFocus(true)}
@@ -1796,55 +1745,26 @@ function LoginScreen({ onLogin }) {
             type="password"
             inputMode="numeric"
             maxLength={4}
-            style={{
-              width: "100%",
-              background: pinFocus ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.10)",
-              border: `1.5px solid ${shake ? "rgba(255,100,100,0.8)" : pinFocus ? "rgba(200,170,255,0.7)" : "rgba(200,170,255,0.25)"}`,
-              borderRadius: 12,
-              padding: "14px 16px",
-              fontSize: 22,
-              color: "#fff",
-              outline: "none",
-              fontFamily: "inherit",
-              transition: "all .2s",
-              letterSpacing: 10,
-              boxShadow: shake ? "0 0 0 3px rgba(255,100,100,0.20)" : pinFocus ? "0 0 0 3px rgba(180,120,255,0.20)" : "none",
-              animation: shake ? "shake .4s ease" : "none",
-            }}
+            style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${shake ? "#E53E3E" : pinFocus ? "#6B21E8" : "rgba(107,33,232,0.25)"}`, padding: "10px 0", fontSize: 24, color: "#1A1429", outline: "none", fontFamily: "inherit", transition: "border-color .2s", letterSpacing: 10, animation: shake ? "shake .4s ease" : "none" }}
           />
         </div>
 
         {/* Erreur */}
         {error && (
-          <div style={{ background: "rgba(255,80,80,0.18)", border: "1px solid rgba(255,100,100,0.35)", borderRadius: 10, padding: "10px 14px", marginBottom: 18, fontSize: 13, color: "#FFB3B3", fontWeight: 500 }}>
+          <div style={{ background: "#FEE2E2", borderRadius: 12, padding: "10px 14px", marginBottom: 20, fontSize: 13, color: "#C53030", fontWeight: 500 }}>
             ⚠️ {error}
           </div>
         )}
 
-        {/* Bouton Se connecter */}
-        <button className="tbtn login-btn" onClick={handleLogin}
-          style={{
-            width: "100%",
-            background: "linear-gradient(135deg, #6B21E8 0%, #8B35FF 100%)",
-            border: "none",
-            color: "#fff",
-            borderRadius: 12,
-            padding: "17px",
-            fontSize: 16,
-            fontWeight: 600,
-            cursor: "pointer",
-            fontFamily: "inherit",
-            boxShadow: "0 6px 24px rgba(107,33,232,0.55), inset 0 1px 0 rgba(255,255,255,0.15)",
-            letterSpacing: 0.3,
-            transition: "all .18s",
-          }}>
+        {/* Bouton connexion */}
+        <button className="tbtn" onClick={handleLogin}
+          style={{ width: "100%", background: "#6B21E8", border: "none", color: "#fff", borderRadius: 50, padding: "18px", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 8px 28px rgba(107,33,232,0.32)", letterSpacing: 0.3 }}>
           Se connecter
         </button>
       </div>
     </div>
   );
 }
-
 
 export default function App() {
   const xlsxReady = useSheetJS();
@@ -1894,7 +1814,7 @@ export default function App() {
         {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onImportMembers={addMember} onImportTxs={addTx} onRefresh={fetchAll} onReset={resetAll} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
-      <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "#1A1429", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 32px rgba(26,20,41,0.28)" }}>
+      <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "#1a2b2e", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 32px rgba(26,43,46,0.30)" }}>
         {TABS.map((tb) => <NavItem key={tb.id} label={tb.label} icon={tb.icon} activeIcon={tb.aicon} active={tab === tb.id} onClick={() => setTab(tb.id)} />)}
       </nav>
       {modal?.kind === "tx"     && <TxSheet type={modal.txType} members={members} onSave={saveTx} onClose={() => setModal(null)} lang={lang} editTx={modal.editTx || null} />}
