@@ -782,56 +782,238 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
   const t = T[lang];
   const allYears = getYrs(txs);
-  const [selYear, setSelYear] = useState("all");
+  const [selYear,  setSelYear]  = useState("all");
+  const [selType,  setSelType]  = useState("all");
   const [selMonth, setSelMonth] = useState("all");
 
   const sorted = [...txs]
-    .filter((tx) => {
+    .filter(tx => {
       const d = new Date(tx.date);
-      if (selYear !== "all" && d.getFullYear() !== Number(selYear)) return false;
-      if (selMonth !== "all" && d.getMonth() + 1 !== Number(selMonth)) return false;
+      if (selYear  !== "all" && d.getFullYear()   !== Number(selYear))  return false;
+      if (selType  !== "all" && tx.type           !== selType)           return false;
+      if (selMonth !== "all" && d.getMonth() + 1  !== Number(selMonth)) return false;
       return true;
     })
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  const selStyle = { width: "100%", background: "#fff", border: `1.5px solid ${C.mintLt}`, borderRadius: 12, padding: "10px 30px 10px 13px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit", appearance: "none", cursor: "pointer", boxShadow: C.shadow };
+  const pillStyle = (active, color) => ({
+    background: active ? (color || C.forest) : C.card,
+    border: `1.5px solid ${active ? (color || C.forest) : C.mintLt}`,
+    color: active ? "#fff" : C.muted,
+    borderRadius: 20, padding: "7px 15px", fontSize: 11, fontWeight: 600,
+    cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit",
+    boxShadow: C.shadow, transition: "all .18s",
+  });
+
+  const selStyle = {
+    width: "100%", background: "#fff", border: `1.5px solid ${C.mintLt}`,
+    borderRadius: 12, padding: "10px 30px 10px 13px", color: C.text,
+    fontSize: 13, outline: "none", fontFamily: "inherit",
+    appearance: "none", cursor: "pointer", boxShadow: C.shadow,
+  };
+
+  // Libellé du filtre actif
+  const activeLabel = [
+    selYear  !== "all" ? selYear  : null,
+    selType  !== "all" ? CFG(lang)[selType]?.label : null,
+    selMonth !== "all" ? t.months[Number(selMonth) - 1] : null,
+  ].filter(Boolean).join(" · ");
 
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
       <CatPills onAdd={onAdd} lang={lang} />
 
-      {/* Filtres Année / Mois */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 14, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-        <div style={{ flex: 1, position: "relative" }}>
-          <select value={selYear} onChange={e => { setSelYear(e.target.value); setSelMonth("all"); }} style={selStyle}>
-            <option value="all">{lang === "ar" ? "كل السنوات" : "Toutes les années"}</option>
-            {allYears.map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
-          <div style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
+      {/* ─ ÉTAPE 1 : Année ─ */}
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7, paddingLeft: 2 }}>
+          {lang === "ar" ? "① السنة" : "① Année"}
         </div>
-        <div style={{ flex: 1, position: "relative" }}>
-          <select value={selMonth} onChange={e => setSelMonth(e.target.value)} disabled={selYear === "all"} style={{ ...selStyle, opacity: selYear === "all" ? 0.45 : 1, cursor: selYear === "all" ? "not-allowed" : "pointer" }}>
-            <option value="all">{lang === "ar" ? "كل الأشهر" : "Tous les mois"}</option>
-            {t.monthsFull.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
-          </select>
-          <div style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
+        <div style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 4 }}>
+          <button className="tbtn" onClick={() => { setSelYear("all"); setSelType("all"); setSelMonth("all"); }} style={pillStyle(selYear === "all")}>
+            {lang === "ar" ? "الكل" : "Toutes"}
+          </button>
+          {allYears.map(y => (
+            <button key={y} className="tbtn" onClick={() => { setSelYear(String(y)); setSelType("all"); setSelMonth("all"); }}
+              style={pillStyle(selYear === String(y), C.forestLt)}>
+              {y}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div style={{ fontSize: 11, color: C.muted, marginBottom: 10, paddingLeft: 2 }}>
-        {sorted.length} {lang === "ar" ? "معاملة" : `transaction${sorted.length !== 1 ? "s" : ""}`}
-        {selYear !== "all" && <span style={{ marginLeft: 6, background: C.mintPale, borderRadius: 6, padding: "1px 7px", border: `1px solid ${C.mintLt}`, color: C.forestLt, fontWeight: 600 }}>{selYear}{selMonth !== "all" ? ` · ${t.months[Number(selMonth)-1]}` : ""}</span>}
+      {/* ─ ÉTAPE 2 : Type (activé seulement si année sélectionnée) ─ */}
+      <div style={{ marginBottom: 10, opacity: selYear === "all" ? 0.4 : 1, pointerEvents: selYear === "all" ? "none" : "auto", transition: "opacity .2s" }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7, paddingLeft: 2 }}>
+          {lang === "ar" ? "② نوع العملية" : "② Type"}
+        </div>
+        <div style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 4 }}>
+          <button className="tbtn" onClick={() => { setSelType("all"); setSelMonth("all"); }} style={pillStyle(selType === "all")}>
+            {lang === "ar" ? "الكل" : "Tous"}
+          </button>
+          {["contribution", "don", "depense"].map(tp => {
+            const cfg = CFG(lang)[tp];
+            return (
+              <button key={tp} className="tbtn" onClick={() => { setSelType(tp); setSelMonth("all"); }}
+                style={pillStyle(selType === tp, cfg.color)}>
+                {cfg.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ─ ÉTAPE 3 : Mois (activé seulement si type sélectionné) ─ */}
+      <div style={{ marginBottom: 14, opacity: selType === "all" ? 0.4 : 1, pointerEvents: selType === "all" ? "none" : "auto", transition: "opacity .2s" }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7, paddingLeft: 2 }}>
+          {lang === "ar" ? "③ الشهر" : "③ Mois"}
+        </div>
+        <div style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 4 }}>
+          <button className="tbtn" onClick={() => setSelMonth("all")} style={pillStyle(selMonth === "all")}>
+            {lang === "ar" ? "الكل" : "Tous"}
+          </button>
+          {t.months.map((m, i) => (
+            <button key={i} className="tbtn" onClick={() => setSelMonth(String(i + 1))}
+              style={pillStyle(selMonth === String(i + 1), C.forestLt)}>
+              {m}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Compteur + badge filtre actif */}
+      <div style={{ fontSize: 11, color: C.muted, marginBottom: 10, paddingLeft: 2, display: "flex", alignItems: "center", gap: 8 }}>
+        <span>{sorted.length} {lang === "ar" ? "معاملة" : `transaction${sorted.length !== 1 ? "s" : ""}`}</span>
+        {activeLabel && (
+          <span style={{ background: C.mintPale, borderRadius: 6, padding: "2px 9px", border: `1px solid ${C.mintLt}`, color: C.forestLt, fontWeight: 600 }}>
+            {activeLabel}
+          </span>
+        )}
       </div>
 
       {sorted.length === 0 ? <Empty label={t.noTx} /> : sorted.map((tx, i) => <TxRow key={tx.id} tx={tx} onDelete={onDelete} onEdit={onEdit} delay={i * 25} lang={lang} />)}
     </div>
   );
 }
+
 // ─── MEMBERS ──────────────────────────────────────────────────────────────────
+function MemberDetailModal({ member, txs, lang, onClose }) {
+  const t = T[lang];
+  const YEAR = 2026;
+  const MONTHS_FULL = t.monthsFull;
+
+  // Contributions 2026 de ce membre
+  const contribTxs = txs.filter(tx =>
+    tx.memberId === member.id &&
+    tx.type === "contribution" &&
+    new Date(tx.date).getFullYear() === YEAR
+  ).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const total2026 = contribTxs.reduce((a, tx) => a + tx.amount, 0);
+
+  // Cumul par mois
+  const byMonth = {};
+  contribTxs.forEach(tx => {
+    const m = new Date(tx.date).getMonth();
+    byMonth[m] = (byMonth[m] || 0) + tx.amount;
+  });
+  const maxMonth = Math.max(...Object.values(byMonth), 1);
+
+  const [bg] = AVC[0];
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(19,17,28,0.6)", backdropFilter: "blur(14px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ background: C.bg, borderRadius: "26px 26px 0 0", width: "100%", maxWidth: 430, maxHeight: "88vh", overflowY: "auto", padding: "0 20px 44px", animation: "sheet .32s cubic-bezier(.16,1,.3,1)", direction: t.dir }}>
+
+        {/* Handle */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
+          <div style={{ width: 40, height: 4, background: C.sage, borderRadius: 4 }} />
+        </div>
+
+        {/* Header membre */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 13 }}>
+            <div style={{ width: 50, height: 50, borderRadius: 15, background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 17, fontWeight: 700, flexShrink: 0 }}>
+              {inits(member.name)}
+            </div>
+            <div>
+              <div style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>{member.name}</div>
+              {member.phone && <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>{member.phone}</div>}
+            </div>
+          </div>
+          <button onClick={onClose} className="tbtn" style={{ background: C.mintPale, border: `1px solid ${C.mintLt}`, color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, cursor: "pointer" }}>✕</button>
+        </div>
+
+        {/* Carte total 2026 */}
+        <div style={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", borderRadius: 18, padding: "18px 20px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: C.shadowMd }}>
+          <div>
+            <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: 500, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 4 }}>
+              {lang === "ar" ? `إجمالي مساهمات ${YEAR}` : `Total contributions ${YEAR}`}
+            </div>
+            <div style={{ color: "#fff", fontSize: 28, fontWeight: 700, letterSpacing: -1, fontFamily: "'DM Serif Display', serif" }}>
+              {new Intl.NumberFormat("fr-FR").format(total2026)}
+              <span style={{ fontSize: 14, fontWeight: 500, marginLeft: 5, opacity: 0.8 }}>MRU</span>
+            </div>
+          </div>
+          <div style={{ fontSize: 36, opacity: 0.85 }}>🏆</div>
+        </div>
+
+        {/* Détail par mois */}
+        {contribTxs.length > 0 ? (
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 12 }}>
+              {lang === "ar" ? "التفصيل الشهري" : "Détail mensuel"}
+            </div>
+            {Object.entries(byMonth).map(([mIdx, val]) => {
+              const pct = Math.round((val / maxMonth) * 100);
+              return (
+                <div key={mIdx} style={{ marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+                    <span style={{ color: C.text, fontSize: 13, fontWeight: 500 }}>{MONTHS_FULL[Number(mIdx)]}</span>
+                    <span style={{ color: C.forestLt, fontSize: 13, fontWeight: 700 }}>{fmt(val)}</span>
+                  </div>
+                  <div style={{ background: C.mintPale, borderRadius: 6, height: 7, overflow: "hidden" }}>
+                    <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg,#7C3AED,#C084FC)", borderRadius: 6, transition: "width .6s cubic-bezier(.16,1,.3,1)" }} />
+                  </div>
+                </div>
+              );
+            })}
+            {/* Liste transactions */}
+            <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 10, marginTop: 20 }}>
+              {lang === "ar" ? "جميع العمليات" : "Toutes les opérations"}
+            </div>
+            {contribTxs.map(tx => (
+              <div key={tx.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 13px", background: C.card, borderRadius: 12, marginBottom: 8, border: `1px solid ${C.mintLt}` }}>
+                <div>
+                  <div style={{ color: C.text, fontSize: 12, fontWeight: 600 }}>{fmtDt(tx.date, lang)}</div>
+                  {tx.note && <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{tx.note}</div>}
+                </div>
+                <div style={{ color: "#8B5CF6", fontWeight: 700, fontSize: 13 }}>+{fmt(tx.amount)}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: "center", padding: "30px 0", color: C.muted }}>
+            <div style={{ fontSize: 32, marginBottom: 10 }}>💤</div>
+            <div style={{ fontSize: 13 }}>{lang === "ar" ? `لا توجد مساهمات في ${YEAR}` : `Aucune contribution en ${YEAR}`}</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
   const t = T[lang];
   const [confDel, setConfDel] = useState(null);
+  const [detailMember, setDetailMember] = useState(null);
   const [search, setSearch] = useState("");
+  const YEAR = 2026;
+
+  const getTotal2026 = (id) => txs.filter(tx =>
+    tx.memberId === id && tx.type === "contribution" &&
+    new Date(tx.date).getFullYear() === YEAR
+  ).reduce((a, tx) => a + tx.amount, 0);
 
   const filtered = members.filter(m => {
     if (!search.trim()) return true;
@@ -852,8 +1034,10 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
       {filtered.length === 0 && <Empty label={t.noMembers} />}
       {filtered.map((m, i) => {
         const [bg, fg] = AVC[i % AVC.length];
+        const total = getTotal2026(m.id);
         return (
-          <Card key={m.id} className="fin-in" sx={{ padding: "14px 15px", marginBottom: 10, animationDelay: `${i * 55}ms` }}>
+          <Card key={m.id} className="fin-in" sx={{ padding: "14px 15px", marginBottom: 10, animationDelay: `${i * 55}ms`, cursor: "pointer" }}
+            onClick={() => setDetailMember(m)}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
                 <div style={{ width: 46, height: 46, borderRadius: 14, background: bg, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: fg, fontSize: 15, fontWeight: 700 }}>{inits(m.name)}</div>
@@ -862,15 +1046,29 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
                   {m.phone && <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>{m.phone}</div>}
                 </div>
               </div>
-              <button className="tbtn" onClick={() => setConfDel(m)} style={{ background: C.redLt, border: "none", color: C.red, borderRadius: 10, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{Ic.trash(C.red, 14)}</button>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {total > 0 && (
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ color: C.forestLt, fontWeight: 700, fontSize: 12 }}>{fmtSh(total)}</div>
+                    <div style={{ color: C.muted, fontSize: 9, textTransform: "uppercase", letterSpacing: 0.4 }}>{YEAR}</div>
+                  </div>
+                )}
+                <div style={{ color: C.muted, opacity: 0.5 }}>{Ic.fwd(C.muted, 14)}</div>
+                <button className="tbtn" onClick={e => { e.stopPropagation(); setConfDel(m); }}
+                  style={{ background: C.redLt, border: "none", color: C.red, borderRadius: 10, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  {Ic.trash(C.red, 14)}
+                </button>
+              </div>
             </div>
           </Card>
         );
       })}
       {confDel && <Confirm t={t} title={t.delMemberTitle} message={t.delMemberMsg(confDel.name)} onConfirm={() => { onDeleteMember(confDel.id); setConfDel(null); }} onCancel={() => setConfDel(null)} />}
+      {detailMember && <MemberDetailModal member={detailMember} txs={txs} lang={lang} onClose={() => setDetailMember(null)} />}
     </div>
   );
 }
+
 // ─── DONUT CHART ─────────────────────────────────────────────────────────────
 function DonutChart({ contrib, dons, dep, lang, chartReady }) {
   const t = T[lang];
