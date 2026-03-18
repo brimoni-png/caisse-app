@@ -585,6 +585,10 @@ function CaisseLogo() {
 function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, setLang, chartReady }) {
   const t = T[lang];
   const [statModal, setStatModal] = useState(null);
+  const curYear  = new Date().getFullYear();
+  const prevYear = curYear - 1;
+  const txsPrev   = txs.filter(tx => new Date(tx.date).getFullYear() === prevYear);
+  const soldePrev = txsPrev.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
   const solde   = txs.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
   const contrib = txs.filter((tx) => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
   const dons    = txs.filter((tx) => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
@@ -596,14 +600,12 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
     { label: t.stats.don,          value: dons,    accentColor: "#F5C842", sign: "+", type: "don" },
     { label: t.stats.depense,      value: dep,     accentColor: "#FF9E9E", sign: "−", type: "depense" },
   ];
-  const curYear = new Date().getFullYear();
 
   return (
     <div style={{ direction: t.dir }}>
 
-      {/* ── HERO HEADER ─────────────────────────────────────────── */}
-      <div style={{ background: "transparent", padding: "16px 4px 0px", marginLeft: 0, marginRight: 0, marginTop: -20, position: "relative", overflow: "visible" }}>
-        <div style={{ position: "absolute", top: 0, right: 0, width: 0, height: 0, pointerEvents: "none" }} />
+      {/* ── HERO HEADER */}
+      <div style={{ padding: "16px 4px 0px", marginTop: -20, position: "relative" }}>
 
         {/* Logo + greeting + lang switch */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
@@ -617,29 +619,22 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
           <LangSwitch lang={lang} setLang={setLang} />
         </div>
 
-        {/* Balance - Purple card with money bag */}
+        {/* Balance card */}
         <div style={{ background: "linear-gradient(135deg, #C084FC 0%, #A855F7 60%, #9333EA 100%)", borderRadius: 24, padding: "24px 22px 20px", marginBottom: 18, position: "relative", overflow: "hidden" }}>
-          {/* Decorative circles */}
           <div style={{ position: "absolute", top: -20, left: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.1)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", bottom: -30, left: 40, width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.07)", pointerEvents: "none" }} />
-          {/* Money bag SVG on right */}
           <div style={{ position: "absolute", right: -10, bottom: -8, width: 130, height: 130, opacity: 0.92, pointerEvents: "none" }}>
             <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-              {/* Coins stack */}
               <ellipse cx="55" cy="165" rx="22" ry="7" fill="#F5C842" opacity="0.9"/>
               <ellipse cx="55" cy="158" rx="22" ry="7" fill="#E8A838"/>
               <ellipse cx="55" cy="151" rx="22" ry="7" fill="#F5C842" opacity="0.9"/>
               <ellipse cx="55" cy="144" rx="22" ry="7" fill="#E8A838"/>
               <ellipse cx="42" cy="170" rx="14" ry="5" fill="#F5C842" opacity="0.8"/>
               <ellipse cx="42" cy="165" rx="14" ry="5" fill="#E8A838"/>
-              {/* Money bag */}
               <ellipse cx="120" cy="130" rx="52" ry="55" fill="#C084FC"/>
               <ellipse cx="120" cy="130" rx="52" ry="55" fill="url(#bagGrad)"/>
-              {/* Bag neck */}
               <rect x="105" y="68" width="30" height="22" rx="8" fill="#7C3AED"/>
-              {/* Bag top knot */}
               <ellipse cx="120" cy="66" rx="18" ry="10" fill="#6D28D9"/>
-              {/* Dollar sign */}
               <text x="120" y="140" textAnchor="middle" fontSize="38" fontWeight="bold" fill="white" opacity="0.9">$</text>
               <defs>
                 <radialGradient id="bagGrad" cx="40%" cy="35%">
@@ -658,7 +653,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
           </div>
         </div>
 
-        {/* 3 STATS CARDS */}
+        {/* Modal détail stat */}
         {statModal && (
           <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(19,17,28,0.55)", backdropFilter: "blur(12px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
             onClick={() => setStatModal(null)}>
@@ -667,7 +662,6 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
               <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
                 <div style={{ width: 40, height: 4, background: "#DEDAE8", borderRadius: 4 }} />
               </div>
-              {/* Title */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, marginTop: 8 }}>
                 <div>
                   <div style={{ color: C.text, fontWeight: 700, fontSize: 18 }}>{statModal.label}</div>
@@ -677,17 +671,15 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
                   <span style={{ color: "#8B5CF6", fontSize: 20, fontWeight: 700 }}>{statModal.sign}{fmt(statModal.value)}</span>
                 </div>
               </div>
-              {/* Monthly breakdown */}
               <div style={{ marginBottom: 8 }}>
                 {Array.from({ length: 12 }, (_, i) => {
                   const monthVal = txs.filter(tx => tx.type === statModal.type && new Date(tx.date).getFullYear() === curYear && new Date(tx.date).getMonth() === i).reduce((a, tx) => a + tx.amount, 0);
                   const maxVal = Math.max(...Array.from({ length: 12 }, (_, j) => txs.filter(tx => tx.type === statModal.type && new Date(tx.date).getFullYear() === curYear && new Date(tx.date).getMonth() === j).reduce((a, tx) => a + tx.amount, 0)), 1);
                   const pct = Math.min(100, (monthVal / maxVal) * 100);
-                  const months = t.months;
                   if (monthVal === 0) return null;
                   return (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                      <div style={{ width: 32, color: C.muted, fontSize: 11, fontWeight: 500, flexShrink: 0 }}>{months[i]}</div>
+                      <div style={{ width: 32, color: C.muted, fontSize: 11, fontWeight: 500, flexShrink: 0 }}>{t.months[i]}</div>
                       <div style={{ flex: 1, background: "#EDEDF5", borderRadius: 6, height: 8, overflow: "hidden" }}>
                         <div style={{ width: `${pct}%`, height: "100%", background: statModal.type === "depense" ? "#EF4444" : statModal.type === "don" ? "#DB2777" : "#8B5CF6", borderRadius: 6, transition: "width .6s" }} />
                       </div>
@@ -702,62 +694,71 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             </div>
           </div>
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 4 }}>
+
+        {/* 4 CARTES STATS (2x2) */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 4 }}>
           {/* Contributions */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[0])}
-            style={{ background: C.card, border: "1.5px solid #EDEDF5", borderRadius: 18, padding: "16px 10px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: "0 2px 12px rgba(91,33,182,0.06)", transition: "all .2s" }}>
+            style={{ background: C.card, border: "1.5px solid #EDEDF5", borderRadius: 18, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: "0 2px 12px rgba(91,33,182,0.06)", transition: "all .2s" }}>
             <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(139,92,246,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
             </div>
             <div>
               <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.contribution}</div>
-              <div style={{ color: "#8B5CF6", fontSize: 14, fontWeight: 700, letterSpacing: -0.3 }}>+{fmtSh(contrib)}</div>
+              <div style={{ color: "#8B5CF6", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>+{fmtSh(contrib)}</div>
             </div>
           </button>
           {/* Dons */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[1])}
-            style={{ background: C.card, border: "1.5px solid #F0C0D8", borderRadius: 18, padding: "16px 10px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: "0 2px 16px rgba(219,39,119,0.08)", transition: "all .2s" }}>
+            style={{ background: C.card, border: "1.5px solid #F0C0D8", borderRadius: 18, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: "0 2px 16px rgba(219,39,119,0.08)", transition: "all .2s" }}>
             <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(219,39,119,0.07)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DB2777" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
             </div>
             <div>
               <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.don}</div>
-              <div style={{ color: "#DB2777", fontSize: 14, fontWeight: 700, letterSpacing: -0.3 }}>+{fmtSh(dons)}</div>
+              <div style={{ color: "#DB2777", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>+{fmtSh(dons)}</div>
             </div>
           </button>
           {/* Dépenses */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[2])}
-            style={{ background: C.card, border: "1.5px solid #EDEDF5", borderRadius: 18, padding: "16px 10px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: "0 2px 12px rgba(91,33,182,0.06)", transition: "all .2s" }}>
+            style={{ background: C.card, border: "1.5px solid #EDEDF5", borderRadius: 18, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: "0 2px 12px rgba(91,33,182,0.06)", transition: "all .2s" }}>
             <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(91,33,182,0.07)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B21B6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
             </div>
             <div>
               <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.depense}</div>
-              <div style={{ color: "#5B21B6", fontSize: 14, fontWeight: 700, letterSpacing: -0.3 }}>-{fmtSh(dep)}</div>
+              <div style={{ color: "#5B21B6", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>-{fmtSh(dep)}</div>
             </div>
           </button>
+          {/* Solde année passée */}
+          <div style={{ background: soldePrev >= 0 ? "linear-gradient(135deg,rgba(124,58,237,0.07),rgba(196,181,253,0.14))" : "rgba(254,226,226,0.6)", border: `1.5px solid ${soldePrev >= 0 ? "#EDE9FE" : "#FECACA"}`, borderRadius: 18, padding: "16px 14px 14px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 10, background: soldePrev >= 0 ? "rgba(124,58,237,0.08)" : "rgba(239,68,68,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={soldePrev >= 0 ? "#7C3AED" : "#EF4444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+            </div>
+            <div>
+              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}</div>
+              <div style={{ color: soldePrev >= 0 ? "#7C3AED" : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>{soldePrev >= 0 ? "+" : ""}{fmtSh(soldePrev)}</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── BODY ───────────────────────────────────────────────── */}
+      {/* ── BODY */}
       <div style={{ padding: "22px 0" }}>
 
-        {/* 3 CATEGORIES SEULEMENT */}
+        {/* Actions rapides */}
         <div className="a2" style={{ marginBottom: 22 }}>
           <SHdr title={t.categories} dir={t.dir} />
           <CatPills onAdd={onAdd} lang={lang} />
         </div>
 
-        {/* Chart */}
-        <div className="a4"><FinChart txs={txs} lang={lang} chartReady={chartReady} /></div>
-
-        {/* Recent transactions */}
+        {/* Transactions récentes */}
         <div className="a5">
           <SHdr title={t.recentTx} badge={`${recent.length}`} action={{ label: t.seeAll, fn: () => onTabChange("ops") }} dir={t.dir} />
           {recent.length === 0 ? <Empty label={t.noTx} /> : recent.map((tx, i) => <TxRow key={tx.id} tx={tx} onDelete={onDelete} onEdit={onEdit} delay={i * 40} lang={lang} />)}
         </div>
 
-        {/* Members preview */}
+        {/* Aperçu membres */}
         <div className="a6">
           <Card sx={{ padding: "16px", marginTop: 6 }}>
             <SHdr title={t.activeMembers} badge={`${members.length}`} dir={t.dir} />
@@ -830,17 +831,26 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
 function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
   const t = T[lang];
   const [confDel, setConfDel] = useState(null);
+  const [search, setSearch] = useState("");
+
+  const filtered = members.filter(m => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return m.name?.toLowerCase().includes(q) || m.phone?.includes(q);
+  });
 
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
       <PBtn onClick={onAddMember} sx={{ marginBottom: 14 }}>
         <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>{Ic.plus()} {t.addMember}</span>
       </PBtn>
+      <SearchBar value={search} onChange={setSearch} placeholder={lang === "ar" ? "بحث في الأعضاء..." : "Rechercher un membre…"} dir={t.dir} />
       <div style={{ fontSize: 11, color: C.muted, marginBottom: 12, paddingLeft: 2 }}>
-        {members.length} {lang === "ar" ? "عضو" : `membre${members.length !== 1 ? "s" : ""}`}
+        {filtered.length} {lang === "ar" ? "عضو" : `membre${filtered.length !== 1 ? "s" : ""}`}
+        {search && filtered.length !== members.length && <span style={{ marginLeft: 6, color: C.forestLt, fontWeight: 600 }}>/ {members.length} total</span>}
       </div>
-      {members.length === 0 && <Empty label={t.noMembers} />}
-      {members.map((m, i) => {
+      {filtered.length === 0 && <Empty label={t.noMembers} />}
+      {filtered.map((m, i) => {
         const [bg, fg] = AVC[i % AVC.length];
         return (
           <Card key={m.id} className="fin-in" sx={{ padding: "14px 15px", marginBottom: 10, animationDelay: `${i * 55}ms` }}>
@@ -966,7 +976,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
 
   const all = txs.filter((tx) => { const d = new Date(tx.date); return d.getMonth() + 1 === month && d.getFullYear() === year; });
 
-  const YEAR_STATS = 2026;
+  const YEAR_STATS = year;  // Suit l'année sélectionnée
   const txs2026 = txs.filter(tx => new Date(tx.date).getFullYear() === YEAR_STATS);
   const yC = txs2026.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
   const yD = txs2026.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
