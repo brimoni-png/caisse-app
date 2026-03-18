@@ -1474,13 +1474,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
         ))}
       </div>
 
-      {/* Solde net 2026 */}
-      <div style={{ background: yB >= 0 ? "linear-gradient(135deg,#7C3AED,#A855F7)" : "linear-gradient(135deg,#EF4444,#F87171)", borderRadius: 16, padding: "14px 18px", marginBottom: 18, display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: C.shadowMd }}>
-        <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: 500, letterSpacing: 0.8, textTransform: "uppercase" }}>{lang === "ar" ? `صافي ${YEAR_STATS}` : `Solde net ${YEAR_STATS}`}</div>
-        <div style={{ color: "#fff", fontSize: 20, fontWeight: 700, letterSpacing: -0.8, fontFamily: "'DM Serif Display', serif" }}>{yB >= 0 ? "+" : "−"}{new Intl.NumberFormat("fr-FR").format(Math.abs(yB))} MRU</div>
-      </div>
-
-      {/* DONUT + TOP 5 + LINE CHART (données 2026) */}
+      {/* DONUT + TOP 5 + LINE CHART (données année sélectionnée) */}
       <DonutChart contrib={yC} dons={yD} dep={yE} lang={lang} chartReady={chartReady} />
       <TopMembers members={members} txs={txs2026} lang={lang} />
       <FinChart txs={txs2026} lang={lang} chartReady={chartReady} />
