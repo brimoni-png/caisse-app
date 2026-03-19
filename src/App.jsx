@@ -125,7 +125,7 @@ const Ic = {
 const T = {
   fr: {
     dir: "ltr", font: "'DM Sans', sans-serif",
-    greeting: "Trésorier", userName: "Cheikh Brahim", subtitle: "Caisse communautaire",
+    greeting: "Resp-Caisse", userName: "Cheikh Brahim", subtitle: "Caisse communautaire",
     balanceGlobal: "Solde Global",
     stats: { contribution: "Contributions", don: "Dons", depense: "Dépenses" },
     activity: "Activité financière", recentTx: "Transactions récentes", seeAll: "Voir tout →",
@@ -156,7 +156,7 @@ const T = {
   },
   ar: {
     dir: "rtl", font: "'DM Sans', sans-serif",
-    greeting: "أمين الصندوق", userName: "الشيخ إبراهيم", subtitle: "صندوق تعاوني",
+    greeting: "مسؤول الصندوق", userName: "الشيخ إبراهيم", subtitle: "صندوق تعاوني",
     balanceGlobal: "الرصيد الإجمالي",
     stats: { contribution: "المساهمات", don: "التبرعات", depense: "المصروفات" },
     activity: "النشاط المالي", recentTx: "آخر المعاملات", seeAll: "عرض الكل ←",
@@ -589,11 +589,19 @@ function CaisseLogo() {
 function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, setLang, chartReady }) {
   const t = T[lang];
   const [statModal, setStatModal] = useState(null);
+  const [editPrevModal, setEditPrevModal] = useState(false);
+  const [editPrevVal,   setEditPrevVal]   = useState("");
   const curYear  = new Date().getFullYear();
   const prevYear = curYear - 1;
-  const txsPrev   = txs.filter(tx => new Date(tx.date).getFullYear() === prevYear);
-  const soldePrev = txsPrev.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
-  const solde   = txs.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
+  const txsPrev      = txs.filter(tx => new Date(tx.date).getFullYear() === prevYear);
+  const soldePrevAuto = txsPrev.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
+  const [soldePrevManual, setSoldePrevManual] = usePersisted(`cc_soldeprev_${prevYear}`, null);
+  const soldePrev = soldePrevManual !== null ? Number(soldePrevManual) : soldePrevAuto;
+  // Solde global = transactions + solde année passée manuel (si modifié)
+  const soldeAuto = txs.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
+  const solde = soldePrevManual !== null
+    ? soldeAuto - soldePrevAuto + Number(soldePrevManual)
+    : soldeAuto;
   const contrib = txs.filter((tx) => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
   const dons    = txs.filter((tx) => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
   const dep     = txs.filter((tx) => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
@@ -717,17 +725,64 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
               <div style={{ color: "#e05252", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>-{fmt(dep)}</div>
             </div>
           </button>
-          {/* Solde année passée */}
-          <div style={{ background: soldePrev >= 0 ? "linear-gradient(135deg,rgba(124,58,237,0.07),rgba(196,181,253,0.14))" : "rgba(254,226,226,0.6)", border: `1.5px solid ${soldePrev >= 0 ? "#EDE9FE" : "#FECACA"}`, borderRadius: 18, padding: "16px 14px 14px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 10, background: soldePrev >= 0 ? "rgba(124,58,237,0.08)" : "rgba(239,68,68,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={soldePrev >= 0 ? "#7C3AED" : "#EF4444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+          {/* Solde année passée — cliquable */}
+          <button className="tbtn" onClick={() => { setEditPrevVal(String(soldePrev)); setEditPrevModal(true); }}
+            style={{ background: soldePrev >= 0 ? "linear-gradient(135deg,rgba(45,156,143,0.08),rgba(45,156,143,0.15))" : "rgba(254,226,226,0.6)", border: `1.5px solid ${soldePrev >= 0 ? "rgba(45,156,143,0.3)" : "#FECACA"}`, borderRadius: 18, padding: "16px 14px 14px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, cursor: "pointer", width: "100%" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: soldePrev >= 0 ? "rgba(45,156,143,0.12)" : "rgba(239,68,68,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={soldePrev >= 0 ? "#2d9c8f" : "#EF4444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+              </div>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.sub} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6, marginTop: 2 }}><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </div>
             <div>
-              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}</div>
-              <div style={{ color: soldePrev >= 0 ? "#7C3AED" : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>{soldePrev >= 0 ? "+" : ""}{fmt(Math.abs(soldePrev))}</div>
+              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>
+                {lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}
+              </div>
+              <div style={{ color: soldePrev >= 0 ? "#2d9c8f" : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>
+                {soldePrev >= 0 ? "+" : ""}{fmt(Math.abs(soldePrev))}
+              </div>
+              {soldePrevManual !== null && <div style={{ fontSize: 8, color: C.sub, marginTop: 2 }}>✏️ {lang === "ar" ? "معدّل" : "modifié"}</div>}
+            </div>
+          </button>
+        </div>
+
+        {/* ── Modal édition Solde année passée ── */}
+        {editPrevModal && (
+          <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(26,43,46,0.6)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
+            onClick={e => e.target === e.currentTarget && setEditPrevModal(false)}>
+            <div style={{ background: C.card, borderRadius: 22, padding: "26px 22px", width: "100%", maxWidth: 320, boxShadow: C.shadowLg, animation: "pop .2s ease both", border: `1px solid ${C.mintLt}` }}>
+              <div style={{ textAlign: "center", marginBottom: 18 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: C.mintLt, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.forestLt} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <div style={{ color: C.text, fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
+                  {lang === "ar" ? `تعديل رصيد ${prevYear}` : `Modifier le solde ${prevYear}`}
+                </div>
+                <div style={{ color: C.muted, fontSize: 12 }}>{lang === "ar" ? "سيُضاف إلى الرصيد الإجمالي" : "Sera ajouté au solde global"}</div>
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7 }}>{lang === "ar" ? `رصيد ${prevYear} (MRU)` : `Solde ${prevYear} (MRU)`}</div>
+                <input type="number" value={editPrevVal} onChange={e => setEditPrevVal(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") { setSoldePrevManual(Number(editPrevVal)); setEditPrevModal(false); } }}
+                  placeholder="0" autoFocus
+                  style={{ width: "100%", background: C.mintLt, border: `1.5px solid ${C.mintLt}`, borderRadius: 12, padding: "12px 14px", fontSize: 18, color: C.text, outline: "none", fontFamily: "inherit", textAlign: "center", fontWeight: 700, transition: "border-color .2s" }}
+                  onFocus={e => e.target.style.borderColor = C.forestLt}
+                  onBlur={e => e.target.style.borderColor = C.mintLt}
+                />
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button className="tbtn" onClick={() => { setSoldePrevManual(null); setEditPrevModal(false); }}
+                  style={{ flex: 1, background: C.mintLt, border: "none", borderRadius: 12, padding: "11px", fontSize: 12, fontWeight: 600, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>
+                  {lang === "ar" ? "إعادة ضبط" : "Réinitialiser"}
+                </button>
+                <button className="tbtn" onClick={() => { setSoldePrevManual(Number(editPrevVal)); setEditPrevModal(false); }}
+                  style={{ flex: 2, background: C.forestLt, border: "none", borderRadius: 12, padding: "11px", fontSize: 13, fontWeight: 700, color: "#fff", cursor: "pointer", fontFamily: "inherit", boxShadow: `0 4px 14px rgba(45,156,143,0.35)` }}>
+                  {lang === "ar" ? "حفظ" : "Enregistrer"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── BODY */}
@@ -769,16 +824,14 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
   const t = T[lang];
   const allYears = getYrs(txs).filter(y => y !== 2025);
-  const [selYear,  setSelYear]  = useState("all");
-  const [selType,  setSelType]  = useState("all");
-  const [selMonth, setSelMonth] = useState("all");
+  const [selYear, setSelYear] = useState("all");
+  const [selType, setSelType] = useState("all");
 
   const sorted = [...txs]
     .filter(tx => {
       const d = new Date(tx.date);
-      if (selYear  !== "all" && d.getFullYear()   !== Number(selYear))  return false;
-      if (selType  !== "all" && tx.type           !== selType)           return false;
-      if (selMonth !== "all" && d.getMonth() + 1  !== Number(selMonth)) return false;
+      if (selYear !== "all" && d.getFullYear() !== Number(selYear)) return false;
+      if (selType !== "all" && tx.type         !== selType)          return false;
       return true;
     })
     .sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -792,18 +845,9 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
     boxShadow: C.shadow, transition: "all .18s",
   });
 
-  const selStyle = {
-    width: "100%", background: "#fff", border: `1.5px solid ${C.mintLt}`,
-    borderRadius: 12, padding: "10px 30px 10px 13px", color: C.text,
-    fontSize: 13, outline: "none", fontFamily: "inherit",
-    appearance: "none", cursor: "pointer", boxShadow: C.shadow,
-  };
-
-  // Libellé du filtre actif
   const activeLabel = [
-    selYear  !== "all" ? selYear  : null,
-    selType  !== "all" ? CFG(lang)[selType]?.label : null,
-    selMonth !== "all" ? t.months[Number(selMonth) - 1] : null,
+    selYear !== "all" ? selYear : null,
+    selType !== "all" ? CFG(lang)[selType]?.label : null,
   ].filter(Boolean).join(" · ");
 
   return (
@@ -816,11 +860,11 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
           {lang === "ar" ? "① السنة" : "① Année"}
         </div>
         <div style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 4 }}>
-          <button className="tbtn" onClick={() => { setSelYear("all"); setSelType("all"); setSelMonth("all"); }} style={pillStyle(selYear === "all")}>
+          <button className="tbtn" onClick={() => { setSelYear("all"); setSelType("all"); }} style={pillStyle(selYear === "all")}>
             {lang === "ar" ? "الكل" : "Toutes"}
           </button>
           {allYears.map(y => (
-            <button key={y} className="tbtn" onClick={() => { setSelYear(String(y)); setSelType("all"); setSelMonth("all"); }}
+            <button key={y} className="tbtn" onClick={() => { setSelYear(String(y)); setSelType("all"); }}
               style={pillStyle(selYear === String(y), C.forestLt)}>
               {y}
             </button>
@@ -828,19 +872,19 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
         </div>
       </div>
 
-      {/* ─ ÉTAPE 2 : Type (activé seulement si année sélectionnée) ─ */}
-      <div style={{ marginBottom: 10, opacity: selYear === "all" ? 0.4 : 1, pointerEvents: selYear === "all" ? "none" : "auto", transition: "opacity .2s" }}>
+      {/* ─ ÉTAPE 2 : Type ─ */}
+      <div style={{ marginBottom: 14, opacity: selYear === "all" ? 0.4 : 1, pointerEvents: selYear === "all" ? "none" : "auto", transition: "opacity .2s" }}>
         <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7, paddingLeft: 2 }}>
           {lang === "ar" ? "② نوع العملية" : "② Type"}
         </div>
         <div style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 4 }}>
-          <button className="tbtn" onClick={() => { setSelType("all"); setSelMonth("all"); }} style={pillStyle(selType === "all")}>
+          <button className="tbtn" onClick={() => setSelType("all")} style={pillStyle(selType === "all")}>
             {lang === "ar" ? "الكل" : "Tous"}
           </button>
           {["contribution", "don", "depense"].map(tp => {
             const cfg = CFG(lang)[tp];
             return (
-              <button key={tp} className="tbtn" onClick={() => { setSelType(tp); setSelMonth("all"); }}
+              <button key={tp} className="tbtn" onClick={() => setSelType(tp)}
                 style={pillStyle(selType === tp, cfg.color)}>
                 {cfg.label}
               </button>
@@ -849,25 +893,7 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
         </div>
       </div>
 
-      {/* ─ ÉTAPE 3 : Mois (activé seulement si type sélectionné) ─ */}
-      <div style={{ marginBottom: 14, opacity: selType === "all" ? 0.4 : 1, pointerEvents: selType === "all" ? "none" : "auto", transition: "opacity .2s" }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7, paddingLeft: 2 }}>
-          {lang === "ar" ? "③ الشهر" : "③ Mois"}
-        </div>
-        <div style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 4 }}>
-          <button className="tbtn" onClick={() => setSelMonth("all")} style={pillStyle(selMonth === "all")}>
-            {lang === "ar" ? "الكل" : "Tous"}
-          </button>
-          {t.months.map((m, i) => (
-            <button key={i} className="tbtn" onClick={() => setSelMonth(String(i + 1))}
-              style={pillStyle(selMonth === String(i + 1), C.forestLt)}>
-              {m}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Compteur + badge filtre actif */}
+      {/* Compteur + badge */}
       <div style={{ fontSize: 11, color: C.muted, marginBottom: 10, paddingLeft: 2, display: "flex", alignItems: "center", gap: 8 }}>
         <span>{sorted.length} {lang === "ar" ? "معاملة" : `transaction${sorted.length !== 1 ? "s" : ""}`}</span>
         {activeLabel && (
@@ -1648,11 +1674,14 @@ function LoginScreen({ onLogin }) {
   const [shake, setShake] = useState(false);
   const [nameFocus, setNameFocus] = useState(false);
   const [pinFocus, setPinFocus] = useState(false);
+  const [loginLang, setLoginLang] = usePersisted("cc5_lang", "fr");
+
+  const isAr = loginLang === "ar";
 
   const handleLogin = () => {
-    if (!name.trim()) { setError("Veuillez saisir votre nom."); return; }
+    if (!name.trim()) { setError(isAr ? "يرجى إدخال اسمك" : "Veuillez saisir votre nom."); return; }
     if (pin !== VALID_PIN) {
-      setError("Code PIN incorrect.");
+      setError(isAr ? "رمز PIN غير صحيح" : "Code PIN incorrect.");
       setShake(true);
       setPin("");
       setTimeout(() => setShake(false), 500);
@@ -1691,7 +1720,7 @@ function LoginScreen({ onLogin }) {
       <div style={{ position:"absolute", bottom:60, left:-30, width:110, height:110, borderRadius:"50%", background:"rgba(32,178,170,0.10)", pointerEvents:"none" }} />
 
       {/* Conteneur centré avec largeur max réduite */}
-      <div style={{ position:"relative", zIndex:1, width:"100%", maxWidth: 320, display:"flex", flexDirection:"column", alignItems:"center" }}>
+      <div style={{ position:"relative", zIndex:1, width:"100%", maxWidth: 320, display:"flex", flexDirection:"column", alignItems:"center", direction: isAr ? "rtl" : "ltr" }}>
 
         {/* ── LOGO CAISSE ── */}
         <div className="l-logo" style={{ marginBottom: 12 }}>
@@ -1715,6 +1744,16 @@ function LoginScreen({ onLogin }) {
           </div>
         </div>
 
+        {/* ── Sélecteur langue ── */}
+        <div style={{ position: "absolute", top: 0, right: 0, display: "flex", background: "rgba(255,255,255,0.12)", borderRadius: 20, padding: 3, gap: 2, border: "1px solid rgba(255,255,255,0.2)" }}>
+          {["fr", "ar"].map(l => (
+            <button key={l} className="tbtn" onClick={() => setLoginLang(l)}
+              style={{ background: loginLang === l ? "rgba(255,255,255,0.25)" : "transparent", border: "none", borderRadius: 16, color: "#fff", fontWeight: 700, fontSize: 11, padding: "5px 12px", cursor: "pointer", fontFamily: "inherit", transition: "all .18s" }}>
+              {l === "fr" ? "FR" : "ع"}
+            </button>
+          ))}
+        </div>
+
         {/* ── TITRE ── */}
         <div className="l-title" style={{ textAlign: "center", marginBottom: 18 }}>
           <div style={{
@@ -1723,11 +1762,12 @@ function LoginScreen({ onLogin }) {
             color: "#ffffff",
             textShadow: "0 2px 10px rgba(0,0,0,0.3)",
             marginBottom: 5,
+            direction: isAr ? "rtl" : "ltr",
           }}>
-            Caisse EL CHEBAB
+            {isAr ? "صندوق الشباب" : "Caisse EL CHEBAB"}
           </div>
           <div style={{ fontSize: 12, color: "rgba(178,237,233,0.80)", fontWeight: 400, letterSpacing: 0.2 }}>
-            Connectez-vous pour continuer
+            {isAr ? "سجّل دخولك للمتابعة" : "Connectez-vous pour continuer"}
           </div>
         </div>
 
@@ -1745,7 +1785,7 @@ function LoginScreen({ onLogin }) {
 
           {/* Champ NOM */}
           <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(178,237,233,0.85)", letterSpacing: 1.6, textTransform: "uppercase", marginBottom: 5 }}>NOM</div>
+            <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(178,237,233,0.85)", letterSpacing: 1.6, textTransform: "uppercase", marginBottom: 5 }}>{isAr ? "الاسم" : "NOM"}</div>
             <input
               className="l-inp"
               value={name}
@@ -1753,7 +1793,7 @@ function LoginScreen({ onLogin }) {
               onFocus={() => setNameFocus(true)}
               onBlur={() => setNameFocus(false)}
               onKeyDown={e => e.key === "Enter" && handleLogin()}
-              placeholder="Votre nom..."
+              placeholder={isAr ? "اسمك..." : "Votre nom..."}
               style={{
                 width: "100%",
                 background: nameFocus ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)",
@@ -1767,7 +1807,7 @@ function LoginScreen({ onLogin }) {
 
           {/* Champ CODE PIN */}
           <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(178,237,233,0.85)", letterSpacing: 1.6, textTransform: "uppercase", marginBottom: 5 }}>CODE PIN</div>
+            <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(178,237,233,0.85)", letterSpacing: 1.6, textTransform: "uppercase", marginBottom: 5 }}>{isAr ? "رمز PIN" : "CODE PIN"}</div>
             <input
               className="l-inp"
               value={pin}
@@ -1810,7 +1850,7 @@ function LoginScreen({ onLogin }) {
               boxShadow: "0 5px 18px rgba(32,178,170,0.48), inset 0 1px 0 rgba(255,255,255,0.15)",
               letterSpacing: 0.3, transition: "all .18s",
             }}>
-            Se connecter
+            {isAr ? "تسجيل الدخول" : "Se connecter"}
           </button>
         </div>
       </div>
