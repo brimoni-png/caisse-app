@@ -57,13 +57,13 @@ const C = {
   shadowLg:  "0 16px 48px rgba(26,43,46,0.16)",
 };
 
-const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Nunito+Sans:wght@300;400;500;600&display=swap');`;
+const FONTS = ``;
 
 const G = `
   ${FONTS}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html,body{height:100%;overscroll-behavior:none;}
-  body{background:#f0f4f5;-webkit-font-smoothing:antialiased;font-family:'Nunito Sans',sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;font-size:15px;}
+  body{background:#f0f4f5;-webkit-font-smoothing:antialiased;font-family:'Times New Roman','Times',serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;font-size:15px;}
   #root{height:100%;display:flex;justify-content:center;background:#f0f4f5;}
   ::-webkit-scrollbar{width:2px;}
   ::-webkit-scrollbar-thumb{background:${C.sage};border-radius:4px;}
@@ -91,7 +91,7 @@ const G = `
   .eco-btn:hover{filter:brightness(1.06);}
   input,select{color-scheme:light;}
   input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
-  button{font-family:'Nunito Sans',sans-serif;}
+  button{font-family:'Times New Roman','Times',serif;}
 `;
 
 // ─── ICONS ────────────────────────────────────────────────────────────────────
@@ -124,7 +124,7 @@ const Ic = {
 // ─── TRANSLATIONS ─────────────────────────────────────────────────────────────
 const T = {
   fr: {
-    dir: "ltr", font: "'DM Sans', sans-serif",
+    dir: "ltr", font: "'Times New Roman','Times',serif",
     greeting: "Resp-Caisse", userName: "Cheikh Brahim", subtitle: "Caisse communautaire",
     balanceGlobal: "Solde Global",
     stats: { contribution: "Contributions", don: "Dons", depense: "Dépenses" },
@@ -155,7 +155,7 @@ const T = {
     categories: "Actions rapides", apercu: "Aperçu du mois",
   },
   ar: {
-    dir: "rtl", font: "'DM Sans', sans-serif",
+    dir: "rtl", font: "'Times New Roman','Times',serif",
     greeting: "مسؤول الصندوق", userName: "الشيخ إبراهيم", subtitle: "صندوق تعاوني",
     balanceGlobal: "الرصيد الإجمالي",
     stats: { contribution: "المساهمات", don: "التبرعات", depense: "المصروفات" },
@@ -533,12 +533,12 @@ function FinChart({ txs, lang, chartReady }) {
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
-          legend: { display: true, position: "bottom", labels: { boxWidth: 9, usePointStyle: true, pointStyle: "circle", color: C.muted, font: { size: 10, family: "DM Sans" } } },
+          legend: { display: true, position: "bottom", labels: { boxWidth: 9, usePointStyle: true, pointStyle: "circle", color: C.muted, font: { size: 10, family: "Times New Roman" } } },
           tooltip: { backgroundColor: C.card, titleColor: C.text, bodyColor: C.muted, borderColor: C.mintLt, borderWidth: 1, padding: 10, cornerRadius: 10 },
         },
         scales: {
-          x: { grid: { display: false }, ticks: { color: C.sub, font: { size: 9, family: "DM Sans" } }, border: { display: false } },
-          y: { grid: { color: C.mintLt }, ticks: { color: C.sub, font: { size: 9, family: "DM Sans" }, callback: (v) => `${(v / 1000).toFixed(0)}k` }, border: { display: false } },
+          x: { grid: { display: false }, ticks: { color: C.sub, font: { size: 9, family: "Times New Roman" } }, border: { display: false } },
+          y: { grid: { color: C.mintLt }, ticks: { color: C.sub, font: { size: 9, family: "Times New Roman" }, callback: (v) => `${(v / 1000).toFixed(0)}k` }, border: { display: false } },
         },
       },
     });
@@ -1116,12 +1116,12 @@ function DonutChart({ contrib, dons, dep, lang, chartReady }) {
         scales: {
           x: {
             grid: { display: false },
-            ticks: { color: "#6B5E8A", font: { size: 11, family: "DM Sans", weight: "600" } },
+            ticks: { color: "#6B5E8A", font: { size: 11, family: "Times New Roman", weight: "600" } },
             border: { display: false },
           },
           y: {
             grid: { color: "#EDE9FE" },
-            ticks: { color: "#9D8BC0", font: { size: 9, family: "DM Sans" }, callback: v => v >= 1000 ? (v/1000).toFixed(0)+"k" : v },
+            ticks: { color: "#9D8BC0", font: { size: 9, family: "Times New Roman" }, callback: v => v >= 1000 ? (v/1000).toFixed(0)+"k" : v },
             border: { display: false },
           },
         },
@@ -1183,6 +1183,502 @@ function TopMembers({ members, txs, lang }) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ─── PDF REPORT MODAL ─────────────────────────────────────────────────────────
+function PdfReportModal({ txs, members, onClose, year }) {
+  const MONTHS_AR = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  const today = new Date();
+  const todayStr = today.toLocaleDateString("ar-MA", { year: "numeric", month: "long", day: "numeric" });
+
+  const txsY = txs.filter(tx => new Date(tx.date).getFullYear() === year);
+  const contribs = txsY.filter(tx => tx.type === "contribution");
+  const dons     = txsY.filter(tx => tx.type === "don");
+  const depenses = txsY.filter(tx => tx.type === "depense");
+
+  const totalC = contribs.reduce((a, tx) => a + tx.amount, 0);
+  const totalD = dons.reduce((a, tx)     => a + tx.amount, 0);
+  const totalE = depenses.reduce((a, tx) => a + tx.amount, 0);
+  const solde  = totalC + totalD - totalE;
+
+  // Bar chart SVG helper
+  const BAR_W = 560, BAR_H = 160, BAR_PAD = 50;
+  const byMonth = Array.from({ length: 12 }, (_, i) => {
+    const c = contribs.filter(tx => new Date(tx.date).getMonth() === i).reduce((a, tx) => a + tx.amount, 0);
+    const d = dons.filter(tx => new Date(tx.date).getMonth() === i).reduce((a, tx) => a + tx.amount, 0);
+    const e = depenses.filter(tx => new Date(tx.date).getMonth() === i).reduce((a, tx) => a + tx.amount, 0);
+    return { c, d, e, net: c + d - e };
+  });
+  const maxVal = Math.max(...byMonth.map(m => Math.max(m.c + m.d, m.e)), 1);
+  const barW = (BAR_W - BAR_PAD * 2) / 12;
+  const toH = v => Math.round((v / maxVal) * (BAR_H - 20));
+  const fmtAR = n => new Intl.NumberFormat("ar-MA").format(Math.round(n));
+
+  // Pie chart SVG
+  const pieTotal = totalC + totalD + totalE;
+  function pieSlice(val, total, startAngle, color) {
+    if (total === 0) return null;
+    const pct = val / total;
+    const angle = pct * 2 * Math.PI;
+    const endAngle = startAngle + angle;
+    const cx = 80, cy = 80, r = 72;
+    const x1 = cx + r * Math.cos(startAngle - Math.PI / 2);
+    const y1 = cy + r * Math.sin(startAngle - Math.PI / 2);
+    const x2 = cx + r * Math.cos(endAngle - Math.PI / 2);
+    const y2 = cy + r * Math.sin(endAngle - Math.PI / 2);
+    const large = angle > Math.PI ? 1 : 0;
+    if (pct < 0.001) return null;
+    return `<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${color}" opacity="0.9"/>`;
+  }
+  let sa = 0;
+  const pieC = pieSlice(totalC, pieTotal, sa, "#2d9c8f"); sa += (totalC / (pieTotal || 1)) * 2 * Math.PI;
+  const pieD = pieSlice(totalD, pieTotal, sa, "#20b2aa"); sa += (totalD / (pieTotal || 1)) * 2 * Math.PI;
+  const pieE = pieSlice(totalE, pieTotal, sa, "#e05252");
+
+  // Top 5 members
+  const topMembers = members
+    .map(m => ({ ...m, total: contribs.filter(tx => tx.memberId === m.id).reduce((a, tx) => a + tx.amount, 0) }))
+    .filter(m => m.total > 0)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
+  const maxMem = topMembers[0]?.total || 1;
+
+  // Sort all txs by date desc
+  const allTxsSorted = [...txsY].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+
+
+  const pdfStyles = `
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap');
+    .pdf-wrap{font-family:'Times New Roman','Times',serif;direction:rtl;background:#fff;color:#1a2b2e;padding:32px;max-width:860px;margin:0 auto;}
+    .pdf-header{background:linear-gradient(135deg,#1a2b2e,#2d9c8f);color:#fff;border-radius:18px;padding:28px 32px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;}
+    .pdf-title{font-size:22px;font-weight:800;margin-bottom:4px;}
+    .pdf-sub{font-size:13px;opacity:0.7;}
+    .pdf-date{font-size:11px;opacity:0.6;text-align:left;}
+    .pdf-kpi-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:24px;}
+    .pdf-kpi{border-radius:14px;padding:16px 14px;border:1.5px solid #e0f5f3;}
+    .pdf-kpi-label{font-size:10px;font-weight:600;color:#7a9ea2;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
+    .pdf-kpi-value{font-size:18px;font-weight:800;}
+    .pdf-section{background:#fff;border:1.5px solid #e0f5f3;border-radius:16px;padding:20px;margin-bottom:20px;}
+    .pdf-section-title{font-size:14px;font-weight:700;color:#1a2b2e;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e0f5f3;display:flex;align-items:center;gap:8px;}
+    .pdf-table{width:100%;border-collapse:collapse;}
+    .pdf-table th{background:#f0faf9;color:#2d9c8f;font-size:11px;font-weight:700;padding:9px 12px;text-align:right;border-bottom:2px solid #e0f5f3;}
+    .pdf-table td{padding:8px 12px;font-size:11px;border-bottom:1px solid #f0faf9;text-align:right;color:#1a2b2e;}
+    .pdf-table tr:last-child td{border-bottom:none;}
+    .pdf-badge{display:inline-block;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:600;}
+    .pdf-footer{text-align:center;color:#7a9ea2;font-size:10px;margin-top:24px;padding-top:16px;border-top:1px solid #e0f5f3;}
+  `;
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 3000, background: "rgba(26,43,46,0.65)", backdropFilter: "blur(16px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ background: C.bg, borderRadius: "26px 26px 0 0", width: "100%", maxWidth: 430, maxHeight: "95vh", overflowY: "auto", padding: "0 0 44px", animation: "sheet .32s cubic-bezier(.16,1,.3,1)", direction: "rtl" }}>
+
+        {/* Handle */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
+          <div style={{ width: 40, height: 4, background: C.sage, borderRadius: 4 }} />
+        </div>
+
+        {/* Header */}
+        <div style={{ padding: "0 20px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ color: C.text, fontWeight: 800, fontSize: 17 }}>تقرير الصندوق {year}</div>
+            <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>تقريرٌ ماليٌّ شاملٌ — معاينة</div>
+          </div>
+          <button onClick={onClose} className="tbtn" style={{ background: C.mintPale, border: `1px solid ${C.mintLt}`, color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, cursor: "pointer", flexShrink: 0 }}>✕</button>
+        </div>
+
+        {/* Preview card */}
+        <div style={{ padding: "0 20px" }}>
+
+          {/* KPI summary */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+            {[
+              { label: "المساهمات", val: totalC, color: "#2d9c8f", bg: "rgba(45,156,143,0.07)", sign: "+" },
+              { label: "التبرعات",  val: totalD, color: "#20b2aa", bg: "rgba(32,178,170,0.07)", sign: "+" },
+              { label: "المصروفات", val: totalE, color: "#e05252", bg: "rgba(224,82,82,0.07)",  sign: "−" },
+              { label: "الرصيد الصافي", val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", bg: solde >= 0 ? "rgba(45,156,143,0.07)" : "rgba(224,82,82,0.07)", sign: solde >= 0 ? "+" : "−" },
+            ].map(k => (
+              <div key={k.label} style={{ background: k.bg, borderRadius: 14, padding: "14px 12px", border: `1.5px solid ${k.color}22` }}>
+                <div style={{ color: C.muted, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 5 }}>{k.label}</div>
+                <div style={{ color: k.color, fontSize: 16, fontWeight: 800 }}>{k.sign}{new Intl.NumberFormat("ar-MA").format(k.val)} MRU</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Mini bar chart preview */}
+          <div style={{ background: C.card, borderRadius: 16, padding: "14px", border: `1px solid ${C.mintLt}`, marginBottom: 14 }}>
+            <div style={{ color: C.text, fontWeight: 700, fontSize: 12, marginBottom: 10 }}>📊 الحركة الشهرية</div>
+            <svg width="100%" viewBox={`0 0 ${BAR_W} ${BAR_H + 30}`} style={{ display: "block" }}>
+              {byMonth.map((m, i) => {
+                const x = BAR_PAD + i * barW;
+                const hC = toH(m.c);
+                const hD = toH(m.d);
+                const hE = toH(m.e);
+                const bw = barW * 0.28;
+                return (
+                  <g key={i}>
+                    <rect x={x + 2} y={BAR_H - hC - 10} width={bw} height={hC || 1} fill="#2d9c8f" rx="2" opacity="0.85" />
+                    <rect x={x + bw + 4} y={BAR_H - hD - 10} width={bw} height={hD || 1} fill="#20b2aa" rx="2" opacity="0.75" />
+                    <rect x={x + bw * 2 + 6} y={BAR_H - hE - 10} width={bw} height={hE || 1} fill="#e05252" rx="2" opacity="0.75" />
+                    <text x={x + barW / 2} y={BAR_H + 20} textAnchor="middle" fontSize="9" fill="#7a9ea2" fontFamily="sans-serif">
+                      {MONTHS_AR[i].slice(0, 3)}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+            <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 4 }}>
+              {[["#2d9c8f","مساهمات"],["#20b2aa","تبرعات"],["#e05252","مصروفات"]].map(([c, l]) => (
+                <div key={l} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <div style={{ width: 8, height: 8, background: c, borderRadius: 2 }} />
+                  <span style={{ fontSize: 9, color: C.muted, fontFamily: "sans-serif" }}>{l}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pie preview */}
+          <div style={{ background: C.card, borderRadius: 16, padding: "14px", border: `1px solid ${C.mintLt}`, marginBottom: 14, display: "flex", alignItems: "center", gap: 16 }}>
+            <svg width="100" height="100" viewBox="0 0 160 160" style={{ flexShrink: 0 }}>
+              {pieTotal === 0
+                ? <circle cx="80" cy="80" r="72" fill="#e0f5f3" />
+                : <g dangerouslySetInnerHTML={{ __html: [pieC, pieD, pieE].filter(Boolean).join("") }} />}
+              <circle cx="80" cy="80" r="38" fill="#fff" />
+              <text x="80" y="86" textAnchor="middle" fontSize="11" fontWeight="bold" fill="#1a2b2e" fontFamily="sans-serif">{Math.round((totalC + totalD) / (pieTotal || 1) * 100)}%</text>
+              <text x="80" y="99" textAnchor="middle" fontSize="8" fill="#7a9ea2" fontFamily="sans-serif">إيرادات</text>
+            </svg>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 12, color: C.text, marginBottom: 10 }}>📈 توزيع المالية</div>
+              {[
+                { label: "المساهمات", val: totalC, color: "#2d9c8f", pct: pieTotal ? Math.round(totalC / pieTotal * 100) : 0 },
+                { label: "التبرعات",  val: totalD, color: "#20b2aa", pct: pieTotal ? Math.round(totalD / pieTotal * 100) : 0 },
+                { label: "المصروفات", val: totalE, color: "#e05252", pct: pieTotal ? Math.round(totalE / pieTotal * 100) : 0 },
+              ].map(s => (
+                <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <div style={{ width: 8, height: 8, background: s.color, borderRadius: 2, flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                      <span style={{ fontSize: 9, color: C.muted }}>{s.label}</span>
+                      <span style={{ fontSize: 9, color: s.color, fontWeight: 700 }}>{s.pct}%</span>
+                    </div>
+                    <div style={{ background: "#f0faf9", borderRadius: 3, height: 4, overflow: "hidden" }}>
+                      <div style={{ width: `${s.pct}%`, height: "100%", background: s.color, borderRadius: 3 }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Top members preview */}
+          {topMembers.length > 0 && (
+            <div style={{ background: C.card, borderRadius: 16, padding: "14px", border: `1px solid ${C.mintLt}`, marginBottom: 14 }}>
+              <div style={{ color: C.text, fontWeight: 700, fontSize: 12, marginBottom: 10 }}>🏆 أكبر المساهمين</div>
+              {topMembers.map((m, i) => (
+                <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <div style={{ fontSize: 14, width: 22 }}>{"🥇🥈🥉4️⃣5️⃣"[i * 2]}{"🥇🥈🥉4️⃣5️⃣"[i * 2 + 1]}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                      <span style={{ fontSize: 11, fontWeight: 600 }}>{m.name}</span>
+                      <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(m.total)} MRU</span>
+                    </div>
+                    <div style={{ background: "#f0faf9", borderRadius: 3, height: 4 }}>
+                      <div style={{ width: `${(m.total / maxMem) * 100}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Info */}
+          <div style={{ background: C.mintPale, borderRadius: 12, padding: "11px 14px", marginBottom: 16, fontSize: 11, color: C.muted, lineHeight: 1.6 }}>
+            📄 سيتم إنشاء تقريرٍ PDF شاملٍ يتضمن جميع العمليات المُسجَّلة ({allTxsSorted.length} عملية)، الرسوم البيانية، قائمة الأعضاء وتقريرٌ ماليٌّ مفصَّل.
+          </div>
+
+          {/* Hidden print content */}
+          <div id="pdf-report-content" style={{ display: "none" }}>
+            <style>{pdfStyles}</style>
+            <div className="pdf-wrap">
+              {/* Header */}
+              <div className="pdf-header">
+                <div>
+                  <div className="pdf-title">تقريرٌ عن الوضعية المالية للصندوق التعاوني</div>
+                  <div className="pdf-sub">السنة المالية {year} — تقريرٌ شاملٌ لجميع العمليات</div>
+                </div>
+                <div className="pdf-date">
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#b2ede7" }}>تاريخ الإصدار</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>{todayStr}</div>
+                </div>
+              </div>
+
+              {/* KPIs */}
+              <div className="pdf-kpi-row">
+                {[
+                  { label: "إجمالي المساهمات", val: totalC, color: "#2d9c8f", sign: "+" },
+                  { label: "إجمالي التبرعات",  val: totalD, color: "#20b2aa", sign: "+" },
+                  { label: "إجمالي المصروفات", val: totalE, color: "#e05252", sign: "−" },
+                  { label: "الرصيد الصافي",    val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", sign: solde >= 0 ? "+" : "−" },
+                ].map(k => (
+                  <div key={k.label} className="pdf-kpi" style={{ background: k.color + "0d" }}>
+                    <div className="pdf-kpi-label">{k.label}</div>
+                    <div className="pdf-kpi-value" style={{ color: k.color }}>{k.sign}{new Intl.NumberFormat("ar-MA").format(Math.round(k.val))} MRU</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Bar chart SVG */}
+              <div className="pdf-section">
+                <div className="pdf-section-title">📊 الحركة الشهرية للمعاملات — {year}</div>
+                <svg width="100%" viewBox={`0 0 ${BAR_W} ${BAR_H + 40}`} style={{ display: "block" }}>
+                  {/* Grid lines */}
+                  {[0.25, 0.5, 0.75, 1].map(f => {
+                    const y = BAR_H - f * (BAR_H - 20) - 10;
+                    return (
+                      <g key={f}>
+                        <line x1={BAR_PAD} y1={y} x2={BAR_W - BAR_PAD} y2={y} stroke="#e0f5f3" strokeWidth="1" />
+                        <text x={BAR_W - BAR_PAD + 4} y={y + 4} fontSize="8" fill="#7a9ea2" textAnchor="start" fontFamily="sans-serif">
+                          {fmtAR(f * maxVal)}
+                        </text>
+                      </g>
+                    );
+                  })}
+                  {byMonth.map((m, i) => {
+                    const x = BAR_PAD + i * barW;
+                    const hC = toH(m.c);
+                    const hD = toH(m.d);
+                    const hE = toH(m.e);
+                    const bw = barW * 0.28;
+                    return (
+                      <g key={i}>
+                        <rect x={x + 2}           y={BAR_H - hC - 10} width={bw} height={hC || 1} fill="#2d9c8f" rx="2" />
+                        <rect x={x + bw + 4}       y={BAR_H - hD - 10} width={bw} height={hD || 1} fill="#20b2aa" rx="2" />
+                        <rect x={x + bw * 2 + 6}   y={BAR_H - hE - 10} width={bw} height={hE || 1} fill="#e05252" rx="2" />
+                        <text x={x + barW / 2} y={BAR_H + 22} textAnchor="middle" fontSize="8" fill="#7a9ea2" fontFamily="sans-serif">
+                          {MONTHS_AR[i].slice(0, 3)}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+                <div style={{ display: "flex", gap: 20, justifyContent: "center", marginTop: 8 }}>
+                  {[["#2d9c8f","المساهمات"],["#20b2aa","التبرعات"],["#e05252","المصروفات"]].map(([c, l]) => (
+                    <div key={l} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <div style={{ width: 12, height: 12, background: c, borderRadius: 3 }} />
+                      <span style={{ fontSize: 11, color: "#4a6568" }}>{l}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pie + Top members side by side */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+                {/* Pie */}
+                <div className="pdf-section" style={{ marginBottom: 0 }}>
+                  <div className="pdf-section-title">📈 توزيع الإيرادات والمصروفات</div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
+                    <svg width="130" height="130" viewBox="0 0 160 160">
+                      {pieTotal === 0
+                        ? <circle cx="80" cy="80" r="72" fill="#e0f5f3" />
+                        : <g dangerouslySetInnerHTML={{ __html: [pieC, pieD, pieE].filter(Boolean).join("") }} />}
+                      <circle cx="80" cy="80" r="38" fill="#fff" />
+                      <text x="80" y="85" textAnchor="middle" fontSize="13" fontWeight="bold" fill="#1a2b2e" fontFamily="sans-serif">
+                        {Math.round((totalC + totalD) / (pieTotal || 1) * 100)}%
+                      </text>
+                      <text x="80" y="99" textAnchor="middle" fontSize="9" fill="#7a9ea2" fontFamily="sans-serif">إيرادات</text>
+                    </svg>
+                    <div>
+                      {[
+                        { label: "مساهمات", val: totalC, color: "#2d9c8f" },
+                        { label: "تبرعات",  val: totalD, color: "#20b2aa" },
+                        { label: "مصروفات", val: totalE, color: "#e05252" },
+                      ].map(s => (
+                        <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                          <div style={{ width: 10, height: 10, background: s.color, borderRadius: 2 }} />
+                          <span style={{ fontSize: 11, color: "#1a2b2e" }}>{s.label}</span>
+                          <span style={{ fontSize: 10, color: s.color, fontWeight: 700, marginRight: "auto" }}>
+                            {fmtAR(s.val)} MRU
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top members */}
+                <div className="pdf-section" style={{ marginBottom: 0 }}>
+                  <div className="pdf-section-title">🏆 أكبر المساهمين</div>
+                  {topMembers.length === 0
+                    ? <div style={{ color: "#7a9ea2", fontSize: 12, textAlign: "center", padding: "20px 0" }}>لا توجد بيانات</div>
+                    : topMembers.map((m, i) => (
+                      <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                        <span style={{ fontSize: 15 }}>{"🥇🥈🥉4️⃣5️⃣".split("").filter((_, j) => j % 2 === 0 || "🥇🥈🥉4️⃣5️⃣"[j-1] === "️")[i] || (i+1)+"."}</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                            <span style={{ fontSize: 11, fontWeight: 600 }}>{m.name}</span>
+                            <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(m.total)} MRU</span>
+                          </div>
+                          <div style={{ background: "#e0f5f3", borderRadius: 3, height: 5 }}>
+                            <div style={{ width: `${(m.total / maxMem) * 100}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* Monthly summary table */}
+              <div className="pdf-section">
+                <div className="pdf-section-title">📅 الملخص الشهري</div>
+                <table className="pdf-table">
+                  <thead>
+                    <tr>
+                      <th>الشهر</th>
+                      <th>المساهمات</th>
+                      <th>التبرعات</th>
+                      <th>المصروفات</th>
+                      <th>الرصيد الشهري</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {byMonth.map((m, i) => {
+                      const net = m.c + m.d - m.e;
+                      const hasData = m.c > 0 || m.d > 0 || m.e > 0;
+                      if (!hasData) return null;
+                      return (
+                        <tr key={i}>
+                          <td style={{ fontWeight: 600 }}>{MONTHS_AR[i]}</td>
+                          <td style={{ color: "#2d9c8f" }}>{m.c > 0 ? fmtAR(m.c) + " MRU" : "—"}</td>
+                          <td style={{ color: "#20b2aa" }}>{m.d > 0 ? fmtAR(m.d) + " MRU" : "—"}</td>
+                          <td style={{ color: "#e05252" }}>{m.e > 0 ? fmtAR(m.e) + " MRU" : "—"}</td>
+                          <td style={{ fontWeight: 700, color: net >= 0 ? "#2d9c8f" : "#e05252" }}>{net >= 0 ? "+" : ""}{fmtAR(net)} MRU</td>
+                        </tr>
+                      );
+                    })}
+                    <tr style={{ background: "#f0faf9", fontWeight: 700 }}>
+                      <td style={{ fontWeight: 800 }}>الإجمالي</td>
+                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>{fmtAR(totalC)} MRU</td>
+                      <td style={{ color: "#20b2aa", fontWeight: 800 }}>{fmtAR(totalD)} MRU</td>
+                      <td style={{ color: "#e05252", fontWeight: 800 }}>{fmtAR(totalE)} MRU</td>
+                      <td style={{ color: solde >= 0 ? "#2d9c8f" : "#e05252", fontWeight: 800 }}>{solde >= 0 ? "+" : ""}{fmtAR(Math.abs(solde))} MRU</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* All transactions table */}
+              <div className="pdf-section">
+                <div className="pdf-section-title">📋 قائمة جميع العمليات ({allTxsSorted.length})</div>
+                <table className="pdf-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>التاريخ</th>
+                      <th>النوع</th>
+                      <th>العضو / الجهة</th>
+                      <th>المبلغ</th>
+                      <th>ملاحظة</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allTxsSorted.map((tx, i) => {
+                      const typeLabel = { contribution: "مساهمة", don: "تبرع", depense: "مصروف" }[tx.type];
+                      const typeColor = { contribution: "#2d9c8f", don: "#20b2aa", depense: "#e05252" }[tx.type];
+                      const typeBg   = { contribution: "rgba(45,156,143,0.1)", don: "rgba(32,178,170,0.1)", depense: "rgba(224,82,82,0.1)" }[tx.type];
+                      const d = new Date(tx.date).toLocaleDateString("ar-MA", { day: "2-digit", month: "short", year: "numeric" });
+                      return (
+                        <tr key={tx.id}>
+                          <td style={{ color: "#7a9ea2", fontWeight: 600 }}>{i + 1}</td>
+                          <td>{d}</td>
+                          <td>
+                            <span className="pdf-badge" style={{ color: typeColor, background: typeBg }}>{typeLabel}</span>
+                          </td>
+                          <td style={{ fontWeight: 600 }}>{tx.memberName || "—"}</td>
+                          <td style={{ color: typeColor, fontWeight: 700 }}>{tx.type === "depense" ? "−" : "+"}{fmtAR(tx.amount)} MRU</td>
+                          <td style={{ color: "#7a9ea2" }}>{tx.note || "—"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Members contributions detail */}
+              {topMembers.length > 0 && (
+                <div className="pdf-section">
+                  <div className="pdf-section-title">👥 تفصيل مساهمات الأعضاء</div>
+                  <table className="pdf-table">
+                    <thead>
+                      <tr>
+                        <th>العضو</th>
+                        <th>عدد المساهمات</th>
+                        <th>إجمالي المساهمات</th>
+                        <th>نسبة المشاركة</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {members.map(m => {
+                        const mContribs = contribs.filter(tx => tx.memberId === m.id);
+                        const total = mContribs.reduce((a, tx) => a + tx.amount, 0);
+                        if (total === 0) return null;
+                        const pct = totalC > 0 ? Math.round(total / totalC * 100) : 0;
+                        return (
+                          <tr key={m.id}>
+                            <td style={{ fontWeight: 600 }}>{m.name}</td>
+                            <td style={{ textAlign: "center" }}>{mContribs.length}</td>
+                            <td style={{ color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(total)} MRU</td>
+                            <td>
+                              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                <div style={{ flex: 1, background: "#e0f5f3", borderRadius: 3, height: 6 }}>
+                                  <div style={{ width: `${pct}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
+                                </div>
+                                <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700, minWidth: 28 }}>{pct}%</span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Footer */}
+              <div className="pdf-footer">
+                <div>تقريرٌ صادرٌ عن أمين الصندوق التعاوني — تاريخ الإصدار: {todayStr}</div>
+                <div style={{ marginTop: 4 }}>جميع المبالغ بالأوقية الموريتانية (MRU)</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Import/Download Report button */}
+          <button className="tbtn eco-btn" onClick={() => {
+            const el = document.getElementById("pdf-report-content");
+            const html = `<!DOCTYPE html><html dir="rtl" lang="ar">
+<head><meta charset="UTF-8"/><title>تقرير الصندوق - ${year}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Times New Roman','Times',serif;background:#fff;color:#1a2b2e;direction:rtl;font-size:13px;}
+</style></head><body>${el.innerHTML}</body></html>`;
+            const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `تقرير-الصندوق-${year}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }}
+            style={{ width: "100%", background: "linear-gradient(135deg,#1a2b2e,#2d9c8f)", border: "none", color: "#fff", borderRadius: 50, padding: "16px", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 8px 24px rgba(26,43,46,0.28)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+            <span style={{ fontSize: 20 }}>📥</span>
+            <span>تنزيل التقرير</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1336,6 +1832,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
 
     window.XLSX.writeFile(wb, `caisse_${EXPORT_YEAR}.xlsx`);
   }
+  const [showPdf, setShowPdf] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState(null);
   const [resetConfirm, setResetConfirm] = useState(false);
@@ -1456,6 +1953,14 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
         <span style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>{lang === "ar" ? `إحصائيات ${YEAR_STATS}` : `Statistiques ${YEAR_STATS}`}</span>
       </div>
 
+      {/* BOUTON RAPPORT PDF */}
+      <button className="tbtn" onClick={() => setShowPdf(true)}
+        style={{ width: "100%", background: "linear-gradient(135deg,#1a2b2e,#2d9c8f)", border: "none", color: "#fff", borderRadius: 16, padding: "14px 18px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16, boxShadow: "0 6px 20px rgba(26,43,46,0.25)", letterSpacing: 0.2 }}>
+        <span style={{ fontSize: 18 }}>📄</span>
+        <span>{lang === "ar" ? "تقرير الوضعية المالية" : "Rapport de situation"}</span>
+        <span style={{ marginRight: "auto", background: "rgba(255,255,255,0.18)", borderRadius: 8, padding: "2px 8px", fontSize: 10, fontWeight: 600, letterSpacing: 0.5 }}>{lang === "ar" ? "عربي" : "AR"}</span>
+      </button>
+
       {/* 3 CARTES STATS 2026 */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
         {[
@@ -1543,6 +2048,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
           </button>
         ))}
       </div>
+      {showPdf && <PdfReportModal txs={txs} members={members} onClose={() => setShowPdf(false)} year={YEAR_STATS} />}
     </div>
   );
 }
@@ -1898,7 +2404,7 @@ export default function App() {
   );
 
   return (
-    <div style={{ background: "#F2EFE9", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: "'Inter',sans-serif", color: C.text, position: "relative", paddingBottom: 90, overflowX: "hidden" }}>
+    <div style={{ background: "#F2EFE9", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: "'Times New Roman','Times',serif", color: C.text, position: "relative", paddingBottom: 90, overflowX: "hidden" }}>
       <style>{G}</style>
       <div style={{ padding: "20px 16px" }}>
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
