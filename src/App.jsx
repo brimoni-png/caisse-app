@@ -193,6 +193,7 @@ const DEF_TX = [];
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 const fmt = (n) => new Intl.NumberFormat("fr-FR").format(n) + " MRU";
+const fmtN = (n) => new Intl.NumberFormat("fr-FR").format(n);
 const fmtSh = (n) => n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n);
 const fmtDt = (d, l) => new Date(d).toLocaleDateString(l === "ar" ? "ar-MA" : "fr-FR", { day: "2-digit", month: "short", year: "numeric" });
 const inits = (n) => n.split(" ").slice(0, 2).map((w) => w[0] || "").join("").toUpperCase();
@@ -441,14 +442,14 @@ function TxRow({ tx, onDelete, onEdit, delay = 0, lang }) {
           <div style={{ color: C.sub, fontSize: 10, marginTop: 2 }}>{fmtDt(tx.date, lang)}</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-          <span style={{ color: cfg.color, fontWeight: 700, fontSize: 13 }}>{cfg.sign}{fmt(tx.amount)}</span>
+          <span style={{ color: cfg.color, fontWeight: 700, fontSize: 13 }}>{cfg.sign}{fmtN(tx.amount)}</span>
           <div className="txacts" style={{ display: "flex", gap: 4, opacity: 0, transition: "opacity .15s" }}>
             <button className="tbtn" onClick={() => onEdit(tx)} style={{ background: C.mintPale, border: "none", color: C.forestLt, borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.edit(C.forestLt)}</button>
             <button className="tbtn" onClick={() => setConf(true)} style={{ background: C.redLt, border: "none", color: C.red, borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.trash(C.red)}</button>
           </div>
         </div>
       </div>
-      {conf && <Confirm t={t} title={t.deleteTitle} message={t.deleteMsg(cfg.label, fmt(tx.amount))} onConfirm={() => { setConf(false); del(); }} onCancel={() => setConf(false)} />}
+      {conf && <Confirm t={t} title={t.deleteTitle} message={t.deleteMsg(cfg.label, fmtN(tx.amount))} onConfirm={() => { setConf(false); del(); }} onCancel={() => setConf(false)} />}
     </>
   );
 }
@@ -660,7 +661,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
                   <div style={{ color: C.muted, fontSize: 13, marginTop: 2 }}>{curYear}</div>
                 </div>
                 <div style={{ background: "rgba(139,92,246,0.1)", borderRadius: 14, padding: "8px 16px" }}>
-                  <span style={{ color: "#8B5CF6", fontSize: 20, fontWeight: 700 }}>{statModal.sign}{fmt(statModal.value)}</span>
+                  <span style={{ color: "#8B5CF6", fontSize: 20, fontWeight: 700 }}>{statModal.sign}{fmtN(statModal.value)}</span>
                 </div>
               </div>
               <div style={{ marginBottom: 8 }}>
@@ -675,7 +676,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
                       <div style={{ flex: 1, background: "#EDEDF5", borderRadius: 6, height: 8, overflow: "hidden" }}>
                         <div style={{ width: `${pct}%`, height: "100%", background: statModal.type === "depense" ? "#EF4444" : statModal.type === "don" ? "#DB2777" : "#8B5CF6", borderRadius: 6, transition: "width .6s" }} />
                       </div>
-                      <div style={{ width: 70, textAlign: "right", color: C.text, fontSize: 12, fontWeight: 600 }}>{fmt(monthVal)}</div>
+                      <div style={{ width: 70, textAlign: "right", color: C.text, fontSize: 12, fontWeight: 600 }}>{fmtN(monthVal)}</div>
                     </div>
                   );
                 })}
@@ -698,7 +699,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.contribution}</div>
-              <div style={{ color: "#2d9c8f", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>+{fmt(contrib)}</div>
+              <div style={{ color: "#2d9c8f", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>+{fmtN(contrib)}</div>
             </div>
           </button>
           {/* Dons */}
@@ -710,7 +711,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.don}</div>
-              <div style={{ color: "#20b2aa", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>+{fmt(dons)}</div>
+              <div style={{ color: "#20b2aa", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>+{fmtN(dons)}</div>
             </div>
           </button>
           {/* Dépenses */}
@@ -722,7 +723,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.depense}</div>
-              <div style={{ color: "#e05252", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>-{fmt(dep)}</div>
+              <div style={{ color: "#e05252", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>-{fmtN(dep)}</div>
             </div>
           </button>
           {/* Solde année passée — cliquable */}
@@ -739,7 +740,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
                 {lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}
               </div>
               <div style={{ color: soldePrev >= 0 ? "#2d9c8f" : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>
-                {soldePrev >= 0 ? "+" : ""}{fmt(Math.abs(soldePrev))}
+                {soldePrev >= 0 ? "+" : ""}{fmtN(Math.abs(soldePrev))}
               </div>
               {soldePrevManual !== null && <div style={{ fontSize: 8, color: C.sub, marginTop: 2 }}>✏️ {lang === "ar" ? "معدّل" : "modifié"}</div>}
             </div>
@@ -761,7 +762,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
                 <div style={{ color: C.muted, fontSize: 12 }}>{lang === "ar" ? "سيُضاف إلى الرصيد الإجمالي" : "Sera ajouté au solde global"}</div>
               </div>
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7 }}>{lang === "ar" ? `رصيد ${prevYear} (MRU)` : `Solde ${prevYear} (MRU)`}</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7 }}>{lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}</div>
                 <input type="number" value={editPrevVal} onChange={e => setEditPrevVal(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") { setSoldePrevManual(Number(editPrevVal)); setEditPrevModal(false); } }}
                   placeholder="0" autoFocus
@@ -965,7 +966,6 @@ function MemberDetailModal({ member, txs, lang, onClose }) {
             </div>
             <div style={{ color: "#fff", fontSize: 28, fontWeight: 700, letterSpacing: -1, fontFamily: "'DM Serif Display', serif" }}>
               {new Intl.NumberFormat("fr-FR").format(total2026)}
-              <span style={{ fontSize: 14, fontWeight: 500, marginLeft: 5, opacity: 0.8 }}>MRU</span>
             </div>
           </div>
           <div style={{ fontSize: 36, opacity: 0.85 }}>🏆</div>
@@ -983,7 +983,7 @@ function MemberDetailModal({ member, txs, lang, onClose }) {
                 <div key={mIdx} style={{ marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
                     <span style={{ color: C.text, fontSize: 13, fontWeight: 500 }}>{MONTHS_FULL[Number(mIdx)]}</span>
-                    <span style={{ color: C.forestLt, fontSize: 13, fontWeight: 700 }}>{fmt(val)}</span>
+                    <span style={{ color: C.forestLt, fontSize: 13, fontWeight: 700 }}>{fmtN(val)}</span>
                   </div>
                   <div style={{ background: C.mintPale, borderRadius: 6, height: 7, overflow: "hidden" }}>
                     <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg,#7C3AED,#C084FC)", borderRadius: 6, transition: "width .6s cubic-bezier(.16,1,.3,1)" }} />
@@ -1001,7 +1001,7 @@ function MemberDetailModal({ member, txs, lang, onClose }) {
                   <div style={{ color: C.text, fontSize: 12, fontWeight: 600 }}>{fmtDt(tx.date, lang)}</div>
                   {tx.note && <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{tx.note}</div>}
                 </div>
-                <div style={{ color: "#8B5CF6", fontWeight: 700, fontSize: 13 }}>+{fmt(tx.amount)}</div>
+                <div style={{ color: "#8B5CF6", fontWeight: 700, fontSize: 13 }}>+{fmtN(tx.amount)}</div>
               </div>
             ))}
           </div>
@@ -1062,7 +1062,7 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang }) {
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 {total > 0 && (
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ color: C.forestLt, fontWeight: 700, fontSize: 12 }}>{fmt(total)}</div>
+                    <div style={{ color: C.forestLt, fontWeight: 700, fontSize: 12 }}>{fmtN(total)}</div>
                     <div style={{ color: C.muted, fontSize: 9, textTransform: "uppercase", letterSpacing: 0.4 }}>{YEAR}</div>
                   </div>
                 )}
@@ -1175,7 +1175,7 @@ function TopMembers({ members, txs, lang }) {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
               <span style={{ color: "#1A1A2E", fontSize: 12, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60%" }}>{m.name}</span>
-              <span style={{ color: AVC2[i], fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{new Intl.NumberFormat("fr-FR").format(m.total)} MRU</span>
+              <span style={{ color: AVC2[i], fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{new Intl.NumberFormat("fr-FR").format(m.total)}</span>
             </div>
             <div style={{ background: "#F5F3FF", borderRadius: 4, height: 5, overflow: "hidden" }}>
               <div style={{ width: `${(m.total / maxVal) * 100}%`, height: "100%", background: `linear-gradient(90deg, ${AVC2[i]}, ${AVC2[Math.min(i+1, 4)]})`, borderRadius: 4, transition: "width .7s cubic-bezier(.16,1,.3,1)" }} />
@@ -1953,7 +1953,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
           <Card key={s.label} sx={{ padding: "12px 10px" }}>
             <div style={{ width: 30, height: 30, borderRadius: 9, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>{s.icon}</div>
             <div style={{ color: C.muted, fontSize: 8, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 }}>{s.label}</div>
-            <div style={{ color: s.color, fontWeight: 700, fontSize: 13 }}>{s.sign}{fmt(s.value)}</div>
+            <div style={{ color: s.color, fontWeight: 700, fontSize: 13 }}>{s.sign}{fmtN(s.value)}</div>
           </Card>
         ))}
       </div>
