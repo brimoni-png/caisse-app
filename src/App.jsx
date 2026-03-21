@@ -1302,7 +1302,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
             ].map(k => (
               <div key={k.label} style={{ background: k.bg, borderRadius: 14, padding: "14px 12px", border: `1.5px solid ${k.color}22` }}>
                 <div style={{ color: C.muted, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 5 }}>{k.label}</div>
-                <div style={{ color: k.color, fontSize: 16, fontWeight: 800 }}>{k.sign}{new Intl.NumberFormat("ar-MA").format(k.val)} MRU</div>
+                <div style={{ color: k.color, fontSize: 16, fontWeight: 800 }}>{k.sign}{new Intl.NumberFormat("ar-MA").format(k.val)}</div>
               </div>
             ))}
           </div>
@@ -1382,14 +1382,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                       <span style={{ fontSize: 11, fontWeight: 600 }}>{m.name}</span>
-                      <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(m.total)} MRU</span>
-                    </div>
-                    <div style={{ background: "#f0faf9", borderRadius: 3, height: 4 }}>
-                      <div style={{ width: `${(m.total / maxMem) * 100}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
-                    </div>
-                  </div>
-                </div>
-              ))}
+                      <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(m.total)}</span>
             </div>
           )}
 
@@ -1424,7 +1417,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                 ].map(k => (
                   <div key={k.label} className="pdf-kpi" style={{ background: k.color + "0d" }}>
                     <div className="pdf-kpi-label">{k.label}</div>
-                    <div className="pdf-kpi-value" style={{ color: k.color }}>{k.sign}{new Intl.NumberFormat("ar-MA").format(Math.round(k.val))} MRU</div>
+                    <div className="pdf-kpi-value" style={{ color: k.color }}>{k.sign}{new Intl.NumberFormat("ar-MA").format(Math.round(k.val))}</div>
                   </div>
                 ))}
               </div>
@@ -1499,7 +1492,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                           <div style={{ width: 10, height: 10, background: s.color, borderRadius: 2 }} />
                           <span style={{ fontSize: 11, color: "#1a2b2e" }}>{s.label}</span>
                           <span style={{ fontSize: 10, color: s.color, fontWeight: 700, marginRight: "auto" }}>
-                            {fmtAR(s.val)} MRU
+                            {fmtAR(s.val)}
                           </span>
                         </div>
                       ))}
@@ -1518,7 +1511,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                         <div style={{ flex: 1 }}>
                           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                             <span style={{ fontSize: 11, fontWeight: 600 }}>{m.name}</span>
-                            <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(m.total)} MRU</span>
+                            <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(m.total)}</span>
                           </div>
                           <div style={{ background: "#e0f5f3", borderRadius: 3, height: 5 }}>
                             <div style={{ width: `${(m.total / maxMem) * 100}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
@@ -1550,19 +1543,19 @@ function PdfReportModal({ txs, members, onClose, year }) {
                       return (
                         <tr key={i}>
                           <td style={{ fontWeight: 600 }}>{MONTHS_AR[i]}</td>
-                          <td style={{ color: "#2d9c8f" }}>{m.c > 0 ? fmtAR(m.c) + " MRU" : "—"}</td>
-                          <td style={{ color: "#20b2aa" }}>{m.d > 0 ? fmtAR(m.d) + " MRU" : "—"}</td>
-                          <td style={{ color: "#e05252" }}>{m.e > 0 ? fmtAR(m.e) + " MRU" : "—"}</td>
-                          <td style={{ fontWeight: 700, color: net >= 0 ? "#2d9c8f" : "#e05252" }}>{net >= 0 ? "" : ""}{fmtAR(net)} MRU</td>
+                          <td style={{ color: "#2d9c8f" }}>{m.c > 0 ? fmtAR(m.c) : "—"}</td>
+                          <td style={{ color: "#20b2aa" }}>{m.d > 0 ? fmtAR(m.d) : "—"}</td>
+                          <td style={{ color: "#e05252" }}>{m.e > 0 ? fmtAR(m.e) : "—"}</td>
+                          <td style={{ fontWeight: 700, color: net >= 0 ? "#2d9c8f" : "#e05252" }}>{net >= 0 ? "" : ""}{fmtAR(net)}</td>
                         </tr>
                       );
                     })}
                     <tr style={{ background: "#f0faf9", fontWeight: 700 }}>
                       <td style={{ fontWeight: 800 }}>الإجمالي</td>
-                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>{fmtAR(totalC)} MRU</td>
-                      <td style={{ color: "#20b2aa", fontWeight: 800 }}>{fmtAR(totalD)} MRU</td>
-                      <td style={{ color: "#e05252", fontWeight: 800 }}>{fmtAR(totalE)} MRU</td>
-                      <td style={{ color: solde >= 0 ? "#2d9c8f" : "#e05252", fontWeight: 800 }}>{solde >= 0 ? "" : ""}{fmtAR(Math.abs(solde))} MRU</td>
+                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>{fmtAR(totalC)}</td>
+                      <td style={{ color: "#20b2aa", fontWeight: 800 }}>{fmtAR(totalD)}</td>
+                      <td style={{ color: "#e05252", fontWeight: 800 }}>{fmtAR(totalE)}</td>
+                      <td style={{ color: solde >= 0 ? "#2d9c8f" : "#e05252", fontWeight: 800 }}>{solde >= 0 ? "" : ""}{fmtAR(Math.abs(solde))}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1595,7 +1588,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                             <td style={{ color: "#7a9ea2", fontWeight: 600 }}>{i + 1}</td>
                             <td style={{ fontWeight: 600 }}>{m.name}</td>
                             <td style={{ color: m.total > 0 ? "#2d9c8f" : "#7a9ea2", fontWeight: 700 }}>
-                              {m.total > 0 ? `${fmtAR(m.total)} MRU` : "—"}
+                              {m.total > 0 ? `${fmtAR(m.total)}` : "—"}
                             </td>
                             <td>
                               {m.total > 0 ? (
@@ -1613,7 +1606,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                     })()}
                     <tr style={{ background: "#f0faf9", fontWeight: 700 }}>
                       <td colSpan={2} style={{ fontWeight: 800 }}>الإجمالي</td>
-                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>{fmtAR(totalC)} MRU</td>
+                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>{fmtAR(totalC)}</td>
                       <td style={{ color: "#2d9c8f", fontWeight: 800 }}>100%</td>
                     </tr>
                   </tbody>
