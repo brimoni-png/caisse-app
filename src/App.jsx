@@ -1595,7 +1595,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                             <td style={{ color: "#7a9ea2", fontWeight: 600 }}>{i + 1}</td>
                             <td style={{ fontWeight: 600 }}>{m.name}</td>
                             <td style={{ color: m.total > 0 ? "#2d9c8f" : "#7a9ea2", fontWeight: 700 }}>
-                              {m.total > 0 ? `+${fmtAR(m.total)} MRU` : "—"}
+                              {m.total > 0 ? `${fmtAR(m.total)} MRU` : "—"}
                             </td>
                             <td>
                               {m.total > 0 ? (
