@@ -139,7 +139,7 @@ const T = {
     monthsFull: ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"],
     newTx: (t) => ({ contribution: "Nouvelle Contribution", don: "Nouveau Don", depense: "Nouvelle Dépense" }[t]),
     editTx: (t) => ({ contribution: "Modifier Contribution", don: "Modifier Don", depense: "Modifier Dépense" }[t]),
-    flds: { amount: "Montant (MRU)", desc: "Description", member: "Membre", date: "Date", donor: "Nom du donateur", donorPh: "Anonyme", memberPh: "Sélectionner un membre", notePh: "Description…" },
+    flds: { amount: "Montant", desc: "Description", member: "Membre", date: "Date", donor: "Nom du donateur", donorPh: "Anonyme", memberPh: "Sélectionner un membre", notePh: "Description…" },
     save: "Enregistrer", cancel: "Annuler", delete: "Supprimer", deleteTitle: "Supprimer ?",
     deleteMsg: (l, a) => `Supprimer cette ${l} de ${a} ?`,
     delMemberTitle: "Retirer ?", delMemberMsg: (n) => `Retirer "${n}" ?`,
@@ -170,7 +170,7 @@ const T = {
     monthsFull: ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"],
     newTx: (t) => ({ contribution: "مساهمة جديدة", don: "تبرع جديد", depense: "مصروف جديد" }[t]),
     editTx: (t) => ({ contribution: "تعديل المساهمة", don: "تعديل التبرع", depense: "تعديل المصروف" }[t]),
-    flds: { amount: "المبلغ (MRU)", desc: "الوصف", member: "العضو", date: "التاريخ", donor: "اسم المتبرع", donorPh: "مجهول", memberPh: "اختر عضواً", notePh: "وصف العملية…" },
+    flds: { amount: "المبلغ", desc: "الوصف", member: "العضو", date: "التاريخ", donor: "اسم المتبرع", donorPh: "مجهول", memberPh: "اختر عضواً", notePh: "وصف العملية…" },
     save: "حفظ", cancel: "إلغاء", delete: "حذف", deleteTitle: "حذف؟",
     deleteMsg: (l, a) => `هل تريد حذف هذه ${l} بقيمة ${a}؟`,
     delMemberTitle: "إزالة؟", delMemberMsg: (n) => `إزالة "${n}"؟`,
@@ -192,7 +192,7 @@ const DEF_MEMBERS = [];
 const DEF_TX = [];
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
-const fmt = (n) => new Intl.NumberFormat("fr-FR").format(n) + " MRU";
+const fmt = (n) => new Intl.NumberFormat("fr-FR").format(n);
 const fmtN = (n) => new Intl.NumberFormat("fr-FR").format(n);
 const fmtSh = (n) => n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n);
 const fmtDt = (d, l) => new Date(d).toLocaleDateString(l === "ar" ? "ar-MA" : "fr-FR", { day: "2-digit", month: "short", year: "numeric" });
@@ -1110,7 +1110,7 @@ function DonutChart({ contrib, dons, dep, lang, chartReady }) {
           tooltip: {
             backgroundColor: "#fff", titleColor: "#1A1A2E", bodyColor: "#6B5E8A",
             borderColor: "#EDE9FE", borderWidth: 1, padding: 10, cornerRadius: 10,
-            callbacks: { label: ctx => " " + new Intl.NumberFormat("fr-FR").format(ctx.parsed.y) + " MRU" }
+            callbacks: { label: ctx => " " + new Intl.NumberFormat("fr-FR").format(ctx.parsed.y) }
           },
         },
         scales: {
@@ -1782,7 +1782,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
     // ── Feuille 3 : Dépenses 2026 — liste détaillée ──
     const depTxs = txs2026all.filter(tx => tx.type === "depense").sort((a,b) => new Date(a.date) - new Date(b.date));
     const depRows = [
-      ["Description / Objet", "Date", "Mois", "Montant (MRU)", "Note"],
+      ["Description / Objet", "Date", "Mois", "Montant", "Note"],
       ...depTxs.map(tx => {
         const d = new Date(tx.date);
         return [tx.note || tx.memberName || "—", tx.date, MONTHS_FR[d.getMonth()], tx.amount, tx.note || ""];
@@ -1799,7 +1799,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
     const totalD = donTxs.reduce((a, tx) => a + tx.amount, 0);
     const totalE = depTxs.reduce((a, tx) => a + tx.amount, 0);
     const resumeRows = [
-      ["Indicateur", "Montant (MRU)"],
+      ["Indicateur", "Montant"],
       ["Total Contributions", totalC],
       ["Total Dons", totalD],
       ["Total Dépenses", totalE],
