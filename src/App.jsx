@@ -1383,6 +1383,13 @@ function PdfReportModal({ txs, members, onClose, year }) {
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                       <span style={{ fontSize: 11, fontWeight: 600 }}>{m.name}</span>
                       <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(m.total)}</span>
+                    </div>
+                    <div style={{ background: C.mintPale, borderRadius: 3, height: 4, overflow: "hidden" }}>
+                      <div style={{ width: `${(m.total / (topMembers[0]?.total || 1)) * 100}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
