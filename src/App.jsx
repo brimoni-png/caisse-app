@@ -1251,8 +1251,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 
 
   const pdfStyles = `
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap');
-    .pdf-wrap{font-family:'Noto Sans Arabic','Times New Roman','Times',serif;direction:rtl;background:#fff;color:#1a2b2e;padding:32px;max-width:860px;margin:0 auto;font-size:14px;}
+    .pdf-wrap{font-family:'Times New Roman','Times',serif;direction:rtl;background:#fff;color:#1a2b2e;padding:32px;max-width:860px;margin:0 auto;font-size:14px;}
     .pdf-header{background:linear-gradient(135deg,#1a2b2e,#2d9c8f);color:#fff;border-radius:18px;padding:28px 32px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;}
     .pdf-title{font-size:22px;font-weight:800;margin-bottom:4px;}
     .pdf-sub{font-size:14px;opacity:0.7;}
@@ -1406,7 +1405,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
               {/* Header */}
               <div className="pdf-header">
                 <div>
-                  <div className="pdf-title">تقرير عن الوضعية المالية للصندوق التعاوني</div>
+                  <div className="pdf-title">تقرير عن الوضعية المالية للصندوق</div>
                   <div className="pdf-sub">السنة المالية {year} — تقرير شامل لجميع العمليات</div>
                 </div>
                 <div className="pdf-date">
@@ -1648,7 +1647,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 
               {/* Footer */}
               <div className="pdf-footer">
-                <div>تقرير صادر عن أمين الصندوق التعاوني — تاريخ الإصدار: {todayStr}</div>
+                <div>تقرير صادر عن أمين الصندوق — تاريخ الإصدار: {todayStr}</div>
                 <div style={{ marginTop: 4 }}>جميع المبالغ بالأوقية الموريتانية (MRU)</div>
               </div>
             </div>
@@ -1662,7 +1661,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Noto Sans Arabic','Times New Roman','Times',serif;background:#fff;color:#1a2b2e;direction:rtl;font-size:14px;}
+  body{font-family:'Times New Roman','Times',serif;background:#fff;color:#1a2b2e;direction:rtl;font-size:14px;}
   @media print{
     body{margin:0;padding:0;}
     .pdf-wrap{padding:16px !important;max-width:100% !important;}
@@ -1672,16 +1671,19 @@ function PdfReportModal({ txs, members, onClose, year }) {
     tr{page-break-inside:avoid;break-inside:avoid;}
     thead{display:table-header-group;}
   }
-</style></head><body>${el.innerHTML}</body></html>`;
+</style></head><body>${el.innerHTML}<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script></body></html>`;
             const blob = new Blob([html], { type: "text/html;charset=utf-8" });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `تقرير-الصندوق-${year}.html`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            const printWin = window.open(url, "_blank");
+            if (!printWin) {
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `تقرير-الصندوق-${year}.html`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+            }
+            setTimeout(() => URL.revokeObjectURL(url), 10000);
           }}
             style={{ width: "100%", background: "linear-gradient(135deg,#1a2b2e,#2d9c8f)", border: "none", color: "#fff", borderRadius: 50, padding: "16px", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 8px 24px rgba(26,43,46,0.28)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
             <span style={{ fontSize: 20 }}>📥</span>
