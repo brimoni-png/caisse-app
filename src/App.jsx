@@ -2173,196 +2173,384 @@ function NavItem({ label, icon, activeIcon, active, onClick }) {
 // ─── LOGIN SCREEN ─────────────────────────────────────────────────────────────
 const VALID_PIN = "2526";
 
+const LOGIN_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60%  { transform: translateX(-7px); }
+    40%,80%  { transform: translateX(7px); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(64,224,208,0.35); }
+    70%  { box-shadow: 0 0 0 14px rgba(64,224,208,0); }
+    100% { box-shadow: 0 0 0 0 rgba(64,224,208,0); }
+  }
+  @keyframes scanline {
+    0%   { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .ls-root * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .ls-root {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    width: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow: hidden;
+    background: #0a1c1f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+    padding: 32px 28px;
+  }
+
+  .ls-bg-gradient {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 70% 55% at 80% 10%, rgba(32,178,150,0.22) 0%, transparent 65%),
+      radial-gradient(ellipse 55% 45% at 10% 85%, rgba(20,140,120,0.18) 0%, transparent 60%),
+      linear-gradient(180deg, #0a1c1f 0%, #0d2624 60%, #0f2f2c 100%);
+  }
+  .ls-grid {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.04;
+    background-image:
+      linear-gradient(rgba(64,224,208,1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(64,224,208,1) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .ls-scanline {
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(64,224,208,0.12), transparent);
+    animation: scanline 6s linear infinite;
+    pointer-events: none;
+  }
+
+  .ls-inner {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 340px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  .ls-logo-wrap {
+    width: 72px; height: 72px; border-radius: 22px;
+    background: linear-gradient(145deg, #1a4a45 0%, #0d3330 100%);
+    border: 1.5px solid rgba(64,224,208,0.3);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 22px;
+    animation: fadeUp .5s cubic-bezier(.16,1,.3,1) both;
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.4),
+      0 0 0 1px rgba(64,224,208,0.08) inset,
+      0 20px 60px rgba(32,178,150,0.12);
+    transition: box-shadow .3s;
+  }
+  .ls-logo-wrap:hover { animation: pulse-ring 1.8s ease infinite; }
+
+  .ls-title-block {
+    text-align: center; margin-bottom: 32px;
+    animation: fadeUp .5s cubic-bezier(.16,1,.3,1) .08s both;
+  }
+  .ls-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px; font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.5px; line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .ls-subtitle {
+    font-size: 11px; font-weight: 500;
+    color: rgba(64,224,208,0.7);
+    letter-spacing: 3px; text-transform: uppercase;
+  }
+
+  .ls-card {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 24px 22px 22px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+    animation: fadeUp .5s cubic-bezier(.16,1,.3,1) .16s both;
+  }
+
+  .ls-label {
+    font-size: 10px; font-weight: 600;
+    color: rgba(178,237,233,0.7);
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 7px; display: block;
+  }
+
+  .ls-inp-wrap { position: relative; margin-bottom: 16px; }
+  .ls-inp-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    opacity: 0.45; pointer-events: none; display: flex; align-items: center;
+  }
+  .ls-inp {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 13px 14px 13px 42px;
+    font-size: 14px; color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    outline: none; transition: all .2s ease;
+    -webkit-appearance: none;
+  }
+  .ls-inp::placeholder { color: rgba(255,255,255,0.25); }
+  .ls-inp:focus {
+    background: rgba(64,224,208,0.07);
+    border-color: rgba(64,224,208,0.6);
+    box-shadow: 0 0 0 3px rgba(64,224,208,0.12);
+  }
+  .ls-inp.has-error {
+    border-color: rgba(239,68,68,0.7);
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+    animation: shake .4s ease;
+  }
+  .ls-inp.pin-inp { letter-spacing: 10px; font-size: 20px; }
+
+  .ls-forgot {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 7px;
+  }
+  .ls-forgot-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 10px; font-weight: 600;
+    color: rgba(64,224,208,0.65);
+    letter-spacing: 1.5px; text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+    transition: color .18s; padding: 0;
+  }
+  .ls-forgot-btn:hover { color: rgba(64,224,208,1); }
+
+  .ls-error {
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.35);
+    border-radius: 10px;
+    padding: 9px 13px; margin-bottom: 14px;
+    font-size: 12px; color: #fca5a5; font-weight: 500;
+    display: flex; align-items: center; gap: 7px;
+    animation: fadeUp .25s ease both;
+  }
+
+  .ls-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #20b2a0 0%, #40e0d0 100%);
+    border: none; border-radius: 14px;
+    padding: 15px;
+    font-size: 13px; font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    color: #0a1c1f;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(32,178,160,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: all .2s cubic-bezier(.16,1,.3,1);
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    margin-top: 4px;
+  }
+  .ls-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .ls-btn:active { transform: scale(.97); }
+  .ls-btn:disabled { opacity: 0.55; cursor: not-allowed; filter: none; transform: none; }
+
+  .ls-divider {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    margin: 20px 0 16px;
+  }
+  .ls-divider-line { flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+  .ls-divider-text {
+    font-size: 10px; color: rgba(255,255,255,0.3);
+    letter-spacing: 1px; text-transform: uppercase; white-space: nowrap;
+  }
+
+  .ls-touchid {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,0.45);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    transition: color .18s; padding: 6px; width: 100%;
+  }
+  .ls-touchid:hover { color: rgba(64,224,208,0.75); }
+
+  .ls-lang {
+    position: absolute; top: 0; right: 0;
+    display: flex;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px; padding: 3px; gap: 2px;
+  }
+  .ls-lang-btn {
+    background: transparent; border: none;
+    border-radius: 14px;
+    color: rgba(255,255,255,0.55);
+    font-size: 11px; font-weight: 700;
+    padding: 5px 13px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all .18s;
+  }
+  .ls-lang-btn.active { background: rgba(64,224,208,0.2); color: #40e0d0; }
+`;
+
 function LoginScreen({ onLogin }) {
   const [name, setName] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
-  const [nameFocus, setNameFocus] = useState(false);
-  const [pinFocus, setPinFocus] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [loginLang, setLoginLang] = usePersisted("cc5_lang", "fr");
 
   const isAr = loginLang === "ar";
 
-  const handleLogin = () => {
-    if (!name.trim()) { setError(isAr ? "يرجى إدخال اسمك" : "Veuillez saisir votre nom."); return; }
+  const handleLogin = async () => {
+    if (!name.trim()) {
+      setError(isAr ? "يرجى إدخال اسمك" : "Veuillez saisir votre nom.");
+      return;
+    }
     if (pin !== VALID_PIN) {
       setError(isAr ? "رمز PIN غير صحيح" : "Code PIN incorrect.");
       setShake(true);
       setPin("");
-      setTimeout(() => setShake(false), 500);
+      setTimeout(() => { setShake(false); setError(""); }, 1800);
       return;
     }
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 600));
     onLogin(name.trim());
   };
 
-  const LOGIN_CSS = `
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-    @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-    .l-card{animation:fadeUp .5s cubic-bezier(.16,1,.3,1) .1s both}
-    .l-logo{animation:fadeUp .5s cubic-bezier(.16,1,.3,1) both}
-    .l-title{animation:fadeUp .5s cubic-bezier(.16,1,.3,1) .07s both}
-    .l-inp::placeholder{color:rgba(255,255,255,0.35)}
-    .l-btn:active{transform:scale(.97)}
-  `;
-
   return (
-    <div style={{
-      position: "relative", minHeight: "100vh", minHeight: "100dvh",
-      width: "100%", maxWidth: 430, margin: "0 auto", overflow: "hidden",
-      background: "linear-gradient(160deg, #0d2b2a 0%, #163e3b 35%, #1a5450 65%, #20b2aa 100%)",
-      display: "flex", flexDirection: "column", alignItems: "center",
-      justifyContent: "center", padding: "24px 20px",
-      fontFamily: "'Plus Jakarta Sans', sans-serif",
-    }}>
+    <div className="ls-root" dir={isAr ? "rtl" : "ltr"}>
       <style>{LOGIN_CSS}</style>
 
-      {/* Cercles décoratifs */}
-      <div style={{ position:"absolute", top:-60, right:-60, width:220, height:220, borderRadius:"50%", background:"rgba(45,156,143,0.18)", pointerEvents:"none" }} />
-      <div style={{ position:"absolute", top:50, left:-50, width:140, height:140, borderRadius:"50%", background:"rgba(32,178,170,0.12)", pointerEvents:"none" }} />
-      <div style={{ position:"absolute", bottom:-80, right:-50, width:250, height:250, borderRadius:"50%", background:"rgba(45,156,143,0.14)", pointerEvents:"none" }} />
-      <div style={{ position:"absolute", bottom:60, left:-30, width:110, height:110, borderRadius:"50%", background:"rgba(32,178,170,0.10)", pointerEvents:"none" }} />
+      <div className="ls-bg-gradient" />
+      <div className="ls-grid" />
+      <div className="ls-scanline" />
 
-      {/* Conteneur centré avec largeur max réduite */}
-      <div style={{ position:"relative", zIndex:1, width:"100%", maxWidth: 320, display:"flex", flexDirection:"column", alignItems:"center", direction: isAr ? "rtl" : "ltr" }}>
+      <div className="ls-inner">
 
-        {/* ── LOGO CAISSE ── */}
-        <div className="l-logo" style={{ marginBottom: 12 }}>
-          <div style={{
-            width: 60, height: 60, borderRadius: 18,
-            background: "linear-gradient(135deg, #2d9c8f 0%, #20b2aa 100%)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 6px 20px rgba(32,178,170,0.40), 0 2px 8px rgba(0,0,0,0.25)",
-            border: "2px solid rgba(255,255,255,0.15)",
-          }}>
-            <svg width="34" height="34" viewBox="0 0 48 48" fill="none">
-              <rect x="6" y="18" width="36" height="24" rx="3" fill="rgba(255,255,255,0.15)" stroke="white" strokeWidth="1.8"/>
-              <path d="M4 20 L24 6 L44 20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <rect x="19" y="30" width="10" height="12" rx="2" fill="white" opacity="0.9"/>
-              <rect x="9" y="24" width="8" height="6" rx="1.5" fill="white" opacity="0.7"/>
-              <rect x="31" y="24" width="8" height="6" rx="1.5" fill="white" opacity="0.7"/>
-              <line x1="24" y1="18" x2="24" y2="42" stroke="white" strokeWidth="1.5" opacity="0.4"/>
-              <circle cx="37" cy="12" r="6" fill="#20b2aa" stroke="white" strokeWidth="1.8"/>
-              <text x="37" y="16" textAnchor="middle" fontSize="8" fontWeight="bold" fill="white">$</text>
-            </svg>
-          </div>
-        </div>
-
-        {/* ── Sélecteur langue ── */}
-        <div style={{ position: "absolute", top: 0, right: 0, display: "flex", background: "rgba(255,255,255,0.12)", borderRadius: 20, padding: 3, gap: 2, border: "1px solid rgba(255,255,255,0.2)" }}>
+        <div className="ls-lang">
           {["fr", "ar"].map(l => (
-            <button key={l} className="tbtn" onClick={() => setLoginLang(l)}
-              style={{ background: loginLang === l ? "rgba(255,255,255,0.25)" : "transparent", border: "none", borderRadius: 16, color: "#fff", fontWeight: 700, fontSize: 11, padding: "5px 12px", cursor: "pointer", fontFamily: "inherit", transition: "all .18s" }}>
+            <button key={l} className={`ls-lang-btn${loginLang === l ? " active" : ""}`} onClick={() => setLoginLang(l)}>
               {l === "fr" ? "FR" : "ع"}
             </button>
           ))}
         </div>
 
-        {/* ── TITRE ── */}
-        <div className="l-title" style={{ textAlign: "center", marginBottom: 18 }}>
-          <div style={{
-            fontSize: 24, fontWeight: 900, lineHeight: 1.1, letterSpacing: -0.3,
-            fontFamily: "'Playfair Display', serif",
-            color: "#ffffff",
-            textShadow: "0 2px 10px rgba(0,0,0,0.3)",
-            marginBottom: 5,
-            direction: isAr ? "rtl" : "ltr",
-          }}>
-            {isAr ? "صندوق الشباب" : "Caisse EL CHEBAB"}
-          </div>
-          <div style={{ fontSize: 12, color: "rgba(178,237,233,0.80)", fontWeight: 400, letterSpacing: 0.2 }}>
-            {isAr ? "سجّل دخولك للمتابعة" : "Connectez-vous pour continuer"}
-          </div>
+        <div className="ls-logo-wrap">
+          <svg width="36" height="36" viewBox="0 0 48 48" fill="none">
+            <rect x="7" y="20" width="34" height="22" rx="3" fill="rgba(64,224,208,0.15)" stroke="rgba(64,224,208,0.85)" strokeWidth="1.6"/>
+            <path d="M4 21 L24 7 L44 21" stroke="rgba(64,224,208,0.85)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            <rect x="20" y="31" width="8" height="11" rx="2" fill="rgba(64,224,208,0.9)"/>
+            <rect x="10" y="25" width="7" height="5" rx="1.5" fill="rgba(64,224,208,0.6)"/>
+            <rect x="31" y="25" width="7" height="5" rx="1.5" fill="rgba(64,224,208,0.6)"/>
+            <circle cx="37" cy="14" r="5" fill="#20b2a0" stroke="rgba(255,255,255,0.3)" strokeWidth="1.4"/>
+            <text x="37" y="17.5" textAnchor="middle" fontSize="7" fontWeight="bold" fill="white">$</text>
+          </svg>
         </div>
 
-        {/* ── CARTE ── */}
-        <div className="l-card" style={{
-          width: "100%",
-          background: "rgba(255,255,255,0.08)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          borderRadius: 20,
-          border: "1px solid rgba(255,255,255,0.18)",
-          padding: "18px 16px 16px",
-          boxShadow: "0 6px 30px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.12)",
-        }}>
+        <div className="ls-title-block">
+          <div className="ls-title">{isAr ? "صندوق الشباب" : "Caisse Al Shabab"}</div>
+          <div className="ls-subtitle">{isAr ? "خزينة رقمية آمنة" : "Secure Digital Vault"}</div>
+        </div>
 
-          {/* Champ NOM */}
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(178,237,233,0.85)", letterSpacing: 1.6, textTransform: "uppercase", marginBottom: 5 }}>{isAr ? "الاسم" : "NOM"}</div>
+        <div className="ls-card">
+
+          <label className="ls-label">{isAr ? "الاسم" : "Username"}</label>
+          <div className="ls-inp-wrap">
+            <span className="ls-inp-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(64,224,208,0.8)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
             <input
-              className="l-inp"
+              className="ls-inp"
               value={name}
               onChange={e => { setName(e.target.value); setError(""); }}
-              onFocus={() => setNameFocus(true)}
-              onBlur={() => setNameFocus(false)}
               onKeyDown={e => e.key === "Enter" && handleLogin()}
-              placeholder={isAr ? "اسمك..." : "Votre nom..."}
-              style={{
-                width: "100%",
-                background: nameFocus ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)",
-                border: `1.5px solid ${nameFocus ? "rgba(45,156,143,0.9)" : "rgba(255,255,255,0.18)"}`,
-                borderRadius: 10, padding: "9px 12px", fontSize: 13, color: "#fff",
-                outline: "none", fontFamily: "inherit", transition: "all .2s",
-                boxShadow: nameFocus ? "0 0 0 3px rgba(45,156,143,0.22)" : "none",
-              }}
+              placeholder={isAr ? "اسمك..." : "Enter identification"}
+              autoComplete="username"
             />
           </div>
 
-          {/* Champ CODE PIN */}
-          <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(178,237,233,0.85)", letterSpacing: 1.6, textTransform: "uppercase", marginBottom: 5 }}>{isAr ? "رمز PIN" : "CODE PIN"}</div>
+          <div className="ls-forgot">
+            <label className="ls-label" style={{ marginBottom: 0 }}>{isAr ? "رمز PIN" : "Access Key"}</label>
+            <button className="ls-forgot-btn">{isAr ? "نسيت؟" : "Forgot?"}</button>
+          </div>
+          <div className="ls-inp-wrap">
+            <span className="ls-inp-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(64,224,208,0.8)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+              </svg>
+            </span>
             <input
-              className="l-inp"
+              className={`ls-inp pin-inp${shake ? " has-error" : ""}`}
               value={pin}
               onChange={e => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); setPin(v); setError(""); }}
-              onFocus={() => setPinFocus(true)}
-              onBlur={() => setPinFocus(false)}
               onKeyDown={e => e.key === "Enter" && handleLogin()}
               placeholder="● ● ● ●"
               type="password"
               inputMode="numeric"
               maxLength={4}
-              style={{
-                width: "100%",
-                background: pinFocus ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)",
-                border: `1.5px solid ${shake ? "rgba(239,68,68,0.9)" : pinFocus ? "rgba(45,156,143,0.9)" : "rgba(255,255,255,0.18)"}`,
-                borderRadius: 10, padding: "9px 12px", fontSize: 18, color: "#fff",
-                outline: "none", fontFamily: "inherit", transition: "all .2s",
-                letterSpacing: 9,
-                boxShadow: shake ? "0 0 0 3px rgba(239,68,68,0.22)" : pinFocus ? "0 0 0 3px rgba(45,156,143,0.22)" : "none",
-                animation: shake ? "shake .4s ease" : "none",
-              }}
             />
           </div>
 
-          {/* Erreur */}
           {error && (
-            <div style={{ background: "rgba(239,68,68,0.2)", border: "1px solid rgba(239,68,68,0.4)", borderRadius: 10, padding: "8px 12px", marginBottom: 12, fontSize: 12, color: "#fca5a5", fontWeight: 500 }}>
-              ⚠️ {error}
+            <div className="ls-error">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" strokeWidth="2" strokeLinecap="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              {error}
             </div>
           )}
 
-          {/* Bouton */}
-          <button className="tbtn l-btn" onClick={handleLogin}
-            style={{
-              width: "100%",
-              background: "linear-gradient(135deg, #2d9c8f 0%, #20b2aa 100%)",
-              border: "none", color: "#fff", borderRadius: 10,
-              padding: "11px", fontSize: 13, fontWeight: 700,
-              cursor: "pointer", fontFamily: "inherit",
-              boxShadow: "0 5px 18px rgba(32,178,170,0.48), inset 0 1px 0 rgba(255,255,255,0.15)",
-              letterSpacing: 0.3, transition: "all .18s",
-            }}>
-            {isAr ? "تسجيل الدخول" : "Se connecter"}
+          <button className="ls-btn" onClick={handleLogin} disabled={loading}>
+            {loading ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: "spin 1s linear infinite" }}>
+                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".25"/><path d="M12 3a9 9 0 019 9"/>
+              </svg>
+            ) : (
+              <>
+                {isAr ? "تسجيل الدخول" : "Authenticate Session"}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+              </>
+            )}
           </button>
         </div>
+
+        <div className="ls-divider">
+          <div className="ls-divider-line" />
+          <span className="ls-divider-text">{isAr ? "أو" : "or"}</span>
+          <div className="ls-divider-line" />
+        </div>
+        <button className="ls-touchid">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2a5 5 0 015 5v3a5 5 0 01-10 0V7a5 5 0 015-5z"/>
+            <path d="M12 12v3"/><path d="M9 9a3 3 0 006 0"/>
+            <path d="M5 15a9 9 0 0014 0"/>
+          </svg>
+          {isAr ? "الدخول ببصمة الإصبع" : "Touch ID Access"}
+        </button>
+
       </div>
     </div>
   );
 }
+
 
 
 export default function App() {
