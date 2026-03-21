@@ -237,15 +237,15 @@ function useSupabaseData() {
   const [txs, setTxs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchAll = async () => {
-    setLoading(true);
+  const fetchAll = async (silent = false) => {
+    if (!silent) setLoading(true);
     const [{ data: mData }, { data: tData }] = await Promise.all([
       supabase.from("members").select("*").order("created_at", { ascending: true }),
       supabase.from("transactions").select("*").order("created_at", { ascending: false }),
     ]);
     if (mData) setMembers(mData.map(m => ({ id: m.id, name: m.name, phone: m.phone || "" })));
     if (tData) setTxs(tData.map(t => ({ id: t.id, type: t.type, memberId: t.member_id, memberName: t.member_name, amount: t.amount, date: t.date, note: t.note || "" })));
-    setLoading(false);
+    if (!silent) setLoading(false);
   };
 
   useEffect(() => { fetchAll(); }, []);
@@ -1252,34 +1252,23 @@ function PdfReportModal({ txs, members, onClose, year }) {
 
   const pdfStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap');
-    @media print {
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .pdf-wrap { padding: 20px; }
-      .pdf-section { page-break-inside: avoid; break-inside: avoid; }
-      .pdf-header { page-break-after: avoid; break-after: avoid; }
-      .pdf-kpi-row { page-break-inside: avoid; break-inside: avoid; }
-      .pdf-table { page-break-inside: auto; }
-      .pdf-table tr { page-break-inside: avoid; break-inside: avoid; }
-      .pdf-table thead { display: table-header-group; }
-      .pdf-footer { page-break-before: avoid; break-before: avoid; }
-    }
-    .pdf-wrap{font-family:'Times New Roman','Times',serif;direction:rtl;background:#fff;color:#1a2b2e;padding:32px;max-width:860px;margin:0 auto;font-size:14px;}
+    .pdf-wrap{font-family:'Noto Sans Arabic','Times New Roman','Times',serif;direction:rtl;background:#fff;color:#1a2b2e;padding:32px;max-width:860px;margin:0 auto;font-size:14px;}
     .pdf-header{background:linear-gradient(135deg,#1a2b2e,#2d9c8f);color:#fff;border-radius:18px;padding:28px 32px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;}
-    .pdf-title{font-size:24px;font-weight:800;margin-bottom:4px;}
+    .pdf-title{font-size:22px;font-weight:800;margin-bottom:4px;}
     .pdf-sub{font-size:14px;opacity:0.7;}
-    .pdf-date{font-size:14px;opacity:0.6;text-align:left;}
+    .pdf-date{font-size:12px;opacity:0.6;text-align:left;}
     .pdf-kpi-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:24px;}
     .pdf-kpi{border-radius:14px;padding:16px 14px;border:1.5px solid #e0f5f3;}
-    .pdf-kpi-label{font-size:12px;font-weight:600;color:#7a9ea2;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
-    .pdf-kpi-value{font-size:20px;font-weight:800;}
+    .pdf-kpi-label{font-size:11px;font-weight:600;color:#7a9ea2;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
+    .pdf-kpi-value{font-size:18px;font-weight:800;}
     .pdf-section{background:#fff;border:1.5px solid #e0f5f3;border-radius:16px;padding:20px;margin-bottom:20px;}
-    .pdf-section-title{font-size:16px;font-weight:700;color:#1a2b2e;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e0f5f3;display:flex;align-items:center;gap:8px;}
+    .pdf-section-title{font-size:14px;font-weight:700;color:#1a2b2e;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e0f5f3;display:flex;align-items:center;gap:8px;}
     .pdf-table{width:100%;border-collapse:collapse;}
-    .pdf-table th{background:#f0faf9;color:#2d9c8f;font-size:14px;font-weight:700;padding:9px 12px;text-align:right;border-bottom:2px solid #e0f5f3;}
-    .pdf-table td{padding:8px 12px;font-size:14px;border-bottom:1px solid #f0faf9;text-align:right;color:#1a2b2e;}
+    .pdf-table th{background:#f0faf9;color:#2d9c8f;font-size:13px;font-weight:700;padding:9px 12px;text-align:right;border-bottom:2px solid #e0f5f3;}
+    .pdf-table td{padding:8px 12px;font-size:13px;border-bottom:1px solid #f0faf9;text-align:right;color:#1a2b2e;}
     .pdf-table tr:last-child td{border-bottom:none;}
-    .pdf-badge{display:inline-block;border-radius:6px;padding:2px 8px;font-size:13px;font-weight:600;}
-    .pdf-footer{text-align:center;color:#7a9ea2;font-size:13px;margin-top:24px;padding-top:16px;border-top:1px solid #e0f5f3;}
+    .pdf-badge{display:inline-block;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:600;}
+    .pdf-footer{text-align:center;color:#7a9ea2;font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid #e0f5f3;}
   `;
 
   return (
@@ -1296,7 +1285,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
         <div style={{ padding: "0 20px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <div style={{ color: C.text, fontWeight: 800, fontSize: 17 }}>تقرير الصندوق {year}</div>
-            <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>تقريرٌ ماليٌّ شاملٌ — معاينة</div>
+            <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>تقرير مالي شامل — معاينة</div>
           </div>
           <button onClick={onClose} className="tbtn" style={{ background: C.mintPale, border: `1px solid ${C.mintLt}`, color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, cursor: "pointer", flexShrink: 0 }}>✕</button>
         </div>
@@ -1407,7 +1396,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 
           {/* Info */}
           <div style={{ background: C.mintPale, borderRadius: 12, padding: "11px 14px", marginBottom: 16, fontSize: 11, color: C.muted, lineHeight: 1.6 }}>
-            📄 سيتم إنشاء تقريرٍ PDF شاملٍ يتضمن جميع العمليات المُسجَّلة ({allTxsSorted.length} عملية)، الرسوم البيانية، قائمة الأعضاء وتقريرٌ ماليٌّ مفصَّل.
+            📄 سيتم إنشاء تقرير PDF شامل يتضمن جميع العمليات المسجلة ({allTxsSorted.length} عملية)، الرسوم البيانية، قائمة الأعضاء وتقرير مالي مفصل.
           </div>
 
           {/* Hidden print content */}
@@ -1417,8 +1406,8 @@ function PdfReportModal({ txs, members, onClose, year }) {
               {/* Header */}
               <div className="pdf-header">
                 <div>
-                  <div className="pdf-title">تقريرٌ عن الوضعية المالية للصندوق التعاوني</div>
-                  <div className="pdf-sub">السنة المالية {year} — تقريرٌ شاملٌ لجميع العمليات</div>
+                  <div className="pdf-title">تقرير عن الوضعية المالية للصندوق التعاوني</div>
+                  <div className="pdf-sub">السنة المالية {year} — تقرير شامل لجميع العمليات</div>
                 </div>
                 <div className="pdf-date">
                   <div style={{ fontSize: 13, fontWeight: 600, color: "#b2ede7" }}>تاريخ الإصدار</div>
@@ -1659,7 +1648,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 
               {/* Footer */}
               <div className="pdf-footer">
-                <div>تقريرٌ صادرٌ عن أمين الصندوق التعاوني — تاريخ الإصدار: {todayStr}</div>
+                <div>تقرير صادر عن أمين الصندوق التعاوني — تاريخ الإصدار: {todayStr}</div>
                 <div style={{ marginTop: 4 }}>جميع المبالغ بالأوقية الموريتانية (MRU)</div>
               </div>
             </div>
@@ -1671,9 +1660,18 @@ function PdfReportModal({ txs, members, onClose, year }) {
             const html = `<!DOCTYPE html><html dir="rtl" lang="ar">
 <head><meta charset="UTF-8"/><title>تقرير الصندوق - ${year}</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Times New Roman','Times',serif;background:#fff;color:#1a2b2e;direction:rtl;font-size:14px;}
-  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.pdf-section{page-break-inside:avoid;break-inside:avoid;}.pdf-header{page-break-after:avoid;}.pdf-kpi-row{page-break-inside:avoid;}.pdf-table{page-break-inside:auto;}.pdf-table tr{page-break-inside:avoid;}.pdf-table thead{display:table-header-group;}.pdf-footer{page-break-before:avoid;}}
+  body{font-family:'Noto Sans Arabic','Times New Roman','Times',serif;background:#fff;color:#1a2b2e;direction:rtl;font-size:14px;}
+  @media print{
+    body{margin:0;padding:0;}
+    .pdf-wrap{padding:16px !important;max-width:100% !important;}
+    .pdf-section{page-break-inside:avoid;break-inside:avoid;}
+    .pdf-kpi-row{page-break-inside:avoid;break-inside:avoid;}
+    table{page-break-inside:auto;}
+    tr{page-break-inside:avoid;break-inside:avoid;}
+    thead{display:table-header-group;}
+  }
 </style></head><body>${el.innerHTML}</body></html>`;
             const blob = new Blob([html], { type: "text/html;charset=utf-8" });
             const url = URL.createObjectURL(blob);
@@ -1868,145 +1866,85 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
     try {
       const data = await file.arrayBuffer();
       const wb = XLSX.read(data);
-      const sheetNames = wb.SheetNames;
-
-      // Helper: parse date from various formats
-      const parseDate = (raw) => {
-        if (!raw) return new Date().toISOString().split("T")[0];
-        if (raw instanceof Date) return raw.toISOString().split("T")[0];
-        if (typeof raw === "number") { const d = new Date(Math.round((raw - 25569)*86400*1000)); return d.toISOString().split("T")[0]; }
-        const s = String(raw).trim();
-        if (s.includes("\\") || s.includes("/")) {
-          const parts = s.split(/[\\/]/);
-          if (parts.length === 3) {
-            const [d, m, y] = parts;
-            return `${y.padStart(4,"0")}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
-          }
-        }
-        return s || new Date().toISOString().split("T")[0];
-      };
-
-      // Helper: insert a transaction row
-      const insertTx = async (type, memberName, amount, date, note, memberIdx) => {
-        if (amount <= 0) return 0;
-        const foundMember = memberIdx[memberName.toLowerCase()];
-        const memberId = foundMember ? foundMember.id : null;
-        const finalMemberName = type === "depense" ? "—" : (foundMember ? foundMember.name : memberName);
-        const { data: newTx } = await supabase.from("transactions").insert([{
-          type, member_id: memberId, member_name: finalMemberName, amount, date, note
-        }]).select().single();
-        return newTx ? 1 : 0;
+      const typeMap = {
+        "Contribution": "contribution", "contribution": "contribution",
+        "Contributions": "contribution", "contributions": "contribution",
+        "Don": "don", "don": "don", "Dons": "don", "dons": "don",
+        "Dépense": "depense", "depense": "depense",
+        "Dépenses": "depense", "depenses": "depense",
+        "مساهمة": "contribution", "المساهمات": "contribution",
+        "تبرع": "don", "التبرعات": "don",
+        "مصروف": "depense", "المصروفات": "depense"
       };
 
       // ── Étape 1 : construire un index des membres existants (nom → id) ──
       const memberIndex = {};
       members.forEach(m => { memberIndex[m.name.trim().toLowerCase()] = m; });
 
+      // ── Étape 2 : importer les membres de la feuille Membres ──
       let membersImported = 0;
-      let txsImported = 0;
       const newMemberIndex = { ...memberIndex };
-
-      // ── DÉTECTION DU FORMAT ──────────────────────────────────────────────────
-      // Format A : feuilles "Membres" + "Transactions"  (format import standard)
-      // Format B : feuilles "Contributions YYYY" / "Dons YYYY" / "Dépenses YYYY" (export de l'app)
-      const hasStdSheets  = sheetNames.includes("Membres") || sheetNames.includes("Transactions");
-      const hasExportSheet = sheetNames.some(n => /^(Contributions|Dons|D.penses)/i.test(n));
-
-      // ── FORMAT A : Membres + Transactions ───────────────────────────────────
-      if (hasStdSheets) {
-        // Import membres
-        if (sheetNames.includes("Membres")) {
-          const rows = XLSX.utils.sheet_to_json(wb.Sheets["Membres"]);
-          for (const row of rows) {
-            const name = String(row["Membre"] || row["membre"] || row["Name"] || row["name"] || "").trim();
-            const phone = String(row["Téléphone"] || row["telephone"] || row["Phone"] || "").trim();
-            if (!name) continue;
-            const key = name.toLowerCase();
-            if (!newMemberIndex[key]) {
-              const { data: newM } = await supabase.from("members").insert([{ name, phone }]).select().single();
-              if (newM) { newMemberIndex[key] = { id: newM.id, name: newM.name, phone: newM.phone || "" }; membersImported++; }
-            }
-          }
-        }
-        // Import transactions
-        if (sheetNames.includes("Transactions")) {
-          const typeMap = {
-            "Contribution":"contribution","contribution":"contribution","Contributions":"contribution",
-            "Don":"don","don":"don","Dons":"don",
-            "Dépense":"depense","depense":"depense","Dépenses":"depense","depenses":"depense",
-            "مساهمة":"contribution","المساهمات":"contribution",
-            "تبرع":"don","التبرعات":"don",
-            "مصروف":"depense","المصروفات":"depense"
-          };
-          const rows = XLSX.utils.sheet_to_json(wb.Sheets["Transactions"]);
-          for (const row of rows) {
-            const type = typeMap[row["Type"] || row["type"]] || "contribution";
-            const amount = parseFloat(row["Montant"] || row["montant"] || row["Amount"] || 0);
-            const memberName = String(row["Membre"] || row["membre"] || "—").trim();
-            const date = parseDate(row["Date"] || row["date"]);
-            const note = String(row["Note"] || row["note"] || "");
-            txsImported += await insertTx(type, memberName, amount, date, note, newMemberIndex);
-          }
-        }
-      }
-
-      // ── FORMAT B : Contributions / Dons / Dépenses (fichier exporté par l'app) ─
-      if (hasExportSheet) {
-        // Parcourir toutes les feuilles et détecter le type
-        for (const sheetName of sheetNames) {
-          const sn = sheetName.toLowerCase();
-          let txType = null;
-          if (/^contribution/.test(sn)) txType = "contribution";
-          else if (/^don/.test(sn)) txType = "don";
-          else if (/^d.pense/.test(sn) || /^depense/.test(sn)) txType = "depense";
-          if (!txType) continue;
-
-          const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]);
-          // La matrice contributions/dons a : Membre | janvier | ... | décembre | TOTAL
-          // La feuille dépenses a : Description | Date | Mois | Montant | Note
-          const MONTHS_FR = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
-
-          for (const row of rows) {
-            const firstKey = Object.keys(row)[0];
-            const nameVal = String(row[firstKey] || "").trim();
-            if (!nameVal || nameVal.toUpperCase() === "TOTAL" || !nameVal) continue;
-
-            if (txType === "depense") {
-              // Feuille dépenses : ligne par opération
-              const amount = parseFloat(row["Montant (MRU)"] || row["Montant"] || row["montant"] || 0);
-              const date = parseDate(row["Date"] || row["date"]);
-              const note = String(row["Description / Objet"] || row["Note"] || row["note"] || nameVal || "");
-              txsImported += await insertTx("depense", "—", amount, date, note, newMemberIndex);
-            } else {
-              // Feuille contributions / dons : matrice Membre × Mois
-              // Vérifier ou créer le membre
-              const memberName = nameVal;
-              const key = memberName.toLowerCase();
-              if (!newMemberIndex[key]) {
-                const { data: newM } = await supabase.from("members").insert([{ name: memberName, phone: "" }]).select().single();
-                if (newM) { newMemberIndex[key] = { id: newM.id, name: newM.name, phone: "" }; membersImported++; }
-              }
-              // Parcourir les colonnes mois
-              for (let mi = 0; mi < 12; mi++) {
-                const monthKey = MONTHS_FR[mi];
-                // Chercher la colonne (case-insensitive, accent-insensitive)
-                const colKey = Object.keys(row).find(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"") === monthKey.normalize("NFD").replace(/[\u0300-\u036f]/g,""));
-                if (!colKey) continue;
-                const amount = parseFloat(row[colKey] || 0);
-                if (amount <= 0) continue;
-                // Utiliser le 1er du mois de l'année extraite du nom de la feuille
-                const yearMatch = sheetName.match(/\d{4}/);
-                const yr = yearMatch ? yearMatch[0] : new Date().getFullYear();
-                const date = `${yr}-${String(mi+1).padStart(2,"0")}-01`;
-                txsImported += await insertTx(txType, memberName, amount, date, "", newMemberIndex);
-              }
+      if (wb.SheetNames.includes("Membres")) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets["Membres"]);
+        for (const row of rows) {
+          const name = String(row["Membre"] || row["membre"] || row["Name"] || row["name"] || "").trim();
+          const phone = String(row["Téléphone"] || row["telephone"] || row["Phone"] || "").trim();
+          if (!name) continue;
+          const key = name.toLowerCase();
+          if (!newMemberIndex[key]) {
+            // Créer le membre dans Supabase et récupérer son ID
+            const { data: newM } = await supabase.from("members").insert([{ name, phone }]).select().single();
+            if (newM) {
+              const m = { id: newM.id, name: newM.name, phone: newM.phone || "" };
+              newMemberIndex[key] = m;
+              membersImported++;
             }
           }
         }
       }
 
-      // ── Étape finale : recharger toutes les données depuis Supabase ──
-      await onRefresh();
+      // ── Étape 3 : importer les transactions en liant l'ID du membre ──
+      let txsImported = 0;
+      if (wb.SheetNames.includes("Transactions")) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets["Transactions"]);
+        for (const row of rows) {
+          const type = typeMap[row["Type"] || row["type"]] || "contribution";
+          const amount = parseFloat(row["Montant"] || row["montant"] || row["Amount"] || 0);
+          const memberName = String(row["Membre"] || row["membre"] || "—").trim();
+          let date = row["Date"] || row["date"];
+          if (date instanceof Date) date = date.toISOString().split("T")[0];
+          else if (typeof date === "number") { const d = new Date(Math.round((date - 25569)*86400*1000)); date = d.toISOString().split("T")[0]; }
+          else {
+            date = String(date || "").trim();
+            // Handle formats: "01\03\2026", "01/03/2026", "2026-03-01"
+            if (date.includes("\\") || date.includes("/")) {
+              const parts = date.split(/[\\/]/);
+              if (parts.length === 3) {
+                // DD/MM/YYYY → YYYY-MM-DD
+                const [d, m, y] = parts;
+                date = `${y.padStart(4,"0")}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
+              }
+            }
+            if (!date || date === "undefined") date = new Date().toISOString().split("T")[0];
+          }
+          const note = String(row["Note"] || row["note"] || "");
+          if (amount <= 0) continue;
+
+          // Chercher l'ID du membre par son nom
+          const foundMember = newMemberIndex[memberName.toLowerCase()];
+          const memberId = foundMember ? foundMember.id : null;
+          const finalMemberName = type === "depense" ? "—" : (foundMember ? foundMember.name : memberName);
+
+          const { data: newTx } = await supabase.from("transactions").insert([{
+            type, member_id: memberId, member_name: finalMemberName,
+            amount, date, note
+          }]).select().single();
+          if (newTx) txsImported++;
+        }
+      }
+
+      // ── Étape 4 : recharger toutes les données depuis Supabase (silencieux) ──
+      await onRefresh(true);
       setImportMsg(t.importSuccess(membersImported, txsImported));
     } catch(err) {
       console.error(err);
@@ -2664,7 +2602,7 @@ export default function App() {
   );
 
   return (
-    <div style={{ background: "#F2EFE9", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: "'Times New Roman','Times',serif", color: C.text, position: "relative", paddingBottom: 90, overflowX: "hidden" }}>
+    <div style={{ background: "#F2EFE9", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: "'Times New Roman','Times',serif", color: C.text, position: "relative", paddingBottom: 90, overflowX: "hidden" }}>
       <style>{G}</style>
       <div style={{ padding: "20px 16px" }}>
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
