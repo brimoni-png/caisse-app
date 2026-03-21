@@ -1568,39 +1568,54 @@ function PdfReportModal({ txs, members, onClose, year }) {
                 </table>
               </div>
 
-              {/* All transactions table */}
+              {/* Members contributions summary table */}
               <div className="pdf-section">
-                <div className="pdf-section-title">📋 قائمة جميع العمليات ({allTxsSorted.length})</div>
+                <div className="pdf-section-title">👥 مساهمات جميع الأعضاء</div>
                 <table className="pdf-table">
                   <thead>
                     <tr>
                       <th>#</th>
-                      <th>التاريخ</th>
-                      <th>النوع</th>
-                      <th>العضو / الجهة</th>
-                      <th>المبلغ</th>
-                      <th>ملاحظة</th>
+                      <th>اسم العضو</th>
+                      <th>إجمالي المساهمات</th>
+                      <th>نسبة المشاركة</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {allTxsSorted.map((tx, i) => {
-                      const typeLabel = { contribution: "مساهمة", don: "تبرع", depense: "مصروف" }[tx.type];
-                      const typeColor = { contribution: "#2d9c8f", don: "#20b2aa", depense: "#e05252" }[tx.type];
-                      const typeBg   = { contribution: "rgba(45,156,143,0.1)", don: "rgba(32,178,170,0.1)", depense: "rgba(224,82,82,0.1)" }[tx.type];
-                      const d = new Date(tx.date).toLocaleDateString("ar-MA", { day: "2-digit", month: "short", year: "numeric" });
-                      return (
-                        <tr key={tx.id}>
-                          <td style={{ color: "#7a9ea2", fontWeight: 600 }}>{i + 1}</td>
-                          <td>{d}</td>
-                          <td>
-                            <span className="pdf-badge" style={{ color: typeColor, background: typeBg }}>{typeLabel}</span>
-                          </td>
-                          <td style={{ fontWeight: 600 }}>{tx.memberName || "—"}</td>
-                          <td style={{ color: typeColor, fontWeight: 700 }}>{tx.type === "depense" ? "−" : "+"}{fmtAR(tx.amount)} MRU</td>
-                          <td style={{ color: "#7a9ea2" }}>{tx.note || "—"}</td>
-                        </tr>
-                      );
-                    })}
+                    {(() => {
+                      const memberContribs = members.map(m => {
+                        const mContribs = contribs.filter(tx => tx.memberId === m.id);
+                        const total = mContribs.reduce((a, tx) => a + tx.amount, 0);
+                        return { ...m, total };
+                      }).sort((a, b) => b.total - a.total);
+                      const grandTotal = memberContribs.reduce((a, m) => a + m.total, 0);
+                      return memberContribs.map((m, i) => {
+                        const pct = grandTotal > 0 ? Math.round(m.total / grandTotal * 100) : 0;
+                        return (
+                          <tr key={m.id}>
+                            <td style={{ color: "#7a9ea2", fontWeight: 600 }}>{i + 1}</td>
+                            <td style={{ fontWeight: 600 }}>{m.name}</td>
+                            <td style={{ color: m.total > 0 ? "#2d9c8f" : "#7a9ea2", fontWeight: 700 }}>
+                              {m.total > 0 ? `+${fmtAR(m.total)} MRU` : "—"}
+                            </td>
+                            <td>
+                              {m.total > 0 ? (
+                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                  <div style={{ flex: 1, background: "#e0f5f3", borderRadius: 3, height: 6 }}>
+                                    <div style={{ width: `${pct}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
+                                  </div>
+                                  <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700, minWidth: 28 }}>{pct}%</span>
+                                </div>
+                              ) : "—"}
+                            </td>
+                          </tr>
+                        );
+                      });
+                    })()}
+                    <tr style={{ background: "#f0faf9", fontWeight: 700 }}>
+                      <td colSpan={2} style={{ fontWeight: 800 }}>الإجمالي</td>
+                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>{fmtAR(totalC)} MRU</td>
+                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>100%</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
