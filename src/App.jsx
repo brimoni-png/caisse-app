@@ -200,9 +200,9 @@ const inits = (n) => n.split(" ").slice(0, 2).map((w) => w[0] || "").join("").to
 const getYrs = (txs) => { const s = new Set(txs.map((t) => new Date(t.date).getFullYear())); s.add(new Date().getFullYear()); return [...s].sort((a, b) => b - a); };
 
 const CFG = (lang) => ({
-  contribution: { label: T[lang].txTypes.contribution, color: C.forestLt, lt: "rgba(200,135,42,0.12)", icon: () => Ic.up(C.forestLt), sign: "+" },
-  don:          { label: T[lang].txTypes.don,          color: C.gold,      lt: C.goldLt,              icon: () => Ic.heart(C.gold),   sign: "+" },
-  depense:      { label: T[lang].txTypes.depense,      color: C.red,       lt: C.redLt,               icon: () => Ic.dn(C.red),       sign: "−" },
+  contribution: { label: T[lang].txTypes.contribution, color: C.forestLt, lt: "rgba(200,135,42,0.12)", icon: () => Ic.up(C.forestLt), sign: "" },
+  don:          { label: T[lang].txTypes.don,          color: C.gold,      lt: C.goldLt,              icon: () => Ic.heart(C.gold),   sign: "" },
+  depense:      { label: T[lang].txTypes.depense,      color: C.red,       lt: C.redLt,               icon: () => Ic.dn(C.red),       sign: "" },
 });
 
 const AVC = [
@@ -609,9 +609,9 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
   const recent  = [...txs].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 4);
 
   const statsRow = [
-    { label: t.stats.contribution, value: contrib, accentColor: C.mint,   sign: "+", type: "contribution" },
-    { label: t.stats.don,          value: dons,    accentColor: "#F5C842", sign: "+", type: "don" },
-    { label: t.stats.depense,      value: dep,     accentColor: "#FF9E9E", sign: "−", type: "depense" },
+    { label: t.stats.contribution, value: contrib, accentColor: C.mint,   sign: "", type: "contribution" },
+    { label: t.stats.don,          value: dons,    accentColor: "#F5C842", sign: "", type: "don" },
+    { label: t.stats.depense,      value: dep,     accentColor: "#FF9E9E", sign: "", type: "depense" },
   ];
 
   return (
@@ -699,7 +699,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.contribution}</div>
-              <div style={{ color: "#2d9c8f", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>+{fmtN(contrib)}</div>
+              <div style={{ color: "#2d9c8f", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(contrib)}</div>
             </div>
           </button>
           {/* Dons */}
@@ -711,7 +711,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.don}</div>
-              <div style={{ color: "#20b2aa", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>+{fmtN(dons)}</div>
+              <div style={{ color: "#20b2aa", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(dons)}</div>
             </div>
           </button>
           {/* Dépenses */}
@@ -723,7 +723,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.depense}</div>
-              <div style={{ color: "#e05252", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>-{fmtN(dep)}</div>
+              <div style={{ color: "#e05252", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(dep)}</div>
             </div>
           </button>
           {/* Solde année passée — cliquable */}
@@ -740,7 +740,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
                 {lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}
               </div>
               <div style={{ color: soldePrev >= 0 ? "#2d9c8f" : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>
-                {soldePrev >= 0 ? "+" : ""}{fmtN(Math.abs(soldePrev))}
+                {fmtN(Math.abs(soldePrev))}
               </div>
               {soldePrevManual !== null && <div style={{ fontSize: 8, color: C.sub, marginTop: 2 }}>✏️ {lang === "ar" ? "معدّل" : "modifié"}</div>}
             </div>
@@ -1001,7 +1001,7 @@ function MemberDetailModal({ member, txs, lang, onClose }) {
                   <div style={{ color: C.text, fontSize: 12, fontWeight: 600 }}>{fmtDt(tx.date, lang)}</div>
                   {tx.note && <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{tx.note}</div>}
                 </div>
-                <div style={{ color: "#8B5CF6", fontWeight: 700, fontSize: 13 }}>+{fmtN(tx.amount)}</div>
+                <div style={{ color: "#8B5CF6", fontWeight: 700, fontSize: 13 }}>{fmtN(tx.amount)}</div>
               </div>
             ))}
           </div>
@@ -1297,8 +1297,8 @@ function PdfReportModal({ txs, members, onClose, year }) {
             {[
               { label: "المساهمات", val: totalC, color: "#2d9c8f", bg: "rgba(45,156,143,0.07)", sign: "" },
               { label: "التبرعات",  val: totalD, color: "#20b2aa", bg: "rgba(32,178,170,0.07)", sign: "" },
-              { label: "المصروفات", val: totalE, color: "#e05252", bg: "rgba(224,82,82,0.07)",  sign: "−" },
-              { label: "الرصيد الصافي", val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", bg: solde >= 0 ? "rgba(45,156,143,0.07)" : "rgba(224,82,82,0.07)", sign: solde >= 0 ? "" : "−" },
+              { label: "المصروفات", val: totalE, color: "#e05252", bg: "rgba(224,82,82,0.07)",  sign: "" },
+              { label: "الرصيد الصافي", val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", bg: solde >= 0 ? "rgba(45,156,143,0.07)" : "rgba(224,82,82,0.07)", sign: "" },
             ].map(k => (
               <div key={k.label} style={{ background: k.bg, borderRadius: 14, padding: "14px 12px", border: `1.5px solid ${k.color}22` }}>
                 <div style={{ color: C.muted, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 5 }}>{k.label}</div>
@@ -1419,8 +1419,8 @@ function PdfReportModal({ txs, members, onClose, year }) {
                 {[
                   { label: "إجمالي المساهمات", val: totalC, color: "#2d9c8f", sign: "" },
                   { label: "إجمالي التبرعات",  val: totalD, color: "#20b2aa", sign: "" },
-                  { label: "إجمالي المصروفات", val: totalE, color: "#e05252", sign: "−" },
-                  { label: "الرصيد الصافي",    val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", sign: solde >= 0 ? "" : "−" },
+                  { label: "إجمالي المصروفات", val: totalE, color: "#e05252", sign: "" },
+                  { label: "الرصيد الصافي",    val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", sign: "" },
                 ].map(k => (
                   <div key={k.label} className="pdf-kpi" style={{ background: k.color + "0d" }}>
                     <div className="pdf-kpi-label">{k.label}</div>
@@ -1953,9 +1953,9 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
       {/* 3 CARTES STATS 2026 */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
         {[
-          { label: t.stats.contribution, value: yC, color: "#8B5CF6", bg: "rgba(139,92,246,0.08)", icon: Ic.up("#8B5CF6", 15), sign: "+" },
-          { label: t.stats.don,          value: yD, color: "#DB2777", bg: "rgba(219,39,119,0.08)", icon: Ic.heart("#DB2777", 15), sign: "+" },
-          { label: t.stats.depense,      value: yE, color: C.red,     bg: C.redLt,                icon: Ic.dn(C.red, 15), sign: "−" },
+          { label: t.stats.contribution, value: yC, color: "#8B5CF6", bg: "rgba(139,92,246,0.08)", icon: Ic.up("#8B5CF6", 15), sign: "" },
+          { label: t.stats.don,          value: yD, color: "#DB2777", bg: "rgba(219,39,119,0.08)", icon: Ic.heart("#DB2777", 15), sign: "" },
+          { label: t.stats.depense,      value: yE, color: C.red,     bg: C.redLt,                icon: Ic.dn(C.red, 15), sign: "" },
         ].map(s => (
           <Card key={s.label} sx={{ padding: "12px 10px" }}>
             <div style={{ width: 30, height: 30, borderRadius: 9, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>{s.icon}</div>
