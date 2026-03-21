@@ -1620,45 +1620,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                 </table>
               </div>
 
-              {/* Members contributions detail */}
-              {topMembers.length > 0 && (
-                <div className="pdf-section">
-                  <div className="pdf-section-title">👥 تفصيل مساهمات الأعضاء</div>
-                  <table className="pdf-table">
-                    <thead>
-                      <tr>
-                        <th>العضو</th>
-                        <th>عدد المساهمات</th>
-                        <th>إجمالي المساهمات</th>
-                        <th>نسبة المشاركة</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {members.map(m => {
-                        const mContribs = contribs.filter(tx => tx.memberId === m.id);
-                        const total = mContribs.reduce((a, tx) => a + tx.amount, 0);
-                        if (total === 0) return null;
-                        const pct = totalC > 0 ? Math.round(total / totalC * 100) : 0;
-                        return (
-                          <tr key={m.id}>
-                            <td style={{ fontWeight: 600 }}>{m.name}</td>
-                            <td style={{ textAlign: "center" }}>{mContribs.length}</td>
-                            <td style={{ color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(total)} MRU</td>
-                            <td>
-                              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                <div style={{ flex: 1, background: "#e0f5f3", borderRadius: 3, height: 6 }}>
-                                  <div style={{ width: `${pct}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
-                                </div>
-                                <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700, minWidth: 28 }}>{pct}%</span>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+
 
               {/* Footer */}
               <div className="pdf-footer">
