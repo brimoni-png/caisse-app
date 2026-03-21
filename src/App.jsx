@@ -1295,10 +1295,10 @@ function PdfReportModal({ txs, members, onClose, year }) {
           {/* KPI summary */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
             {[
-              { label: "المساهمات", val: totalC, color: "#2d9c8f", bg: "rgba(45,156,143,0.07)", sign: "+" },
-              { label: "التبرعات",  val: totalD, color: "#20b2aa", bg: "rgba(32,178,170,0.07)", sign: "+" },
+              { label: "المساهمات", val: totalC, color: "#2d9c8f", bg: "rgba(45,156,143,0.07)", sign: "" },
+              { label: "التبرعات",  val: totalD, color: "#20b2aa", bg: "rgba(32,178,170,0.07)", sign: "" },
               { label: "المصروفات", val: totalE, color: "#e05252", bg: "rgba(224,82,82,0.07)",  sign: "−" },
-              { label: "الرصيد الصافي", val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", bg: solde >= 0 ? "rgba(45,156,143,0.07)" : "rgba(224,82,82,0.07)", sign: solde >= 0 ? "+" : "−" },
+              { label: "الرصيد الصافي", val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", bg: solde >= 0 ? "rgba(45,156,143,0.07)" : "rgba(224,82,82,0.07)", sign: solde >= 0 ? "" : "−" },
             ].map(k => (
               <div key={k.label} style={{ background: k.bg, borderRadius: 14, padding: "14px 12px", border: `1.5px solid ${k.color}22` }}>
                 <div style={{ color: C.muted, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 5 }}>{k.label}</div>
@@ -1417,10 +1417,10 @@ function PdfReportModal({ txs, members, onClose, year }) {
               {/* KPIs */}
               <div className="pdf-kpi-row">
                 {[
-                  { label: "إجمالي المساهمات", val: totalC, color: "#2d9c8f", sign: "+" },
-                  { label: "إجمالي التبرعات",  val: totalD, color: "#20b2aa", sign: "+" },
+                  { label: "إجمالي المساهمات", val: totalC, color: "#2d9c8f", sign: "" },
+                  { label: "إجمالي التبرعات",  val: totalD, color: "#20b2aa", sign: "" },
                   { label: "إجمالي المصروفات", val: totalE, color: "#e05252", sign: "−" },
-                  { label: "الرصيد الصافي",    val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", sign: solde >= 0 ? "+" : "−" },
+                  { label: "الرصيد الصافي",    val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", sign: solde >= 0 ? "" : "−" },
                 ].map(k => (
                   <div key={k.label} className="pdf-kpi" style={{ background: k.color + "0d" }}>
                     <div className="pdf-kpi-label">{k.label}</div>
@@ -1553,7 +1553,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                           <td style={{ color: "#2d9c8f" }}>{m.c > 0 ? fmtAR(m.c) + " MRU" : "—"}</td>
                           <td style={{ color: "#20b2aa" }}>{m.d > 0 ? fmtAR(m.d) + " MRU" : "—"}</td>
                           <td style={{ color: "#e05252" }}>{m.e > 0 ? fmtAR(m.e) + " MRU" : "—"}</td>
-                          <td style={{ fontWeight: 700, color: net >= 0 ? "#2d9c8f" : "#e05252" }}>{net >= 0 ? "+" : ""}{fmtAR(net)} MRU</td>
+                          <td style={{ fontWeight: 700, color: net >= 0 ? "#2d9c8f" : "#e05252" }}>{net >= 0 ? "" : ""}{fmtAR(net)} MRU</td>
                         </tr>
                       );
                     })}
@@ -1562,7 +1562,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                       <td style={{ color: "#2d9c8f", fontWeight: 800 }}>{fmtAR(totalC)} MRU</td>
                       <td style={{ color: "#20b2aa", fontWeight: 800 }}>{fmtAR(totalD)} MRU</td>
                       <td style={{ color: "#e05252", fontWeight: 800 }}>{fmtAR(totalE)} MRU</td>
-                      <td style={{ color: solde >= 0 ? "#2d9c8f" : "#e05252", fontWeight: 800 }}>{solde >= 0 ? "+" : ""}{fmtAR(Math.abs(solde))} MRU</td>
+                      <td style={{ color: solde >= 0 ? "#2d9c8f" : "#e05252", fontWeight: 800 }}>{solde >= 0 ? "" : ""}{fmtAR(Math.abs(solde))} MRU</td>
                     </tr>
                   </tbody>
                 </table>
