@@ -33,40 +33,60 @@ function useChartJS() {
   return ready;
 }
 
-// ─── DESIGN TOKENS — #1a2b2e Teal Dark ──────────────────────────────────────
+// ─── DESIGN TOKENS — Sovereign Ledger ────────────────────────────────────────
 const C = {
-  forest:    "#1a2b2e",
-  forestMid: "#1f3a3e",
-  forestLt:  "#2d9c8f",
-  mint:      "#b2ede7",
-  mintLt:    "#e0f5f3",
-  mintPale:  "#f0faf9",
-  lime:      "#6dcfc4",
-  sage:      "#4db8ab",
-  bg:        "#f0f4f5",
-  card:      "#ffffff",
-  text:      "#1a2b2e",
-  muted:     "#4a6568",
-  sub:       "#7a9ea2",
-  red:       "#e05252",
-  redLt:     "#fde8e8",
-  gold:      "#2d9c8f",
-  goldLt:    "#e6faf8",
-  shadow:    "0 2px 14px rgba(26,43,46,0.08)",
-  shadowMd:  "0 6px 24px rgba(26,43,46,0.12)",
-  shadowLg:  "0 16px 48px rgba(26,43,46,0.16)",
+  // Primary
+  primary:       "#012d1d",
+  primaryCont:   "#1b4332",
+  onPrimary:     "#ffffff",
+  // Secondary
+  secondary:     "#712edd",
+  secondaryCont: "#e9d8fd",
+  onSecondary:   "#ffffff",
+  // Tertiary
+  tertiary:      "#54001d",
+  // Surfaces
+  surface:       "#f9faf6",
+  surfaceLow:    "#f3f4f0",
+  surfaceLowest: "#ffffff",
+  surfaceHigh:   "#e8eae4",
+  // On-surface
+  text:          "#1a1c1a",
+  muted:         "#4a5248",
+  sub:           "#7a8578",
+  outline:       "#c1c8c2",
+  // Semantic
+  red:           "#c0392b",
+  redLt:         "#fce8e6",
+  gold:          "#1b4332",
+  goldLt:        "#d8f3e8",
+  // Aliases for compatibility
+  forest:        "#012d1d",
+  forestMid:     "#1b4332",
+  forestLt:      "#1b6b4a",
+  mint:          "#a8d5c2",
+  mintLt:        "#d8f3e8",
+  mintPale:      "#edf7f2",
+  lime:          "#4caf8a",
+  sage:          "#2d7a5a",
+  bg:            "#f3f4f0",
+  card:          "#ffffff",
+  // Ambient shadows (no heavy drops)
+  shadow:    "0 2px 24px rgba(1,45,29,0.06)",
+  shadowMd:  "0 6px 32px rgba(1,45,29,0.08)",
+  shadowLg:  "0 16px 48px rgba(1,45,29,0.10)",
 };
 
-const FONTS = ``;
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');`;
 
 const G = `
   ${FONTS}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html,body{height:100%;overscroll-behavior:none;}
-  body{background:#f0f4f5;-webkit-font-smoothing:antialiased;font-family:'Times New Roman','Times',serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;font-size:15px;}
-  #root{height:100%;display:flex;justify-content:center;background:#f0f4f5;}
+  body{background:#f3f4f0;-webkit-font-smoothing:antialiased;font-family:'Manrope','Segoe UI',sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;font-size:15px;color:#1a1c1a;}
+  #root{height:100%;display:flex;justify-content:center;background:#f3f4f0;}
   ::-webkit-scrollbar{width:2px;}
-  ::-webkit-scrollbar-thumb{background:${C.sage};border-radius:4px;}
+  ::-webkit-scrollbar-thumb{background:#2d7a5a;border-radius:4px;}
   @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
   @keyframes sheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
   @keyframes pop{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}
@@ -85,13 +105,13 @@ const G = `
   .fin-in{animation:fin .3s ease both}
   .out{animation:gone .22s ease forwards;overflow:hidden;}
   .tbtn{transition:all .18s cubic-bezier(.16,1,.3,1);cursor:pointer;}
-  .tbtn:active{transform:scale(.96);}
+  .tbtn:active{transform:scale(.97);}
   .txrow:hover .txacts{opacity:1 !important;}
-  .cat-card:hover{transform:translateY(-3px);box-shadow:${C.shadowMd} !important;}
-  .eco-btn:hover{filter:brightness(1.06);}
+  .cat-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(1,45,29,0.10) !important;}
+  .eco-btn:hover{filter:brightness(1.05);}
   input,select{color-scheme:light;}
   input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
-  button{font-family:'Times New Roman','Times',serif;}
+  button{font-family:'Manrope','Segoe UI',sans-serif;}
 `;
 
 // ─── ICONS ────────────────────────────────────────────────────────────────────
@@ -124,7 +144,7 @@ const Ic = {
 // ─── TRANSLATIONS ─────────────────────────────────────────────────────────────
 const T = {
   fr: {
-    dir: "ltr", font: "'Times New Roman','Times',serif",
+    dir: "ltr", font: "'Manrope','Segoe UI',sans-serif",
     greeting: "Resp-Caisse", userName: "Cheikh Brahim", subtitle: "Caisse communautaire",
     balanceGlobal: "Solde Global",
     stats: { contribution: "Contributions", don: "Dons", depense: "Dépenses" },
@@ -155,7 +175,7 @@ const T = {
     categories: "Actions rapides", apercu: "Aperçu du mois",
   },
   ar: {
-    dir: "rtl", font: "'Times New Roman','Times',serif",
+    dir: "rtl", font: "'Manrope','Segoe UI',sans-serif",
     greeting: "مسؤول الصندوق", userName: "الشيخ إبراهيم", subtitle: "صندوق تعاوني",
     balanceGlobal: "الرصيد الإجمالي",
     stats: { contribution: "المساهمات", don: "التبرعات", depense: "المصروفات" },
@@ -200,15 +220,15 @@ const inits = (n) => n.split(" ").slice(0, 2).map((w) => w[0] || "").join("").to
 const getYrs = (txs) => { const s = new Set(txs.map((t) => new Date(t.date).getFullYear())); s.add(new Date().getFullYear()); return [...s].sort((a, b) => b - a); };
 
 const CFG = (lang) => ({
-  contribution: { label: T[lang].txTypes.contribution, color: C.forestLt, lt: "rgba(200,135,42,0.12)", icon: () => Ic.up(C.forestLt), sign: "" },
-  don:          { label: T[lang].txTypes.don,          color: C.gold,      lt: C.goldLt,              icon: () => Ic.heart(C.gold),   sign: "" },
-  depense:      { label: T[lang].txTypes.depense,      color: C.red,       lt: C.redLt,               icon: () => Ic.dn(C.red),       sign: "" },
+  contribution: { label: T[lang].txTypes.contribution, color: "#1b6b4a", lt: "rgba(27,107,74,0.10)", icon: () => Ic.up("#1b6b4a"), sign: "" },
+  don:          { label: T[lang].txTypes.don,          color: "#712edd", lt: "rgba(113,46,221,0.10)", icon: () => Ic.heart("#712edd"), sign: "" },
+  depense:      { label: T[lang].txTypes.depense,      color: "#c0392b", lt: "rgba(192,57,43,0.10)",  icon: () => Ic.dn("#c0392b"),   sign: "" },
 });
 
 const AVC = [
-  ["rgba(168,230,207,0.35)","#0D3B2E"],["rgba(13,59,46,0.15)","#0D3B2E"],
-  ["rgba(111,207,151,0.25)","#155740"],["rgba(168,230,207,0.50)","#0D3B2E"],
-  ["rgba(200,135,42,0.25)","#0D3B2E"],  ["rgba(183,216,200,0.40)","#155740"],
+  ["#1b4332","#ffffff"],["#012d1d","#a8d5c2"],
+  ["#1b6b4a","#ffffff"],["#712edd","#ffffff"],
+  ["#54001d","#ffffff"],["#2d7a5a","#ffffff"],
 ];
 
 // ─── PERSISTED STATE ──────────────────────────────────────────────────────────
@@ -287,11 +307,11 @@ function useSupabaseData() {
 
 // ─── UI ATOMS ─────────────────────────────────────────────────────────────────
 function Card({ children, sx = {}, className = "" }) {
-  return <div className={className} style={{ background: C.card, borderRadius: 20, boxShadow: "0 2px 16px rgba(26,43,46,0.07)", border: "1px solid rgba(26,43,46,0.06)", ...sx }}>{children}</div>;
+  return <div className={className} style={{ background: C.surfaceLowest, borderRadius: 24, boxShadow: "0 2px 24px rgba(1,45,29,0.06)", ...sx }}>{children}</div>;
 }
 
 function Lbl({ c }) {
-  return <div style={{ fontSize: 10, fontWeight: 700, color: "#1A1429", letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 8 }}>{c}</div>;
+  return <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 8, fontFamily: "'Manrope',sans-serif" }}>{c}</div>;
 }
 
 function Inp({ label, dir = "ltr", sx = {}, ...p }) {
@@ -300,7 +320,7 @@ function Inp({ label, dir = "ltr", sx = {}, ...p }) {
     <div style={{ marginBottom: 20 }}>
       {label && <Lbl c={label} />}
       <input {...p} onFocus={(e) => { sf(true); p.onFocus?.(e); }} onBlur={(e) => { sf(false); p.onBlur?.(e); }}
-        style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${f ? "#2d9c8f" : "rgba(26,43,46,0.18)"}`, borderRadius: 0, padding: "10px 2px", color: "#1A1429", fontSize: 15, outline: "none", direction: dir, fontFamily: "inherit", transition: "border-color .2s", ...sx }} />
+        style={{ width: "100%", background: f ? C.surfaceLowest : C.surfaceLow, border: "none", borderBottom: `2px solid ${f ? C.forestLt : "transparent"}`, borderRadius: f ? "12px 12px 0 0" : 12, padding: "11px 14px", color: C.text, fontSize: 15, outline: "none", direction: dir, fontFamily: "'Manrope',sans-serif", transition: "all .2s", ...sx }} />
     </div>
   );
 }
@@ -310,8 +330,8 @@ function Sel({ label, dir = "ltr", children, ...p }) {
     <div style={{ marginBottom: 20 }}>
       {label && <Lbl c={label} />}
       <div style={{ position: "relative" }}>
-        <select {...p} style={{ width: "100%", background: "transparent", border: "none", borderBottom: "2px solid rgba(107,33,232,0.2)", borderRadius: 0, padding: "10px 28px 10px 2px", color: "#1A1429", fontSize: 15, outline: "none", direction: dir, fontFamily: "inherit", appearance: "none", cursor: "pointer" }}>{children}</select>
-        <div style={{ position: "absolute", right: 2, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev("#6B21E8")}</div>
+        <select {...p} style={{ width: "100%", background: C.surfaceLow, border: "none", borderRadius: 12, padding: "11px 36px 11px 14px", color: C.text, fontSize: 15, outline: "none", direction: dir, fontFamily: "'Manrope',sans-serif", appearance: "none", cursor: "pointer" }}>{children}</select>
+        <div style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
       </div>
     </div>
   );
@@ -320,7 +340,7 @@ function Sel({ label, dir = "ltr", children, ...p }) {
 function PBtn({ children, onClick, sx = {}, disabled }) {
   return (
     <button className="tbtn eco-btn" disabled={disabled} onClick={onClick}
-      style={{ background: disabled ? "#7ab5b0" : "#1a2b2e", border: "none", color: "#fff", borderRadius: 50, padding: "16px 20px", fontSize: 15, fontWeight: 700, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginTop: 8, boxShadow: disabled ? "none" : "0 8px 24px rgba(26,43,46,0.28)", fontFamily: "inherit", letterSpacing: 0.2, ...sx }}>
+      style={{ background: disabled ? "#a8c5b8" : "linear-gradient(135deg, #012d1d, #1b4332)", border: "none", color: "#fff", borderRadius: 24, padding: "16px 20px", fontSize: 15, fontWeight: 700, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginTop: 8, boxShadow: disabled ? "none" : "0 8px 32px rgba(1,45,29,0.22)", fontFamily: "'Manrope',sans-serif", letterSpacing: 0.2, ...sx }}>
       {children}
     </button>
   );
@@ -329,7 +349,7 @@ function PBtn({ children, onClick, sx = {}, disabled }) {
 function GBtn({ children, onClick, sx = {} }) {
   return (
     <button className="tbtn" onClick={onClick}
-      style={{ background: "#F2EFE9", border: "1.5px solid rgba(107,33,232,0.15)", color: "#7A6E8A", borderRadius: 50, padding: "12px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", ...sx }}>
+      style={{ background: C.surfaceHigh, border: "none", color: C.text, borderRadius: 24, padding: "12px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Manrope',sans-serif", ...sx }}>
       {children}
     </button>
   );
@@ -337,10 +357,10 @@ function GBtn({ children, onClick, sx = {} }) {
 
 function LangSwitch({ lang, setLang }) {
   return (
-    <div style={{ display: "flex", background: "rgba(255,255,255,0.8)", borderRadius: 20, padding: 3, gap: 2, border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+    <div style={{ display: "flex", background: "rgba(255,255,255,0.85)", borderRadius: 20, padding: 3, gap: 2, boxShadow: "0 2px 12px rgba(1,45,29,0.08)" }}>
       {["fr", "ar"].map((l) => (
         <button key={l} className="tbtn" onClick={() => setLang(l)}
-          style={{ background: lang === l ? "#1A1A1A" : "transparent", border: "none", borderRadius: 16, color: lang === l ? "#fff" : "#6B7A6B", fontWeight: 600, fontSize: 11, padding: "5px 13px", cursor: "pointer", fontFamily: "inherit", transition: "all .18s" }}>
+          style={{ background: lang === l ? C.primary : "transparent", border: "none", borderRadius: 16, color: lang === l ? "#fff" : C.muted, fontWeight: 700, fontSize: 11, padding: "5px 13px", cursor: "pointer", fontFamily: "'Manrope',sans-serif", transition: "all .18s" }}>
           {l === "fr" ? "FR" : "ع"}
         </button>
       ))}
@@ -350,15 +370,15 @@ function LangSwitch({ lang, setLang }) {
 
 function Sheet({ title, onClose, children, dir = "ltr" }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(26,43,46,0.5)", backdropFilter: "blur(14px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(1,45,29,0.45)", backdropFilter: "blur(14px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
       onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: "#f0f4f5", borderRadius: "26px 26px 0 0", width: "100%", maxWidth: 430, maxHeight: "93vh", overflowY: "auto", padding: "0 20px 44px", animation: "sheet .32s cubic-bezier(.16,1,.3,1)", direction: dir, boxShadow: "0 -12px 50px rgba(26,20,41,0.18)" }}>
-        <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
-          <div style={{ width: 40, height: 4, background: C.sage, borderRadius: 4 }} />
+      <div style={{ background: C.surface, borderRadius: "28px 28px 0 0", width: "100%", maxWidth: 430, maxHeight: "93vh", overflowY: "auto", padding: "0 24px 48px", animation: "sheet .32s cubic-bezier(.16,1,.3,1)", direction: dir, boxShadow: "0 -16px 60px rgba(1,45,29,0.14)" }}>
+        <div style={{ display: "flex", justifyContent: "center", padding: "14px 0 10px" }}>
+          <div style={{ width: 36, height: 4, background: C.outline, borderRadius: 4 }} />
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexDirection: dir === "rtl" ? "row-reverse" : "row" }}>
-          <span style={{ color: C.text, fontWeight: 700, fontSize: 17 }}>{title}</span>
-          <button onClick={onClose} className="tbtn" style={{ background: C.mintPale, border: `1px solid ${C.mintLt}`, color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>✕</button>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexDirection: dir === "rtl" ? "row-reverse" : "row" }}>
+          <span style={{ color: C.text, fontWeight: 800, fontSize: 18, fontFamily: "'Manrope',sans-serif" }}>{title}</span>
+          <button onClick={onClose} className="tbtn" style={{ background: C.surfaceLow, border: "none", color: C.muted, borderRadius: 12, width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>✕</button>
         </div>
         {children}
       </div>
@@ -368,16 +388,16 @@ function Sheet({ title, onClose, children, dir = "ltr" }) {
 
 function Confirm({ title, message, onConfirm, onCancel, t }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(26,43,46,0.55)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <div style={{ background: C.card, borderRadius: 22, padding: "28px 22px", width: "100%", maxWidth: 310, direction: t.dir, fontFamily: t.font, boxShadow: C.shadowLg, animation: "pop .2s ease both", border: `1px solid ${C.mintLt}` }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(1,45,29,0.5)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div style={{ background: C.surfaceLowest, borderRadius: 28, padding: "28px 24px", width: "100%", maxWidth: 310, direction: t.dir, fontFamily: "'Manrope',sans-serif", boxShadow: C.shadowLg, animation: "pop .2s ease both" }}>
         <div style={{ textAlign: "center", marginBottom: 22 }}>
-          <div style={{ width: 54, height: 54, borderRadius: 16, background: C.redLt, margin: "0 auto 14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.trash(C.red, 22)}</div>
-          <div style={{ color: C.text, fontWeight: 700, fontSize: 16, marginBottom: 7 }}>{title}</div>
+          <div style={{ width: 54, height: 54, borderRadius: 18, background: C.redLt, margin: "0 auto 14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.trash(C.red, 22)}</div>
+          <div style={{ color: C.text, fontWeight: 800, fontSize: 16, marginBottom: 7 }}>{title}</div>
           <div style={{ color: C.muted, fontSize: 13, lineHeight: 1.6 }}>{message}</div>
         </div>
         <div style={{ display: "flex", gap: 10, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <GBtn onClick={onCancel} sx={{ flex: 1 }}>{t.cancel}</GBtn>
-          <button className="tbtn" onClick={onConfirm} style={{ flex: 1, background: C.red, border: "none", color: "#fff", borderRadius: 12, padding: "12px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t.delete}</button>
+          <button className="tbtn" onClick={onConfirm} style={{ flex: 1, background: C.red, border: "none", color: "#fff", borderRadius: 16, padding: "12px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Manrope',sans-serif" }}>{t.delete}</button>
         </div>
       </div>
     </div>
@@ -386,10 +406,10 @@ function Confirm({ title, message, onConfirm, onCancel, t }) {
 
 function SHdr({ title, badge, action, dir = "ltr" }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexDirection: dir === "rtl" ? "row-reverse" : "row" }}>
-      <span style={{ color: C.text, fontWeight: 600, fontSize: 14 }}>{title}</span>
-      {badge && <span style={{ fontSize: 10, fontWeight: 600, color: C.muted, background: C.mintPale, borderRadius: 8, padding: "2px 9px", border: `1px solid ${C.mintLt}` }}>{badge}</span>}
-      {action && <button className="tbtn" onClick={action.fn} style={{ fontSize: 11, fontWeight: 600, color: C.forestLt, background: "none", border: "none", cursor: "pointer", padding: 0 }}>{action.label}</button>}
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexDirection: dir === "rtl" ? "row-reverse" : "row" }}>
+      <span style={{ color: C.text, fontWeight: 700, fontSize: 14, fontFamily: "'Manrope',sans-serif", letterSpacing: -0.2 }}>{title}</span>
+      {badge && <span style={{ fontSize: 10, fontWeight: 700, color: C.muted, background: C.surfaceLow, borderRadius: 8, padding: "2px 9px" }}>{badge}</span>}
+      {action && <button className="tbtn" onClick={action.fn} style={{ fontSize: 11, fontWeight: 700, color: C.forestLt, background: "none", border: "none", cursor: "pointer", padding: 0 }}>{action.label}</button>}
     </div>
   );
 }
@@ -399,8 +419,8 @@ function SHdr({ title, badge, action, dir = "ltr" }) {
 function SearchBar({ value, onChange, placeholder, dir = "ltr" }) {
   const [focused, setFocused] = useState(false);
   return (
-    <div style={{ position: "relative", marginBottom: 14 }}>
-      <div style={{ position: "absolute", left: dir === "rtl" ? "auto" : 13, right: dir === "rtl" ? 13 : "auto", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", opacity: focused ? 1 : 0.5, transition: "opacity .2s" }}>
+    <div style={{ position: "relative", marginBottom: 16 }}>
+      <div style={{ position: "absolute", left: dir === "rtl" ? "auto" : 14, right: dir === "rtl" ? 14 : "auto", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", opacity: focused ? 1 : 0.45, transition: "opacity .2s" }}>
         {Ic.search(focused ? C.forestLt : C.muted, 15)}
       </div>
       <input
@@ -410,10 +430,10 @@ function SearchBar({ value, onChange, placeholder, dir = "ltr" }) {
         onBlur={() => setFocused(false)}
         placeholder={placeholder}
         dir={dir}
-        style={{ width: "100%", background: focused ? C.card : C.mintPale, border: `1.5px solid ${focused ? C.forestLt : C.mintLt}`, borderRadius: 14, padding: dir === "rtl" ? "11px 42px 11px 14px" : "11px 14px 11px 38px", fontSize: 13, color: C.text, outline: "none", fontFamily: "inherit", transition: "all .2s", boxShadow: focused ? "0 0 0 3px rgba(124,58,237,0.1)" : "none" }}
+        style={{ width: "100%", background: focused ? C.surfaceLowest : C.surfaceLow, border: "none", borderRadius: 16, padding: dir === "rtl" ? "12px 44px 12px 14px" : "12px 14px 12px 40px", fontSize: 13, color: C.text, outline: "none", fontFamily: "'Manrope',sans-serif", transition: "all .2s", boxShadow: focused ? C.shadow : "none" }}
       />
       {value && (
-        <button onClick={() => onChange("")} style={{ position: "absolute", right: dir === "rtl" ? "auto" : 11, left: dir === "rtl" ? 11 : "auto", top: "50%", transform: "translateY(-50%)", background: C.muted, border: "none", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}>
+        <button onClick={() => onChange("")} style={{ position: "absolute", right: dir === "rtl" ? "auto" : 12, left: dir === "rtl" ? 12 : "auto", top: "50%", transform: "translateY(-50%)", background: C.outline, border: "none", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}>
           {Ic.xcircle(C.muted, 18)}
         </button>
       )}
@@ -431,7 +451,7 @@ function TxRow({ tx, onDelete, onEdit, delay = 0, lang }) {
   return (
     <>
       <div className={`txrow fin-in${out ? " out" : ""}`}
-        style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 15px", borderRadius: 16, background: C.card, border: `1px solid ${C.mintLt}`, marginBottom: 8, animationDelay: `${delay}ms`, cursor: "default", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: C.shadow }}>
+        style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderRadius: 20, background: C.surfaceLowest, marginBottom: 10, animationDelay: `${delay}ms`, cursor: "default", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 2px 16px rgba(1,45,29,0.05)" }}>
         <div style={{ width: 42, height: 42, borderRadius: 13, background: cfg.lt, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>{cfg.icon()}</div>
         <div style={{ flex: 1, minWidth: 0, textAlign: t.dir === "rtl" ? "right" : "left" }}>
           <div style={{ color: C.text, fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tx.memberName}</div>
@@ -444,7 +464,7 @@ function TxRow({ tx, onDelete, onEdit, delay = 0, lang }) {
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <span style={{ color: cfg.color, fontWeight: 700, fontSize: 13 }}>{cfg.sign}{fmtN(tx.amount)}</span>
           <div className="txacts" style={{ display: "flex", gap: 4, opacity: 0, transition: "opacity .15s" }}>
-            <button className="tbtn" onClick={() => onEdit(tx)} style={{ background: C.mintPale, border: "none", color: C.forestLt, borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.edit(C.forestLt)}</button>
+            <button className="tbtn" onClick={() => onEdit(tx)} style={{ background: C.surfaceLow, border: "none", color: C.forestLt, borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.edit(C.forestLt)}</button>
             <button className="tbtn" onClick={() => setConf(true)} style={{ background: C.redLt, border: "none", color: C.red, borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.trash(C.red)}</button>
           </div>
         </div>
@@ -459,53 +479,50 @@ function CatPills({ onAdd, lang }) {
   const cats = [
     {
       type: "contribution",
-      color: "#2d9c8f",
-      bg: "rgba(45,156,143,0.10)",
+      color: "#1b6b4a",
+      bg: "rgba(27,107,74,0.10)",
       icon: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Pièce de monnaie avec $ */}
-          <circle cx="12" cy="12" r="9" fill="rgba(45,156,143,0.15)" stroke="#2d9c8f" strokeWidth="1.7"/>
-          <path d="M12 7v10M9.5 9.5a2.5 2.5 0 015 0c0 1.4-1.2 2.2-2.5 2.5-1.3.3-2.5 1.1-2.5 2.5a2.5 2.5 0 005 0" stroke="#2d9c8f" strokeWidth="1.6"/>
+          <circle cx="12" cy="12" r="9" fill="rgba(27,107,74,0.12)" stroke="#1b6b4a" strokeWidth="1.7"/>
+          <path d="M12 7v10M9.5 9.5a2.5 2.5 0 015 0c0 1.4-1.2 2.2-2.5 2.5-1.3.3-2.5 1.1-2.5 2.5a2.5 2.5 0 005 0" stroke="#1b6b4a" strokeWidth="1.6"/>
         </svg>
       ),
     },
     {
       type: "don",
-      color: "#20b2aa",
-      bg: "rgba(32,178,170,0.10)",
+      color: "#712edd",
+      bg: "rgba(113,46,221,0.10)",
       icon: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Mains ouvertes tendant un cœur */}
-          <path d="M12 6c0 0-1.5-2-3-2C7.5 4 6 5.3 6 6.8 6 8.6 8 10 12 12c4-2 6-3.4 6-5.2C18 5.3 16.5 4 15 4c-1.5 0-3 2-3 2z" fill="rgba(32,178,170,0.18)" stroke="#20b2aa" strokeWidth="1.7"/>
-          <path d="M5 15c0-1 .7-1.5 1.5-1.5S8 14 8 15l.5 1h7l.5-1c0-1 .7-1.5 1.5-1.5S19 14 19 15v1.5c0 .8-.7 1.5-1.5 1.5h-11C5.7 18 5 17.3 5 16.5V15z" fill="rgba(32,178,170,0.18)" stroke="#20b2aa" strokeWidth="1.7"/>
+          <path d="M12 6c0 0-1.5-2-3-2C7.5 4 6 5.3 6 6.8 6 8.6 8 10 12 12c4-2 6-3.4 6-5.2C18 5.3 16.5 4 15 4c-1.5 0-3 2-3 2z" fill="rgba(113,46,221,0.12)" stroke="#712edd" strokeWidth="1.7"/>
+          <path d="M5 15c0-1 .7-1.5 1.5-1.5S8 14 8 15l.5 1h7l.5-1c0-1 .7-1.5 1.5-1.5S19 14 19 15v1.5c0 .8-.7 1.5-1.5 1.5h-11C5.7 18 5 17.3 5 16.5V15z" fill="rgba(113,46,221,0.10)" stroke="#712edd" strokeWidth="1.7"/>
         </svg>
       ),
     },
     {
       type: "depense",
-      color: "#e05252",
-      bg: "rgba(224,82,82,0.10)",
+      color: "#c0392b",
+      bg: "rgba(192,57,43,0.10)",
       icon: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Reçu / facture */}
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(224,82,82,0.15)" stroke="#e05252" strokeWidth="1.7"/>
-          <polyline points="14 2 14 8 20 8" stroke="#e05252" strokeWidth="1.7"/>
-          <line x1="16" y1="13" x2="8" y2="13" stroke="#e05252" strokeWidth="1.5"/>
-          <line x1="16" y1="17" x2="8" y2="17" stroke="#e05252" strokeWidth="1.5"/>
-          <line x1="10" y1="9" x2="8" y2="9" stroke="#e05252" strokeWidth="1.5"/>
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(192,57,43,0.12)" stroke="#c0392b" strokeWidth="1.7"/>
+          <polyline points="14 2 14 8 20 8" stroke="#c0392b" strokeWidth="1.7"/>
+          <line x1="16" y1="13" x2="8" y2="13" stroke="#c0392b" strokeWidth="1.5"/>
+          <line x1="16" y1="17" x2="8" y2="17" stroke="#c0392b" strokeWidth="1.5"/>
+          <line x1="10" y1="9" x2="8" y2="9" stroke="#c0392b" strokeWidth="1.5"/>
         </svg>
       ),
     },
   ];
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 22 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
       {cats.map(cat => (
         <button key={cat.type} className="tbtn cat-card" onClick={() => onAdd(cat.type)}
-          style={{ background: C.card, border: "none", borderRadius: 20, padding: "18px 8px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, boxShadow: C.shadow, transition: "all .22s" }}>
-          <div style={{ width: 54, height: 54, borderRadius: 16, background: cat.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          style={{ background: C.surfaceLowest, border: "none", borderRadius: 24, padding: "20px 8px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, boxShadow: "0 2px 16px rgba(1,45,29,0.05)", transition: "all .22s" }}>
+          <div style={{ width: 54, height: 54, borderRadius: 18, background: cat.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {cat.icon}
           </div>
-          <span style={{ fontSize: 11, fontWeight: 700, color: cat.color, textAlign: "center", letterSpacing: 0.2 }}>{T[lang].txTypes[cat.type]}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: cat.color, textAlign: "center", letterSpacing: 0.2, fontFamily: "'Manrope',sans-serif" }}>{T[lang].txTypes[cat.type]}</span>
         </button>
       ))}
     </div>
@@ -527,19 +544,19 @@ function FinChart({ txs, lang, chartReady }) {
     cRef.current = new window.Chart(ref.current, {
       type: "line",
       data: { labels: ms, datasets: [
-        { label: t.stats.contribution, data: c, borderColor: "#2d9c8f", backgroundColor: "rgba(45,156,143,0.08)", tension: 0.45, fill: true, pointBackgroundColor: "#2d9c8f", pointRadius: 3, borderWidth: 2 },
-        { label: t.stats.don,          data: d, borderColor: "#20b2aa", backgroundColor: "rgba(32,178,170,0.07)", tension: 0.45, fill: true, pointBackgroundColor: "#20b2aa", pointRadius: 3, borderWidth: 2 },
-        { label: t.stats.depense,      data: e, borderColor: "#e05252", backgroundColor: "rgba(224,82,82,0.06)", tension: 0.45, fill: true, pointBackgroundColor: "#e05252", pointRadius: 3, borderWidth: 2 },
+        { label: t.stats.contribution, data: c, borderColor: "#1b6b4a", backgroundColor: "rgba(27,107,74,0.08)", tension: 0.45, fill: true, pointBackgroundColor: "#1b6b4a", pointRadius: 3, borderWidth: 2 },
+        { label: t.stats.don,          data: d, borderColor: "#712edd", backgroundColor: "rgba(113,46,221,0.06)", tension: 0.45, fill: true, pointBackgroundColor: "#712edd", pointRadius: 3, borderWidth: 2 },
+        { label: t.stats.depense,      data: e, borderColor: "#c0392b", backgroundColor: "rgba(192,57,43,0.06)", tension: 0.45, fill: true, pointBackgroundColor: "#c0392b", pointRadius: 3, borderWidth: 2 },
       ]},
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
-          legend: { display: true, position: "bottom", labels: { boxWidth: 9, usePointStyle: true, pointStyle: "circle", color: C.muted, font: { size: 10, family: "Times New Roman" } } },
-          tooltip: { backgroundColor: C.card, titleColor: C.text, bodyColor: C.muted, borderColor: C.mintLt, borderWidth: 1, padding: 10, cornerRadius: 10 },
+          legend: { display: true, position: "bottom", labels: { boxWidth: 9, usePointStyle: true, pointStyle: "circle", color: C.muted, font: { size: 10, family: "Manrope" } } },
+          tooltip: { backgroundColor: C.surfaceLowest, titleColor: C.text, bodyColor: C.muted, borderColor: "transparent", borderWidth: 1, padding: 10, cornerRadius: 10 },
         },
         scales: {
-          x: { grid: { display: false }, ticks: { color: C.sub, font: { size: 9, family: "Times New Roman" } }, border: { display: false } },
-          y: { grid: { color: C.mintLt }, ticks: { color: C.sub, font: { size: 9, family: "Times New Roman" }, callback: (v) => `${(v / 1000).toFixed(0)}k` }, border: { display: false } },
+          x: { grid: { display: false }, ticks: { color: C.sub, font: { size: 9, family: "Manrope" } }, border: { display: false } },
+          y: { grid: { color: C.surfaceLow }, ticks: { color: C.sub, font: { size: 9, family: "Manrope" }, callback: (v) => `${(v / 1000).toFixed(0)}k` }, border: { display: false } },
         },
       },
     });
@@ -551,7 +568,7 @@ function FinChart({ txs, lang, chartReady }) {
       <div style={{ height: 190, position: "relative" }}>
         {chartReady ? <canvas ref={ref} /> : (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.sub, fontSize: 12 }}>
-            <div style={{ width: 18, height: 18, border: `2px solid ${C.lime}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite", marginRight: 8 }} />Chargement…
+            <div style={{ width: 18, height: 18, border: `2px solid ${C.forestLt}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite", marginRight: 8 }} />Chargement…
           </div>
         )}
       </div>
@@ -562,7 +579,7 @@ function FinChart({ txs, lang, chartReady }) {
 function Empty({ label }) {
   return (
     <div style={{ textAlign: "center", padding: "48px 24px", color: C.sub }}>
-      <div style={{ width: 58, height: 58, borderRadius: 18, background: C.mintPale, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.rcpt(C.sage)}</div>
+      <div style={{ width: 58, height: 58, borderRadius: 18, background: C.surfaceLow, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.rcpt(C.forestLt)}</div>
       <div style={{ fontSize: 13, fontWeight: 500 }}>{label}</div>
     </div>
   );
@@ -571,16 +588,13 @@ function Empty({ label }) {
 // ─── LOGO CAISSE ─────────────────────────────────────────────────────────────
 function CaisseLogo() {
   return (
-    <div style={{ width: 40, height: 40, borderRadius: 13, background: "linear-gradient(135deg, #7C3AED, #A855F7)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 14px rgba(124,58,237,0.4)" }}>
+    <div style={{ width: 42, height: 42, borderRadius: 14, background: "linear-gradient(135deg, #012d1d, #1b4332)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 16px rgba(1,45,29,0.35)" }}>
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <rect x="2" y="5" width="18" height="13" rx="3" fill="#1A1A2E" />
-        <circle cx="11" cy="11.5" r="3.5" stroke="#F5C842" strokeWidth="1.4" fill="none" />
-        <circle cx="11" cy="11.5" r="1.3" fill="#F5C842" />
-        <line x1="11" y1="8.5" x2="11" y2="9.8" stroke="#F5C842" strokeWidth="1.4" strokeLinecap="round" />
-        <circle cx="5" cy="7.5" r="0.9" fill="#F5C842" opacity="0.7" />
-        <circle cx="5" cy="15.5" r="0.9" fill="#F5C842" opacity="0.7" />
-        <rect x="5.5" y="17.5" width="2.5" height="1.8" rx="0.9" fill="#1A1A2E" />
-        <rect x="14" y="17.5" width="2.5" height="1.8" rx="0.9" fill="#1A1A2E" />
+        <rect x="2" y="5" width="18" height="13" rx="3" fill="rgba(168,213,194,0.15)" stroke="rgba(168,213,194,0.8)" strokeWidth="1.4" />
+        <circle cx="11" cy="11.5" r="3.2" stroke="rgba(168,213,194,0.9)" strokeWidth="1.4" fill="none" />
+        <circle cx="11" cy="11.5" r="1.2" fill="rgba(168,213,194,0.9)" />
+        <circle cx="5" cy="7.5" r="0.8" fill="rgba(168,213,194,0.6)" />
+        <circle cx="5" cy="15.5" r="0.8" fill="rgba(168,213,194,0.6)" />
       </svg>
     </div>
   );
@@ -610,7 +624,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 
   const statsRow = [
     { label: t.stats.contribution, value: contrib, accentColor: C.mint,   sign: "", type: "contribution" },
-    { label: t.stats.don,          value: dons,    accentColor: "#F5C842", sign: "", type: "don" },
+    { label: t.stats.don,          value: dons,    accentColor: "#712edd", sign: "", type: "don" },
     { label: t.stats.depense,      value: dep,     accentColor: "#FF9E9E", sign: "", type: "depense" },
   ];
 
@@ -621,47 +635,46 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
       <div style={{ padding: "16px 4px 0px", marginTop: -20, position: "relative" }}>
 
         {/* Logo + greeting + lang switch */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <CaisseLogo />
             <div>
-              <div style={{ color: C.muted, fontSize: 11, fontWeight: 500, letterSpacing: 0.3 }}>{t.greeting}</div>
-              <div style={{ color: C.text, fontSize: 15, fontWeight: 600, letterSpacing: -0.2 }}>{t.userName}</div>
+              <div style={{ color: C.muted, fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase" }}>{t.greeting}</div>
+              <div style={{ color: C.text, fontSize: 16, fontWeight: 800, letterSpacing: -0.3, fontFamily: "'Manrope',sans-serif" }}>{t.userName}</div>
             </div>
           </div>
           <LangSwitch lang={lang} setLang={setLang} />
         </div>
 
-        {/* Balance card */}
-        <div style={{ background: "linear-gradient(135deg, #1a2b2e 0%, #1f4a4e 50%, #2d9c8f 100%)", borderRadius: 24, padding: "24px 22px 20px", marginBottom: 18, position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: -20, left: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.1)", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", bottom: -30, left: 40, width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.07)", pointerEvents: "none" }} />
-
-          <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, fontWeight: 500, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 8 }}>{t.balanceGlobal}</div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 }}>
-            <div style={{ color: "#fff", fontSize: 44, fontWeight: 700, letterSpacing: -2.5, lineHeight: 1, fontFamily: "'DM Serif Display', serif" }}>
+        {/* Balance card — Sovereign Ledger hero */}
+        <div style={{ background: "linear-gradient(135deg, #012d1d 0%, #1b4332 100%)", borderRadius: 28, padding: "28px 24px 24px", marginBottom: 20, position: "relative", overflow: "hidden", boxShadow: "0 12px 40px rgba(1,45,29,0.28)" }}>
+          <div style={{ position: "absolute", top: -40, right: -30, width: 140, height: 140, borderRadius: "50%", background: "rgba(255,255,255,0.04)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", bottom: -50, left: -20, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,0.03)", pointerEvents: "none" }} />
+          <div style={{ color: "rgba(168,213,194,0.75)", fontSize: 10, fontWeight: 700, letterSpacing: 1.6, textTransform: "uppercase", marginBottom: 10, fontFamily: "'Manrope',sans-serif" }}>{t.balanceGlobal}</div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6 }}>
+            <div style={{ color: "#fff", fontSize: 48, fontWeight: 800, letterSpacing: -3, lineHeight: 1, fontFamily: "'Manrope',sans-serif" }}>
               {new Intl.NumberFormat("fr-FR").format(solde)}
             </div>
-            <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 16, fontWeight: 500 }}>MRU</span>
+            <span style={{ color: "rgba(168,213,194,0.7)", fontSize: 15, fontWeight: 600 }}>MRU</span>
           </div>
         </div>
 
         {/* Modal détail stat */}
         {statModal && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(19,17,28,0.55)", backdropFilter: "blur(12px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+          <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(1,45,29,0.5)", backdropFilter: "blur(12px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
             onClick={() => setStatModal(null)}>
-            <div style={{ background: "#f0f4f5", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 430, padding: "0 20px 40px", animation: "sheet .3s cubic-bezier(.16,1,.3,1)" }}
+            <div style={{ background: C.surface, borderRadius: "28px 28px 0 0", width: "100%", maxWidth: 430, padding: "0 24px 44px", animation: "sheet .3s cubic-bezier(.16,1,.3,1)" }}
               onClick={e => e.stopPropagation()}>
-              <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
-                <div style={{ width: 40, height: 4, background: "#DEDAE8", borderRadius: 4 }} />
+              <div style={{ display: "flex", justifyContent: "center", padding: "14px 0 10px" }}>
+                <div style={{ width: 36, height: 4, background: C.outline, borderRadius: 4 }} />
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, marginTop: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22, marginTop: 8 }}>
                 <div>
-                  <div style={{ color: C.text, fontWeight: 700, fontSize: 18 }}>{statModal.label}</div>
-                  <div style={{ color: C.muted, fontSize: 13, marginTop: 2 }}>{curYear}</div>
+                  <div style={{ color: C.text, fontWeight: 800, fontSize: 18, fontFamily: "'Manrope',sans-serif" }}>{statModal.label}</div>
+                  <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>{curYear}</div>
                 </div>
-                <div style={{ background: "rgba(139,92,246,0.1)", borderRadius: 14, padding: "8px 16px" }}>
-                  <span style={{ color: "#8B5CF6", fontSize: 20, fontWeight: 700 }}>{statModal.sign}{fmtN(statModal.value)}</span>
+                <div style={{ background: C.surfaceLow, borderRadius: 16, padding: "8px 16px" }}>
+                  <span style={{ color: C.forestLt, fontSize: 20, fontWeight: 800 }}>{fmtN(statModal.value)}</span>
                 </div>
               </div>
               <div style={{ marginBottom: 8 }}>
@@ -672,11 +685,11 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
                   if (monthVal === 0) return null;
                   return (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                      <div style={{ width: 32, color: C.muted, fontSize: 11, fontWeight: 500, flexShrink: 0 }}>{t.months[i]}</div>
-                      <div style={{ flex: 1, background: "#EDEDF5", borderRadius: 6, height: 8, overflow: "hidden" }}>
-                        <div style={{ width: `${pct}%`, height: "100%", background: statModal.type === "depense" ? "#EF4444" : statModal.type === "don" ? "#DB2777" : "#8B5CF6", borderRadius: 6, transition: "width .6s" }} />
+                      <div style={{ width: 32, color: C.muted, fontSize: 11, fontWeight: 600, flexShrink: 0 }}>{t.months[i]}</div>
+                      <div style={{ flex: 1, background: C.surfaceLow, borderRadius: 6, height: 8, overflow: "hidden" }}>
+                        <div style={{ width: `${pct}%`, height: "100%", background: statModal.type === "depense" ? C.red : statModal.type === "don" ? C.secondary : C.forestLt, borderRadius: 6, transition: "width .6s" }} />
                       </div>
-                      <div style={{ width: 70, textAlign: "right", color: C.text, fontSize: 12, fontWeight: 600 }}>{fmtN(monthVal)}</div>
+                      <div style={{ width: 70, textAlign: "right", color: C.text, fontSize: 12, fontWeight: 700 }}>{fmtN(monthVal)}</div>
                     </div>
                   );
                 })}
@@ -689,57 +702,54 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
         )}
 
         {/* 4 CARTES STATS (2x2) */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 4 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 4 }}>
           {/* Contributions */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[0])}
-            style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
-            <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(45,156,143,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {/* Icône pièce/contribution */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2d9c8f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M9.5 10.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5c0 1.5-2.5 3-2.5 3s-2.5-1.5-2.5-3z" fill="rgba(45,156,143,0.18)"/><path d="M9.5 13.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5"/></svg>
+            style={{ background: C.surfaceLowest, border: "none", borderRadius: 24, padding: "18px 16px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 10, boxShadow: "0 2px 16px rgba(1,45,29,0.05)", transition: "all .2s" }}>
+            <div style={{ width: 40, height: 40, borderRadius: 14, background: "rgba(27,107,74,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1b6b4a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M9.5 10.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5c0 1.5-2.5 3-2.5 3s-2.5-1.5-2.5-3z" fill="rgba(27,107,74,0.15)"/><path d="M9.5 13.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5"/></svg>
             </div>
             <div>
-              <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.contribution}</div>
-              <div style={{ color: "#2d9c8f", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(contrib)}</div>
+              <div style={{ color: C.sub, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 3 }}>{t.stats.contribution}</div>
+              <div style={{ color: "#1b6b4a", fontSize: 16, fontWeight: 800, letterSpacing: -0.5 }}>{fmtN(contrib)}</div>
             </div>
           </button>
           {/* Dons */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[1])}
-            style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
-            <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(32,178,170,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {/* Icône mains offrantes / don */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#20b2aa" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 4.02 3.268 2 6 2c1.657 0 3.15.817 4 2.07C10.85 2.817 12.343 2 14 2c2.732 0 5 2.02 5 5.191 0 4.105-5.37 8.863-11 14.402z" fill="rgba(32,178,170,0.18)"/></svg>
+            style={{ background: C.surfaceLowest, border: "none", borderRadius: 24, padding: "18px 16px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 10, boxShadow: "0 2px 16px rgba(1,45,29,0.05)", transition: "all .2s" }}>
+            <div style={{ width: 40, height: 40, borderRadius: 14, background: "rgba(113,46,221,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#712edd" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 4.02 3.268 2 6 2c1.657 0 3.15.817 4 2.07C10.85 2.817 12.343 2 14 2c2.732 0 5 2.02 5 5.191 0 4.105-5.37 8.863-11 14.402z" fill="rgba(113,46,221,0.12)"/></svg>
             </div>
             <div>
-              <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.don}</div>
-              <div style={{ color: "#20b2aa", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(dons)}</div>
+              <div style={{ color: C.sub, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 3 }}>{t.stats.don}</div>
+              <div style={{ color: "#712edd", fontSize: 16, fontWeight: 800, letterSpacing: -0.5 }}>{fmtN(dons)}</div>
             </div>
           </button>
           {/* Dépenses */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[2])}
-            style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
-            <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(224,82,82,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {/* Icône facture / dépense */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e05252" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(224,82,82,0.12)"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            style={{ background: C.surfaceLowest, border: "none", borderRadius: 24, padding: "18px 16px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 10, boxShadow: "0 2px 16px rgba(1,45,29,0.05)", transition: "all .2s" }}>
+            <div style={{ width: 40, height: 40, borderRadius: 14, background: "rgba(192,57,43,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c0392b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(192,57,43,0.10)"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
             <div>
-              <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.depense}</div>
-              <div style={{ color: "#e05252", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(dep)}</div>
+              <div style={{ color: C.sub, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 3 }}>{t.stats.depense}</div>
+              <div style={{ color: "#c0392b", fontSize: 16, fontWeight: 800, letterSpacing: -0.5 }}>{fmtN(dep)}</div>
             </div>
           </button>
           {/* Solde année passée — cliquable */}
           <button className="tbtn" onClick={() => { setEditPrevVal(String(soldePrev)); setEditPrevModal(true); }}
-            style={{ background: soldePrev >= 0 ? "linear-gradient(135deg,rgba(45,156,143,0.08),rgba(45,156,143,0.15))" : "rgba(254,226,226,0.6)", border: `1.5px solid ${soldePrev >= 0 ? "rgba(45,156,143,0.3)" : "#FECACA"}`, borderRadius: 18, padding: "16px 14px 14px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, cursor: "pointer", width: "100%" }}>
+            style={{ background: soldePrev >= 0 ? "rgba(27,107,74,0.08)" : "rgba(192,57,43,0.07)", border: "none", borderRadius: 24, padding: "18px 16px 16px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 10, cursor: "pointer", width: "100%", boxShadow: "0 2px 16px rgba(1,45,29,0.05)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: soldePrev >= 0 ? "rgba(45,156,143,0.12)" : "rgba(239,68,68,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={soldePrev >= 0 ? "#2d9c8f" : "#EF4444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+              <div style={{ width: 40, height: 40, borderRadius: 14, background: soldePrev >= 0 ? "rgba(27,107,74,0.12)" : "rgba(192,57,43,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={soldePrev >= 0 ? "#1b6b4a" : "#c0392b"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
               </div>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.sub} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6, marginTop: 2 }}><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.sub} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginTop: 2 }}><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </div>
             <div>
-              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>
+              <div style={{ color: C.sub, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 3 }}>
                 {lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}
               </div>
-              <div style={{ color: soldePrev >= 0 ? "#2d9c8f" : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>
+              <div style={{ color: soldePrev >= 0 ? "#1b6b4a" : "#c0392b", fontSize: 16, fontWeight: 800, letterSpacing: -0.5 }}>
                 {fmtN(Math.abs(soldePrev))}
               </div>
               {soldePrevManual !== null && <div style={{ fontSize: 8, color: C.sub, marginTop: 2 }}>✏️ {lang === "ar" ? "معدّل" : "modifié"}</div>}
@@ -749,35 +759,33 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 
         {/* ── Modal édition Solde année passée ── */}
         {editPrevModal && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(26,43,46,0.6)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
+          <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(1,45,29,0.55)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
             onClick={e => e.target === e.currentTarget && setEditPrevModal(false)}>
-            <div style={{ background: C.card, borderRadius: 22, padding: "26px 22px", width: "100%", maxWidth: 320, boxShadow: C.shadowLg, animation: "pop .2s ease both", border: `1px solid ${C.mintLt}` }}>
-              <div style={{ textAlign: "center", marginBottom: 18 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: C.mintLt, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ background: C.surfaceLowest, borderRadius: 28, padding: "28px 24px", width: "100%", maxWidth: 320, boxShadow: C.shadowLg, animation: "pop .2s ease both" }}>
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 16, background: C.surfaceLow, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.forestLt} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </div>
-                <div style={{ color: C.text, fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
+                <div style={{ color: C.text, fontWeight: 800, fontSize: 15, marginBottom: 4, fontFamily: "'Manrope',sans-serif" }}>
                   {lang === "ar" ? `تعديل رصيد ${prevYear}` : `Modifier le solde ${prevYear}`}
                 </div>
                 <div style={{ color: C.muted, fontSize: 12 }}>{lang === "ar" ? "سيُضاف إلى الرصيد الإجمالي" : "Sera ajouté au solde global"}</div>
               </div>
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7 }}>{lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 8 }}>{lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}</div>
                 <input type="number" value={editPrevVal} onChange={e => setEditPrevVal(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") { setSoldePrevManual(Number(editPrevVal)); setEditPrevModal(false); } }}
                   placeholder="0" autoFocus
-                  style={{ width: "100%", background: C.mintLt, border: `1.5px solid ${C.mintLt}`, borderRadius: 12, padding: "12px 14px", fontSize: 18, color: C.text, outline: "none", fontFamily: "inherit", textAlign: "center", fontWeight: 700, transition: "border-color .2s" }}
-                  onFocus={e => e.target.style.borderColor = C.forestLt}
-                  onBlur={e => e.target.style.borderColor = C.mintLt}
+                  style={{ width: "100%", background: C.surfaceLow, border: "none", borderRadius: 14, padding: "14px", fontSize: 20, color: C.text, outline: "none", fontFamily: "'Manrope',sans-serif", textAlign: "center", fontWeight: 800 }}
                 />
               </div>
               <div style={{ display: "flex", gap: 10 }}>
                 <button className="tbtn" onClick={() => { setSoldePrevManual(null); setEditPrevModal(false); }}
-                  style={{ flex: 1, background: C.mintLt, border: "none", borderRadius: 12, padding: "11px", fontSize: 12, fontWeight: 600, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>
+                  style={{ flex: 1, background: C.surfaceLow, border: "none", borderRadius: 14, padding: "12px", fontSize: 12, fontWeight: 600, color: C.muted, cursor: "pointer", fontFamily: "'Manrope',sans-serif" }}>
                   {lang === "ar" ? "إعادة ضبط" : "Réinitialiser"}
                 </button>
                 <button className="tbtn" onClick={() => { setSoldePrevManual(Number(editPrevVal)); setEditPrevModal(false); }}
-                  style={{ flex: 2, background: C.forestLt, border: "none", borderRadius: 12, padding: "11px", fontSize: 13, fontWeight: 700, color: "#fff", cursor: "pointer", fontFamily: "inherit", boxShadow: `0 4px 14px rgba(45,156,143,0.35)` }}>
+                  style={{ flex: 2, background: "linear-gradient(135deg,#012d1d,#1b4332)", border: "none", borderRadius: 14, padding: "12px", fontSize: 13, fontWeight: 700, color: "#fff", cursor: "pointer", fontFamily: "'Manrope',sans-serif", boxShadow: "0 4px 16px rgba(1,45,29,0.25)" }}>
                   {lang === "ar" ? "حفظ" : "Enregistrer"}
                 </button>
               </div>
@@ -803,16 +811,16 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 
         {/* Aperçu membres */}
         <div className="a6">
-          <Card sx={{ padding: "16px", marginTop: 6 }}>
+          <Card sx={{ padding: "18px", marginTop: 6 }}>
             <SHdr title={t.activeMembers} badge={`${members.length}`} dir={t.dir} />
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
               <div style={{ display: "flex" }}>
                 {members.slice(0, 4).map((m, i) => {
-                  const [bg, fg] = AVC[i % AVC.length];
-                  return <div key={m.id} style={{ width: 38, height: 38, borderRadius: 12, background: bg, border: `2px solid ${C.card}`, marginLeft: i === 0 ? 0 : -9, display: "flex", alignItems: "center", justifyContent: "center", color: fg, fontSize: 12, fontWeight: 700, zIndex: 10 - i }}>{inits(m.name)}</div>;
+                  const colors = ["#1b4332","#712edd","#54001d","#1b6b4a"];
+                  return <div key={m.id} style={{ width: 38, height: 38, borderRadius: 12, background: colors[i % colors.length], border: `2px solid ${C.surfaceLowest}`, marginLeft: i === 0 ? 0 : -9, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700, zIndex: 10 - i }}>{inits(m.name)}</div>;
                 })}
               </div>
-              <button className="tbtn" onClick={() => onTabChange("members")} style={{ fontSize: 11, fontWeight: 600, color: C.forestLt, background: C.mintPale, border: `1px solid rgba(200,135,42,0.2)`, borderRadius: 9, padding: "7px 13px", cursor: "pointer" }}>{t.seeMembers}</button>
+              <button className="tbtn" onClick={() => onTabChange("members")} style={{ fontSize: 11, fontWeight: 700, color: C.forestLt, background: C.surfaceLow, border: "none", borderRadius: 12, padding: "7px 14px", cursor: "pointer", fontFamily: "'Manrope',sans-serif" }}>{t.seeMembers}</button>
             </div>
           </Card>
         </div>
@@ -838,12 +846,12 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 
   const pillStyle = (active, color) => ({
-    background: active ? (color || C.forest) : C.card,
-    border: `1.5px solid ${active ? (color || C.forest) : C.mintLt}`,
+    background: active ? (color || C.primary) : C.surfaceLowest,
+    border: "none",
     color: active ? "#fff" : C.muted,
-    borderRadius: 20, padding: "7px 15px", fontSize: 11, fontWeight: 600,
-    cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit",
-    boxShadow: C.shadow, transition: "all .18s",
+    borderRadius: 20, padding: "8px 16px", fontSize: 11, fontWeight: 700,
+    cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'Manrope',sans-serif",
+    boxShadow: active ? "0 4px 16px rgba(1,45,29,0.18)" : C.shadow, transition: "all .18s",
   });
 
   const activeLabel = [
@@ -898,7 +906,7 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
       <div style={{ fontSize: 11, color: C.muted, marginBottom: 10, paddingLeft: 2, display: "flex", alignItems: "center", gap: 8 }}>
         <span>{sorted.length} {lang === "ar" ? "معاملة" : `transaction${sorted.length !== 1 ? "s" : ""}`}</span>
         {activeLabel && (
-          <span style={{ background: C.mintPale, borderRadius: 6, padding: "2px 9px", border: `1px solid ${C.mintLt}`, color: C.forestLt, fontWeight: 600 }}>
+          <span style={{ background: C.surfaceLow, borderRadius: 6, padding: "2px 9px", border: "none", color: C.forestLt, fontWeight: 600 }}>
             {activeLabel}
           </span>
         )}
@@ -941,13 +949,13 @@ function MemberDetailModal({ member, txs, lang, onClose }) {
 
         {/* Handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
-          <div style={{ width: 40, height: 4, background: C.sage, borderRadius: 4 }} />
+          <div style={{ width: 40, height: 4, background: C.primary, borderRadius: 4 }} />
         </div>
 
         {/* Header membre */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 13 }}>
-            <div style={{ width: 50, height: 50, borderRadius: 15, background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 17, fontWeight: 700, flexShrink: 0 }}>
+            <div style={{ width: 50, height: 50, borderRadius: 15, background: "linear-gradient(135deg,#012d1d,#1b4332)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 17, fontWeight: 700, flexShrink: 0 }}>
               {inits(member.name)}
             </div>
             <div>
@@ -955,11 +963,11 @@ function MemberDetailModal({ member, txs, lang, onClose }) {
               {member.phone && <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>{member.phone}</div>}
             </div>
           </div>
-          <button onClick={onClose} className="tbtn" style={{ background: C.mintPale, border: `1px solid ${C.mintLt}`, color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, cursor: "pointer" }}>✕</button>
+          <button onClick={onClose} className="tbtn" style={{ background: C.surfaceLow, border: "none", color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, cursor: "pointer" }}>✕</button>
         </div>
 
         {/* Carte total 2026 */}
-        <div style={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", borderRadius: 18, padding: "18px 20px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: C.shadowMd }}>
+        <div style={{ background: "linear-gradient(135deg,#012d1d,#1b4332)", borderRadius: 18, padding: "18px 20px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: C.shadowMd }}>
           <div>
             <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: 500, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 4 }}>
               {lang === "ar" ? `إجمالي مساهمات ${YEAR}` : `Total contributions ${YEAR}`}
@@ -985,8 +993,8 @@ function MemberDetailModal({ member, txs, lang, onClose }) {
                     <span style={{ color: C.text, fontSize: 13, fontWeight: 500 }}>{MONTHS_FULL[Number(mIdx)]}</span>
                     <span style={{ color: C.forestLt, fontSize: 13, fontWeight: 700 }}>{fmtN(val)}</span>
                   </div>
-                  <div style={{ background: C.mintPale, borderRadius: 6, height: 7, overflow: "hidden" }}>
-                    <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg,#7C3AED,#C084FC)", borderRadius: 6, transition: "width .6s cubic-bezier(.16,1,.3,1)" }} />
+                  <div style={{ background: C.surfaceLow, borderRadius: 6, height: 7, overflow: "hidden" }}>
+                    <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg,#1b6b4a,#4caf8a)", borderRadius: 6, transition: "width .6s cubic-bezier(.16,1,.3,1)" }} />
                   </div>
                 </div>
               );
@@ -996,12 +1004,12 @@ function MemberDetailModal({ member, txs, lang, onClose }) {
               {lang === "ar" ? "جميع العمليات" : "Toutes les opérations"}
             </div>
             {contribTxs.map(tx => (
-              <div key={tx.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 13px", background: C.card, borderRadius: 12, marginBottom: 8, border: `1px solid ${C.mintLt}` }}>
+              <div key={tx.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 13px", background: C.surfaceLowest, borderRadius: 12, marginBottom: 8, border: "none" }}>
                 <div>
                   <div style={{ color: C.text, fontSize: 12, fontWeight: 600 }}>{fmtDt(tx.date, lang)}</div>
                   {tx.note && <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{tx.note}</div>}
                 </div>
-                <div style={{ color: "#8B5CF6", fontWeight: 700, fontSize: 13 }}>{fmtN(tx.amount)}</div>
+                <div style={{ color: "#1b6b4a", fontWeight: 700, fontSize: 13 }}>{fmtN(tx.amount)}</div>
               </div>
             ))}
           </div>
@@ -1097,10 +1105,10 @@ function DonutChart({ contrib, dons, dep, lang, chartReady }) {
         labels: [t.stats.contribution, t.stats.don, t.stats.depense],
         datasets: [{
           data: [contrib, dons, dep],
-          backgroundColor: ["rgba(124,58,237,0.85)", "rgba(219,39,119,0.85)", "rgba(239,68,68,0.85)"],
+          backgroundColor: ["rgba(27,107,74,0.85)", "rgba(113,46,221,0.85)", "rgba(192,57,43,0.85)"],
           borderRadius: 10,
           borderSkipped: false,
-          hoverBackgroundColor: ["#7C3AED", "#DB2777", "#EF4444"],
+          hoverBackgroundColor: ["#1b6b4a", "#712edd", "#c0392b"],
         }]
       },
       options: {
@@ -1109,19 +1117,19 @@ function DonutChart({ contrib, dons, dep, lang, chartReady }) {
           legend: { display: false },
           tooltip: {
             backgroundColor: "#fff", titleColor: "#1A1A2E", bodyColor: "#6B5E8A",
-            borderColor: "#EDE9FE", borderWidth: 1, padding: 10, cornerRadius: 10,
+            borderColor: C.surfaceLow, borderWidth: 0, padding: 10, cornerRadius: 10,
             callbacks: { label: ctx => " " + new Intl.NumberFormat("fr-FR").format(ctx.parsed.y) }
           },
         },
         scales: {
           x: {
             grid: { display: false },
-            ticks: { color: "#6B5E8A", font: { size: 11, family: "Times New Roman", weight: "600" } },
+            ticks: { color: "#6B5E8A", font: { size: 11, family: "Manrope", weight: "600" } },
             border: { display: false },
           },
           y: {
-            grid: { color: "#EDE9FE" },
-            ticks: { color: "#9D8BC0", font: { size: 9, family: "Times New Roman" }, callback: v => v >= 1000 ? (v/1000).toFixed(0)+"k" : v },
+            grid: { color: C.surfaceLow },
+            ticks: { color: "#9D8BC0", font: { size: 9, family: "Manrope" }, callback: v => v >= 1000 ? (v/1000).toFixed(0)+"k" : v },
             border: { display: false },
           },
         },
@@ -1131,7 +1139,7 @@ function DonutChart({ contrib, dons, dep, lang, chartReady }) {
   }, [chartReady, contrib, dons, dep, lang]);
 
   return (
-    <div style={{ background: "#fff", borderRadius: 20, boxShadow: "0 2px 16px rgba(124,58,237,0.08)", border: "1px solid #EDE9FE", padding: "16px", marginBottom: 16 }}>
+    <div style={{ background: C.surfaceLowest, borderRadius: 24, boxShadow: C.shadow, padding: "16px", marginBottom: 16 }}>
       <div style={{ marginBottom: 14 }}>
         <span style={{ color: "#1A1A2E", fontWeight: 600, fontSize: 14 }}>{lang === "ar" ? "توزيع المالية" : "Répartition financière"}</span>
       </div>
@@ -1161,13 +1169,13 @@ function TopMembers({ members, txs, lang }) {
   if (ranked.length === 0) return null;
   const medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"];
   const maxVal = ranked[0].total;
-  const AVC2 = ["#7C3AED","#A855F7","#C084FC","#DDD6FE","#EDE9FE"];
+  const AVC2 = ["#012d1d","#1b4332","#1b6b4a","#712edd","#a8d5c2"];
   return (
-    <div style={{ background: "#fff", borderRadius: 20, boxShadow: "0 2px 16px rgba(124,58,237,0.08)", border: "1px solid #EDE9FE", padding: "16px", marginBottom: 16 }}>
+    <div style={{ background: C.surfaceLowest, borderRadius: 24, boxShadow: C.shadow, padding: "16px", marginBottom: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-        {Ic.trophy("#F5C842", 16)}
+        {Ic.trophy("#1b6b4a", 16)}
         <span style={{ color: "#1A1A2E", fontWeight: 600, fontSize: 14 }}>{lang === "ar" ? "أكبر المساهمين" : "Top contributeurs"}</span>
-        <span style={{ fontSize: 10, fontWeight: 600, color: "#6B5E8A", background: "#F5F3FF", borderRadius: 8, padding: "2px 9px", border: "1px solid #EDE9FE", marginLeft: "auto" }}>Top {ranked.length}</span>
+        <span style={{ fontSize: 10, fontWeight: 600, color: C.muted, background: C.surfaceLow, borderRadius: 8, padding: "2px 9px", marginLeft: "auto" }}>Top {ranked.length}</span>
       </div>
       {ranked.map((m, i) => (
         <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: i < ranked.length - 1 ? 10 : 0, direction: t.dir }}>
@@ -1177,7 +1185,7 @@ function TopMembers({ members, txs, lang }) {
               <span style={{ color: "#1A1A2E", fontSize: 12, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60%" }}>{m.name}</span>
               <span style={{ color: AVC2[i], fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{new Intl.NumberFormat("fr-FR").format(m.total)}</span>
             </div>
-            <div style={{ background: "#F5F3FF", borderRadius: 4, height: 5, overflow: "hidden" }}>
+            <div style={{ background: C.surfaceLow, borderRadius: 4, height: 5, overflow: "hidden" }}>
               <div style={{ width: `${(m.total / maxVal) * 100}%`, height: "100%", background: `linear-gradient(90deg, ${AVC2[i]}, ${AVC2[Math.min(i+1, 4)]})`, borderRadius: 4, transition: "width .7s cubic-bezier(.16,1,.3,1)" }} />
             </div>
           </div>
@@ -1233,9 +1241,9 @@ function PdfReportModal({ txs, members, onClose, year }) {
     return `<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${color}" opacity="0.9"/>`;
   }
   let sa = 0;
-  const pieC = pieSlice(totalC, pieTotal, sa, "#2d9c8f"); sa += (totalC / (pieTotal || 1)) * 2 * Math.PI;
-  const pieD = pieSlice(totalD, pieTotal, sa, "#20b2aa"); sa += (totalD / (pieTotal || 1)) * 2 * Math.PI;
-  const pieE = pieSlice(totalE, pieTotal, sa, "#e05252");
+  const pieC = pieSlice(totalC, pieTotal, sa, "#1b6b4a"); sa += (totalC / (pieTotal || 1)) * 2 * Math.PI;
+  const pieD = pieSlice(totalD, pieTotal, sa, "#712edd"); sa += (totalD / (pieTotal || 1)) * 2 * Math.PI;
+  const pieE = pieSlice(totalE, pieTotal, sa, "#c0392b");
 
   // Top 5 members
   const topMembers = members
@@ -1251,8 +1259,8 @@ function PdfReportModal({ txs, members, onClose, year }) {
 
 
   const pdfStyles = `
-    .pdf-wrap{font-family:'Times New Roman','Times',serif;direction:rtl;background:#fff;color:#1a2b2e;padding:32px;max-width:860px;margin:0 auto;font-size:14px;}
-    .pdf-header{background:linear-gradient(135deg,#1a2b2e,#2d9c8f);color:#fff;border-radius:18px;padding:28px 32px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;}
+    .pdf-wrap{font-family:'Manrope','Segoe UI',sans-serif;direction:rtl;background:#fff;color:#1a2b2e;padding:32px;max-width:860px;margin:0 auto;font-size:14px;}
+    .pdf-header{background:linear-gradient(135deg,#012d1d,#1b4332);color:#fff;border-radius:18px;padding:28px 32px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;}
     .pdf-title{font-size:22px;font-weight:800;margin-bottom:4px;}
     .pdf-sub{font-size:14px;opacity:0.7;}
     .pdf-date{font-size:12px;opacity:0.6;text-align:left;}
@@ -1261,9 +1269,9 @@ function PdfReportModal({ txs, members, onClose, year }) {
     .pdf-kpi-label{font-size:11px;font-weight:600;color:#7a9ea2;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
     .pdf-kpi-value{font-size:18px;font-weight:800;}
     .pdf-section{background:#fff;border:1.5px solid #e0f5f3;border-radius:16px;padding:20px;margin-bottom:20px;}
-    .pdf-section-title{font-size:14px;font-weight:700;color:#1a2b2e;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e0f5f3;display:flex;align-items:center;gap:8px;}
+    .pdf-section-title{font-size:14px;font-weight:700;color:#1a2b2e;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #d8f3e8;display:flex;align-items:center;gap:8px;}
     .pdf-table{width:100%;border-collapse:collapse;}
-    .pdf-table th{background:#f0faf9;color:#2d9c8f;font-size:13px;font-weight:700;padding:9px 12px;text-align:right;border-bottom:2px solid #e0f5f3;}
+    .pdf-table th{background:#edf7f2;color:#1b6b4a;font-size:13px;font-weight:700;padding:9px 12px;text-align:right;border-bottom:2px solid #d8f3e8;}
     .pdf-table td{padding:8px 12px;font-size:13px;border-bottom:1px solid #f0faf9;text-align:right;color:#1a2b2e;}
     .pdf-table tr:last-child td{border-bottom:none;}
     .pdf-badge{display:inline-block;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:600;}
@@ -1271,13 +1279,13 @@ function PdfReportModal({ txs, members, onClose, year }) {
   `;
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 3000, background: "rgba(26,43,46,0.65)", backdropFilter: "blur(16px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+    <div style={{ position: "fixed", inset: 0, zIndex: 3000, background: "rgba(1,45,29,0.65)", backdropFilter: "blur(16px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
       onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={{ background: C.bg, borderRadius: "26px 26px 0 0", width: "100%", maxWidth: 430, maxHeight: "95vh", overflowY: "auto", padding: "0 0 44px", animation: "sheet .32s cubic-bezier(.16,1,.3,1)", direction: "rtl" }}>
 
         {/* Handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
-          <div style={{ width: 40, height: 4, background: C.sage, borderRadius: 4 }} />
+          <div style={{ width: 40, height: 4, background: C.primary, borderRadius: 4 }} />
         </div>
 
         {/* Header */}
@@ -1286,7 +1294,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
             <div style={{ color: C.text, fontWeight: 800, fontSize: 17 }}>تقرير الصندوق {year}</div>
             <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>تقرير مالي شامل — معاينة</div>
           </div>
-          <button onClick={onClose} className="tbtn" style={{ background: C.mintPale, border: `1px solid ${C.mintLt}`, color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, cursor: "pointer", flexShrink: 0 }}>✕</button>
+          <button onClick={onClose} className="tbtn" style={{ background: C.surfaceLow, border: "none", color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, cursor: "pointer", flexShrink: 0 }}>✕</button>
         </div>
 
         {/* Preview card */}
@@ -1295,10 +1303,10 @@ function PdfReportModal({ txs, members, onClose, year }) {
           {/* KPI summary */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
             {[
-              { label: "المساهمات", val: totalC, color: "#2d9c8f", bg: "rgba(45,156,143,0.07)", sign: "" },
-              { label: "التبرعات",  val: totalD, color: "#20b2aa", bg: "rgba(32,178,170,0.07)", sign: "" },
-              { label: "المصروفات", val: totalE, color: "#e05252", bg: "rgba(224,82,82,0.07)",  sign: "" },
-              { label: "الرصيد الصافي", val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", bg: solde >= 0 ? "rgba(45,156,143,0.07)" : "rgba(224,82,82,0.07)", sign: "" },
+              { label: "المساهمات", val: totalC, color: "#1b6b4a", bg: "rgba(27,107,74,0.07)", sign: "" },
+              { label: "التبرعات",  val: totalD, color: "#712edd", bg: "rgba(113,46,221,0.07)", sign: "" },
+              { label: "المصروفات", val: totalE, color: "#c0392b", bg: "rgba(192,57,43,0.07)",  sign: "" },
+              { label: "الرصيد الصافي", val: Math.abs(solde), color: solde >= 0 ? "#1b6b4a" : "#c0392b", bg: solde >= 0 ? "rgba(27,107,74,0.07)" : "rgba(192,57,43,0.07)", sign: "" },
             ].map(k => (
               <div key={k.label} style={{ background: k.bg, borderRadius: 14, padding: "14px 12px", border: `1.5px solid ${k.color}22` }}>
                 <div style={{ color: C.muted, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 5 }}>{k.label}</div>
@@ -1308,7 +1316,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
           </div>
 
           {/* Mini bar chart preview */}
-          <div style={{ background: C.card, borderRadius: 16, padding: "14px", border: `1px solid ${C.mintLt}`, marginBottom: 14 }}>
+          <div style={{ background: C.surfaceLowest, borderRadius: 16, padding: "14px", border: "none", marginBottom: 14 }}>
             <div style={{ color: C.text, fontWeight: 700, fontSize: 12, marginBottom: 10 }}>📊 الحركة الشهرية</div>
             <svg width="100%" viewBox={`0 0 ${BAR_W} ${BAR_H + 30}`} style={{ display: "block" }}>
               {byMonth.map((m, i) => {
@@ -1319,9 +1327,9 @@ function PdfReportModal({ txs, members, onClose, year }) {
                 const bw = barW * 0.28;
                 return (
                   <g key={i}>
-                    <rect x={x + 2} y={BAR_H - hC - 10} width={bw} height={hC || 1} fill="#2d9c8f" rx="2" opacity="0.85" />
-                    <rect x={x + bw + 4} y={BAR_H - hD - 10} width={bw} height={hD || 1} fill="#20b2aa" rx="2" opacity="0.75" />
-                    <rect x={x + bw * 2 + 6} y={BAR_H - hE - 10} width={bw} height={hE || 1} fill="#e05252" rx="2" opacity="0.75" />
+                    <rect x={x + 2} y={BAR_H - hC - 10} width={bw} height={hC || 1} fill="#1b6b4a" rx="2" opacity="0.85" />
+                    <rect x={x + bw + 4} y={BAR_H - hD - 10} width={bw} height={hD || 1} fill="#712edd" rx="2" opacity="0.75" />
+                    <rect x={x + bw * 2 + 6} y={BAR_H - hE - 10} width={bw} height={hE || 1} fill="#c0392b" rx="2" opacity="0.75" />
                     <text x={x + barW / 2} y={BAR_H + 20} textAnchor="middle" fontSize="9" fill="#7a9ea2" fontFamily="sans-serif">
                       {MONTHS_AR[i].slice(0, 3)}
                     </text>
@@ -1330,7 +1338,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
               })}
             </svg>
             <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 4 }}>
-              {[["#2d9c8f","مساهمات"],["#20b2aa","تبرعات"],["#e05252","مصروفات"]].map(([c, l]) => (
+              {[["#1b6b4a","مساهمات"],["#712edd","تبرعات"],["#c0392b","مصروفات"]].map(([c, l]) => (
                 <div key={l} style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <div style={{ width: 8, height: 8, background: c, borderRadius: 2 }} />
                   <span style={{ fontSize: 9, color: C.muted, fontFamily: "sans-serif" }}>{l}</span>
@@ -1340,7 +1348,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
           </div>
 
           {/* Pie preview */}
-          <div style={{ background: C.card, borderRadius: 16, padding: "14px", border: `1px solid ${C.mintLt}`, marginBottom: 14, display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{ background: C.surfaceLowest, borderRadius: 16, padding: "14px", border: "none", marginBottom: 14, display: "flex", alignItems: "center", gap: 16 }}>
             <svg width="100" height="100" viewBox="0 0 160 160" style={{ flexShrink: 0 }}>
               {pieTotal === 0
                 ? <circle cx="80" cy="80" r="72" fill="#e0f5f3" />
@@ -1352,9 +1360,9 @@ function PdfReportModal({ txs, members, onClose, year }) {
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 12, color: C.text, marginBottom: 10 }}>📈 توزيع المالية</div>
               {[
-                { label: "المساهمات", val: totalC, color: "#2d9c8f", pct: pieTotal ? Math.round(totalC / pieTotal * 100) : 0 },
-                { label: "التبرعات",  val: totalD, color: "#20b2aa", pct: pieTotal ? Math.round(totalD / pieTotal * 100) : 0 },
-                { label: "المصروفات", val: totalE, color: "#e05252", pct: pieTotal ? Math.round(totalE / pieTotal * 100) : 0 },
+                { label: "المساهمات", val: totalC, color: "#1b6b4a", pct: pieTotal ? Math.round(totalC / pieTotal * 100) : 0 },
+                { label: "التبرعات",  val: totalD, color: "#712edd", pct: pieTotal ? Math.round(totalD / pieTotal * 100) : 0 },
+                { label: "المصروفات", val: totalE, color: "#c0392b", pct: pieTotal ? Math.round(totalE / pieTotal * 100) : 0 },
               ].map(s => (
                 <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                   <div style={{ width: 8, height: 8, background: s.color, borderRadius: 2, flexShrink: 0 }} />
@@ -1374,7 +1382,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 
           {/* Top members preview */}
           {topMembers.length > 0 && (
-            <div style={{ background: C.card, borderRadius: 16, padding: "14px", border: `1px solid ${C.mintLt}`, marginBottom: 14 }}>
+            <div style={{ background: C.surfaceLowest, borderRadius: 16, padding: "14px", border: "none", marginBottom: 14 }}>
               <div style={{ color: C.text, fontWeight: 700, fontSize: 12, marginBottom: 10 }}>🏆 أكبر المساهمين</div>
               {topMembers.map((m, i) => (
                 <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -1382,10 +1390,10 @@ function PdfReportModal({ txs, members, onClose, year }) {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                       <span style={{ fontSize: 11, fontWeight: 600 }}>{m.name}</span>
-                      <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(m.total)}</span>
+                      <span style={{ fontSize: 10, color: "#1b6b4a", fontWeight: 700 }}>{fmtAR(m.total)}</span>
                     </div>
-                    <div style={{ background: C.mintPale, borderRadius: 3, height: 4, overflow: "hidden" }}>
-                      <div style={{ width: `${(m.total / (topMembers[0]?.total || 1)) * 100}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
+                    <div style={{ background: C.surfaceLow, borderRadius: 3, height: 4, overflow: "hidden" }}>
+                      <div style={{ width: `${(m.total / (topMembers[0]?.total || 1)) * 100}%`, height: "100%", background: "#1b6b4a", borderRadius: 3 }} />
                     </div>
                   </div>
                 </div>
@@ -1394,7 +1402,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
           )}
 
           {/* Info */}
-          <div style={{ background: C.mintPale, borderRadius: 12, padding: "11px 14px", marginBottom: 16, fontSize: 11, color: C.muted, lineHeight: 1.6 }}>
+          <div style={{ background: C.surfaceLow, borderRadius: 12, padding: "11px 14px", marginBottom: 16, fontSize: 11, color: C.muted, lineHeight: 1.6 }}>
             📄 سيتم إنشاء تقرير PDF شامل يتضمن جميع العمليات المسجلة ({allTxsSorted.length} عملية)، الرسوم البيانية، قائمة الأعضاء وتقرير مالي مفصل.
           </div>
 
@@ -1417,10 +1425,10 @@ function PdfReportModal({ txs, members, onClose, year }) {
               {/* KPIs */}
               <div className="pdf-kpi-row">
                 {[
-                  { label: "إجمالي المساهمات", val: totalC, color: "#2d9c8f", sign: "" },
-                  { label: "إجمالي التبرعات",  val: totalD, color: "#20b2aa", sign: "" },
-                  { label: "إجمالي المصروفات", val: totalE, color: "#e05252", sign: "" },
-                  { label: "الرصيد الصافي",    val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", sign: "" },
+                  { label: "إجمالي المساهمات", val: totalC, color: "#1b6b4a", sign: "" },
+                  { label: "إجمالي التبرعات",  val: totalD, color: "#712edd", sign: "" },
+                  { label: "إجمالي المصروفات", val: totalE, color: "#c0392b", sign: "" },
+                  { label: "الرصيد الصافي",    val: Math.abs(solde), color: solde >= 0 ? "#1b6b4a" : "#c0392b", sign: "" },
                 ].map(k => (
                   <div key={k.label} className="pdf-kpi" style={{ background: k.color + "0d" }}>
                     <div className="pdf-kpi-label">{k.label}</div>
@@ -1453,9 +1461,9 @@ function PdfReportModal({ txs, members, onClose, year }) {
                     const bw = barW * 0.28;
                     return (
                       <g key={i}>
-                        <rect x={x + 2}           y={BAR_H - hC - 10} width={bw} height={hC || 1} fill="#2d9c8f" rx="2" />
-                        <rect x={x + bw + 4}       y={BAR_H - hD - 10} width={bw} height={hD || 1} fill="#20b2aa" rx="2" />
-                        <rect x={x + bw * 2 + 6}   y={BAR_H - hE - 10} width={bw} height={hE || 1} fill="#e05252" rx="2" />
+                        <rect x={x + 2}           y={BAR_H - hC - 10} width={bw} height={hC || 1} fill="#1b6b4a" rx="2" />
+                        <rect x={x + bw + 4}       y={BAR_H - hD - 10} width={bw} height={hD || 1} fill="#712edd" rx="2" />
+                        <rect x={x + bw * 2 + 6}   y={BAR_H - hE - 10} width={bw} height={hE || 1} fill="#c0392b" rx="2" />
                         <text x={x + barW / 2} y={BAR_H + 22} textAnchor="middle" fontSize="8" fill="#7a9ea2" fontFamily="sans-serif">
                           {MONTHS_AR[i].slice(0, 3)}
                         </text>
@@ -1464,7 +1472,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                   })}
                 </svg>
                 <div style={{ display: "flex", gap: 20, justifyContent: "center", marginTop: 8 }}>
-                  {[["#2d9c8f","المساهمات"],["#20b2aa","التبرعات"],["#e05252","المصروفات"]].map(([c, l]) => (
+                  {[["#1b6b4a","المساهمات"],["#712edd","التبرعات"],["#c0392b","المصروفات"]].map(([c, l]) => (
                     <div key={l} style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <div style={{ width: 12, height: 12, background: c, borderRadius: 3 }} />
                       <span style={{ fontSize: 11, color: "#4a6568" }}>{l}</span>
@@ -1491,9 +1499,9 @@ function PdfReportModal({ txs, members, onClose, year }) {
                     </svg>
                     <div>
                       {[
-                        { label: "مساهمات", val: totalC, color: "#2d9c8f" },
-                        { label: "تبرعات",  val: totalD, color: "#20b2aa" },
-                        { label: "مصروفات", val: totalE, color: "#e05252" },
+                        { label: "مساهمات", val: totalC, color: "#1b6b4a" },
+                        { label: "تبرعات",  val: totalD, color: "#712edd" },
+                        { label: "مصروفات", val: totalE, color: "#c0392b" },
                       ].map(s => (
                         <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
                           <div style={{ width: 10, height: 10, background: s.color, borderRadius: 2 }} />
@@ -1518,10 +1526,10 @@ function PdfReportModal({ txs, members, onClose, year }) {
                         <div style={{ flex: 1 }}>
                           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                             <span style={{ fontSize: 11, fontWeight: 600 }}>{m.name}</span>
-                            <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(m.total)}</span>
+                            <span style={{ fontSize: 10, color: "#1b6b4a", fontWeight: 700 }}>{fmtAR(m.total)}</span>
                           </div>
                           <div style={{ background: "#e0f5f3", borderRadius: 3, height: 5 }}>
-                            <div style={{ width: `${(m.total / maxMem) * 100}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
+                            <div style={{ width: `${(m.total / maxMem) * 100}%`, height: "100%", background: "#1b6b4a", borderRadius: 3 }} />
                           </div>
                         </div>
                       </div>
@@ -1550,19 +1558,19 @@ function PdfReportModal({ txs, members, onClose, year }) {
                       return (
                         <tr key={i}>
                           <td style={{ fontWeight: 600 }}>{MONTHS_AR[i]}</td>
-                          <td style={{ color: "#2d9c8f" }}>{m.c > 0 ? fmtAR(m.c) : "—"}</td>
-                          <td style={{ color: "#20b2aa" }}>{m.d > 0 ? fmtAR(m.d) : "—"}</td>
-                          <td style={{ color: "#e05252" }}>{m.e > 0 ? fmtAR(m.e) : "—"}</td>
-                          <td style={{ fontWeight: 700, color: net >= 0 ? "#2d9c8f" : "#e05252" }}>{net >= 0 ? "" : ""}{fmtAR(net)}</td>
+                          <td style={{ color: "#1b6b4a" }}>{m.c > 0 ? fmtAR(m.c) : "—"}</td>
+                          <td style={{ color: "#712edd" }}>{m.d > 0 ? fmtAR(m.d) : "—"}</td>
+                          <td style={{ color: "#c0392b" }}>{m.e > 0 ? fmtAR(m.e) : "—"}</td>
+                          <td style={{ fontWeight: 700, color: net >= 0 ? "#1b6b4a" : "#c0392b" }}>{net >= 0 ? "" : ""}{fmtAR(net)}</td>
                         </tr>
                       );
                     })}
                     <tr style={{ background: "#f0faf9", fontWeight: 700 }}>
                       <td style={{ fontWeight: 800 }}>الإجمالي</td>
-                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>{fmtAR(totalC)}</td>
-                      <td style={{ color: "#20b2aa", fontWeight: 800 }}>{fmtAR(totalD)}</td>
-                      <td style={{ color: "#e05252", fontWeight: 800 }}>{fmtAR(totalE)}</td>
-                      <td style={{ color: solde >= 0 ? "#2d9c8f" : "#e05252", fontWeight: 800 }}>{solde >= 0 ? "" : ""}{fmtAR(Math.abs(solde))}</td>
+                      <td style={{ color: "#1b6b4a", fontWeight: 800 }}>{fmtAR(totalC)}</td>
+                      <td style={{ color: "#712edd", fontWeight: 800 }}>{fmtAR(totalD)}</td>
+                      <td style={{ color: "#c0392b", fontWeight: 800 }}>{fmtAR(totalE)}</td>
+                      <td style={{ color: solde >= 0 ? "#1b6b4a" : "#c0392b", fontWeight: 800 }}>{solde >= 0 ? "" : ""}{fmtAR(Math.abs(solde))}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1594,16 +1602,16 @@ function PdfReportModal({ txs, members, onClose, year }) {
                           <tr key={m.id}>
                             <td style={{ color: "#7a9ea2", fontWeight: 600 }}>{i + 1}</td>
                             <td style={{ fontWeight: 600 }}>{m.name}</td>
-                            <td style={{ color: m.total > 0 ? "#2d9c8f" : "#7a9ea2", fontWeight: 700 }}>
+                            <td style={{ color: m.total > 0 ? "#1b6b4a" : "#7a9ea2", fontWeight: 700 }}>
                               {m.total > 0 ? `${fmtAR(m.total)}` : "—"}
                             </td>
                             <td>
                               {m.total > 0 ? (
                                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                                   <div style={{ flex: 1, background: "#e0f5f3", borderRadius: 3, height: 6 }}>
-                                    <div style={{ width: `${pct}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
+                                    <div style={{ width: `${pct}%`, height: "100%", background: "#1b6b4a", borderRadius: 3 }} />
                                   </div>
-                                  <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700, minWidth: 28 }}>{pct}%</span>
+                                  <span style={{ fontSize: 10, color: "#1b6b4a", fontWeight: 700, minWidth: 28 }}>{pct}%</span>
                                 </div>
                               ) : "—"}
                             </td>
@@ -1613,8 +1621,8 @@ function PdfReportModal({ txs, members, onClose, year }) {
                     })()}
                     <tr style={{ background: "#f0faf9", fontWeight: 700 }}>
                       <td colSpan={2} style={{ fontWeight: 800 }}>الإجمالي</td>
-                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>{fmtAR(totalC)}</td>
-                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>100%</td>
+                      <td style={{ color: "#1b6b4a", fontWeight: 800 }}>{fmtAR(totalC)}</td>
+                      <td style={{ color: "#1b6b4a", fontWeight: 800 }}>100%</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1638,7 +1646,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Times New Roman','Times',serif;background:#fff;color:#1a2b2e;direction:rtl;font-size:14px;}
+  body{font-family:'Manrope','Segoe UI',sans-serif;background:#fff;color:#1a2b2e;direction:rtl;font-size:14px;}
   @media print{
     body{margin:0;padding:0;}
     .pdf-wrap{padding:16px !important;max-width:100% !important;}
@@ -1662,7 +1670,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
             }
             setTimeout(() => URL.revokeObjectURL(url), 10000);
           }}
-            style={{ width: "100%", background: "linear-gradient(135deg,#1a2b2e,#2d9c8f)", border: "none", color: "#fff", borderRadius: 50, padding: "16px", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 8px 24px rgba(26,43,46,0.28)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+            style={{ width: "100%", background: "linear-gradient(135deg,#012d1d,#1b4332)", border: "none", color: "#fff", borderRadius: 50, padding: "16px", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "'Manrope',sans-serif", boxShadow: "0 8px 24px rgba(1,45,29,0.28)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
             <span style={{ fontSize: 20 }}>📥</span>
             <span>تنزيل التقرير</span>
           </button>
@@ -1938,13 +1946,13 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
     <div style={{ direction: t.dir, padding: "10px 0" }}>
       {/* TITRE STATS */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-        <div style={{ width: 4, height: 20, background: "linear-gradient(180deg,#7C3AED,#C084FC)", borderRadius: 2 }} />
+        <div style={{ width: 4, height: 20, background: "linear-gradient(180deg,#012d1d,#1b6b4a)", borderRadius: 2 }} />
         <span style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>{lang === "ar" ? `إحصائيات ${YEAR_STATS}` : `Statistiques ${YEAR_STATS}`}</span>
       </div>
 
       {/* BOUTON RAPPORT PDF */}
       <button className="tbtn" onClick={() => setShowPdf(true)}
-        style={{ width: "100%", background: "linear-gradient(135deg,#1a2b2e,#2d9c8f)", border: "none", color: "#fff", borderRadius: 16, padding: "14px 18px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16, boxShadow: "0 6px 20px rgba(26,43,46,0.25)", letterSpacing: 0.2 }}>
+        style={{ width: "100%", background: "linear-gradient(135deg,#012d1d,#1b4332)", border: "none", color: "#fff", borderRadius: 16, padding: "14px 18px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Manrope',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16, boxShadow: "0 6px 20px rgba(1,45,29,0.25)", letterSpacing: 0.2 }}>
         <span style={{ fontSize: 18 }}>📄</span>
         <span>{lang === "ar" ? "تقرير الوضعية المالية" : "Rapport de situation"}</span>
         <span style={{ marginRight: "auto", background: "rgba(255,255,255,0.18)", borderRadius: 8, padding: "2px 8px", fontSize: 10, fontWeight: 600, letterSpacing: 0.5 }}>{lang === "ar" ? "عربي" : "AR"}</span>
@@ -1953,8 +1961,8 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
       {/* 3 CARTES STATS 2026 */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
         {[
-          { label: t.stats.contribution, value: yC, color: "#8B5CF6", bg: "rgba(139,92,246,0.08)", icon: Ic.up("#8B5CF6", 15), sign: "" },
-          { label: t.stats.don,          value: yD, color: "#DB2777", bg: "rgba(219,39,119,0.08)", icon: Ic.heart("#DB2777", 15), sign: "" },
+          { label: t.stats.contribution, value: yC, color: "#1b6b4a", bg: "rgba(27,107,74,0.08)", icon: Ic.up("#1b6b4a", 15), sign: "" },
+          { label: t.stats.don,          value: yD, color: "#712edd", bg: "rgba(113,46,221,0.08)", icon: Ic.heart("#712edd", 15), sign: "" },
           { label: t.stats.depense,      value: yE, color: C.red,     bg: C.redLt,                icon: Ic.dn(C.red, 15), sign: "" },
         ].map(s => (
           <Card key={s.label} sx={{ padding: "12px 10px" }}>
@@ -1971,24 +1979,24 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
       <FinChart txs={txs2026} lang={lang} chartReady={chartReady} />
 
       {/* RESET */}
-      <div style={{ marginTop: 20, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20 }}>
+      <div style={{ marginTop: 20, borderTop: "none", paddingTop:, paddingTop: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: C.redLt, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🗑️</div>
           <span style={{ color: C.red, fontWeight: 700, fontSize: 14 }}>{t.resetBtn}</span>
         </div>
         {!resetConfirm ? (
           <button className="tbtn" onClick={() => setResetConfirm(true)}
-            style={{ width: "100%", background: C.redLt, border: `1.5px solid rgba(224,82,82,0.3)`, borderRadius: 14, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: "inherit" }}>
+            style={{ width: "100%", background: C.redLt, border: "none", borderRadius: 14, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: "'Manrope',sans-serif" }}>
             <span style={{ fontSize: 16 }}>⚠️</span>
             <span style={{ fontSize: 13, fontWeight: 600, color: C.red }}>{t.resetBtn}</span>
           </button>
         ) : (
-          <div style={{ background: C.redLt, border: `1.5px solid rgba(224,82,82,0.3)`, borderRadius: 14, padding: "16px" }}>
+          <div style={{ background: C.redLt, border: "none", borderRadius: 14, padding: "16px" }}>
             <div style={{ color: C.red, fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{t.resetConfirmTitle}</div>
             <div style={{ color: C.muted, fontSize: 12, marginBottom: 14, lineHeight: 1.5 }}>{t.resetConfirmMsg}</div>
             <div style={{ display: "flex", gap: 10 }}>
-              <button className="tbtn" onClick={() => setResetConfirm(false)} style={{ flex: 1, background: C.card, border: `1.5px solid ${C.mintLt}`, borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 500, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>{t.cancel}</button>
-              <button className="tbtn" onClick={doReset} disabled={resetting} style={{ flex: 1, background: C.red, border: "none", borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 600, color: "#fff", cursor: resetting ? "not-allowed" : "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <button className="tbtn" onClick={() => setResetConfirm(false)} style={{ flex: 1, background: C.surfaceLowest, border: "none", borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 500, color: C.muted, cursor: "pointer", fontFamily: "'Manrope',sans-serif" }}>{t.cancel}</button>
+              <button className="tbtn" onClick={doReset} disabled={resetting} style={{ flex: 1, background: C.red, border: "none", borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 600, color: "#fff", cursor: resetting ? "not-allowed" : "pointer", fontFamily: "'Manrope',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                 {resetting ? <><div style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} />...</> : t.delete}
               </button>
             </div>
@@ -1997,18 +2005,18 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
       </div>
 
       {/* IMPORT */}
-      <div style={{ marginTop: 20, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20, marginBottom: 10 }}>
+      <div style={{ marginTop: 20, borderTop: "none", paddingTop:, paddingTop: 20, marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: "#EFF8FF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>📂</div>
           <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{t.importBtn}</span>
-          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.mintPale, borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
+          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.surfaceLow, borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
         </div>
         <div style={{ fontSize: 10, color: C.muted, marginBottom: 10, lineHeight: 1.5 }}>{t.importInfo}</div>
         <label style={{ display: "block", cursor: xlsxReady ? "pointer" : "not-allowed" }}>
           <input type="file" accept=".xlsx,.xls" onChange={doImport} disabled={!xlsxReady || importing} style={{ display: "none" }} />
-          <div style={{ background: importing ? C.mintPale : "#EFF8FF", border: `1.5px dashed ${importing ? C.mintLt : "#93C5FD"}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: xlsxReady ? 1 : 0.5 }}>
+          <div style={{ background: importing ? C.surfaceLow : "#EFF8FF", border: `1.5px dashed ${importing ? C.surfaceLow : "#93C5FD"}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: xlsxReady ? 1 : 0.5 }}>
             {importing
-              ? <><div style={{ width: 16, height: 16, border: `2px solid ${C.lime}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} /><span style={{ fontSize: 13, color: C.muted }}>Importation...</span></>
+              ? <><div style={{ width: 16, height: 16, border: `2px solid ${C.forestLt}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} /><span style={{ fontSize: 13, color: C.muted }}>Importation...</span></>
               : <><span style={{ fontSize: 18 }}>📥</span><span style={{ fontSize: 13, fontWeight: 600, color: "#2563EB" }}>{t.importBtn}</span></>
             }
           </div>
@@ -2017,18 +2025,18 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
       </div>
 
       {/* EXPORT */}
-      <div style={{ marginTop: 6, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20 }}>
+      <div style={{ marginTop: 6, borderTop: "none", paddingTop:, paddingTop: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 13, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: C.mintPale, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.dl(C.forestLt)}</div>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: C.surfaceLow, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.dl(C.forestLt)}</div>
           <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{t.exportBtn}</span>
-          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.mintPale, border: `1px solid ${C.mintLt}`, borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
+          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.surfaceLow, border: "none", borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
         </div>
         {[
-          { mode: "month", label: t.exportMonth, sub: `${t.monthsFull[month - 1]} ${year}`, color: C.forestLt, lt: C.mintPale, icon: "📊" },
-          { mode: "all",   label: lang === "ar" ? "كل السنوات" : "Toutes les années", sub: `${txs.length} op · ${[...new Set(txs.map(tx => new Date(tx.date).getFullYear()))].length} an(s)`, color: C.gold, lt: C.goldLt, icon: "📥" },
+          { mode: "month", label: t.exportMonth, sub: `${t.monthsFull[month - 1]} ${year}`, color: C.forestLt, lt: C.surfaceLow, icon: "📊" },
+          { mode: "all",   label: lang === "ar" ? "كل السنوات" : "Toutes les années", sub: `${txs.length} op · ${[...new Set(txs.map(tx => new Date(tx.date).getFullYear()))].length} an(s)`, color: C.forestLt, lt: C.surfaceLow, icon: "📥" },
         ].map((btn) => (
           <button key={btn.mode} className="tbtn" onClick={() => doExport(btn.mode)} disabled={!xlsxReady}
-            style={{ width: "100%", background: xlsxReady ? btn.lt : C.mintPale, border: `1.5px solid ${xlsxReady ? C.mintLt : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: xlsxReady ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "inherit", marginBottom: 10, opacity: xlsxReady ? 1 : 0.5, boxShadow: xlsxReady ? C.shadow : "none" }}>
+            style={{ width: "100%", background: xlsxReady ? btn.lt : C.surfaceLow, border: `1.5px solid ${xlsxReady ? C.surfaceLow : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: xlsxReady ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "'Manrope',sans-serif", marginBottom: 10, opacity: xlsxReady ? 1 : 0.5, boxShadow: xlsxReady ? C.shadow : "none" }}>
             <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
               <div style={{ color: xlsxReady ? btn.color : C.muted, fontWeight: 600, fontSize: 13 }}>{btn.label}</div>
               <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{btn.sub}</div>
@@ -2050,12 +2058,12 @@ function Settings({ lang, setLang, t, onLogout }) {
       { icon: Ic.globe(C.forestLt), label: t.langLbl, value: lang === "fr" ? "Français" : "عربي", action: () => setLang(lang === "fr" ? "ar" : "fr") },
       { icon: Ic.moon(C.muted),    label: t.themeLbl, value: t.darkMode, action: () => {} },
     ]},
-    { title: t.secLbl, items: [{ icon: Ic.lock(C.gold), label: t.changePin, value: "****", action: () => {} }] },
+    { title: t.secLbl, items: [{ icon: Ic.lock(C.forestLt), label: t.changePin, value: "****", action: () => {} }] },
     { title: t.aboutLbl, items: [{ icon: Ic.info(C.forestLt), label: t.aboutLbl, value: t.version, action: () => {} }] },
   ];
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
-      <div className="a1" style={{ background: "linear-gradient(135deg, #4C1D95, #7C3AED)", borderRadius: 22, padding: "22px 20px", marginBottom: 20, boxShadow: C.shadowMd }}>
+      <div className="a1" style={{ background: "linear-gradient(135deg, #012d1d, #1b4332)", borderRadius: 22, padding: "22px 20px", marginBottom: 20, boxShadow: C.shadowMd }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <div style={{ width: 56, height: 56, borderRadius: 18, overflow: "hidden", flexShrink: 0, border: "2px solid rgba(255,255,255,0.35)", boxShadow: "0 4px 14px rgba(0,0,0,0.3)" }}>
             <img src={PROFILE_IMG} alt="Profil" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
@@ -2072,9 +2080,9 @@ function Settings({ lang, setLang, t, onLogout }) {
           <Card sx={{ overflow: "hidden" }}>
             {g.items.map((item, ii) => (
               <button key={ii} className="tbtn" onClick={item.action}
-                style={{ width: "100%", background: "none", border: "none", borderTop: ii > 0 ? `1px solid ${C.mintLt}` : "none", padding: "13px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, justifyContent: "space-between", fontFamily: "inherit", flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+                style={{ width: "100%", background: "none", border: "none", borderTop: ii > 0 ? `1px solid ${C.surfaceLow}` : "none", padding: "13px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, justifyContent: "space-between", fontFamily: "'Manrope',sans-serif", flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 11, background: C.mintPale, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>{item.icon}</div>
+                  <div style={{ width: 36, height: 36, borderRadius: 11, background: C.surfaceLow, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>{item.icon}</div>
                   <span style={{ color: C.text, fontSize: 13, fontWeight: 500 }}>{item.label}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
@@ -2087,7 +2095,7 @@ function Settings({ lang, setLang, t, onLogout }) {
         </div>
       ))}
       <div className="a5">
-        <button className="tbtn" onClick={onLogout} style={{ width: "100%", background: C.redLt, border: `1.5px solid rgba(224,82,82,0.2)`, borderRadius: 14, padding: "14px", color: C.red, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t.logout}</button>
+        <button className="tbtn" onClick={onLogout} style={{ width: "100%", background: C.redLt, border: "none", borderRadius: 14, padding: "14px", color: C.red, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'Manrope',sans-serif" }}>{t.logout}</button>
       </div>
     </div>
   );
@@ -2112,8 +2120,8 @@ function TxSheet({ type, members, onSave, onClose, lang, editTx }) {
   };
   return (
     <Sheet title={editTx ? t.editTx(type) : t.newTx(type)} onClose={onClose} dir={t.dir}>
-      <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 20, padding: "12px 14px", background: cfg.lt, borderRadius: 14, border: `1.5px solid ${C.mintLt}`, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-        <div style={{ width: 36, height: 36, borderRadius: 11, background: C.card, boxShadow: C.shadow, display: "flex", alignItems: "center", justifyContent: "center" }}>{cfg.icon()}</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 20, padding: "12px 14px", background: cfg.lt, borderRadius: 14, border: "none", flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+        <div style={{ width: 36, height: 36, borderRadius: 11, background: C.surfaceLowest, boxShadow: C.shadow, display: "flex", alignItems: "center", justifyContent: "center" }}>{cfg.icon()}</div>
         <span style={{ color: cfg.color, fontWeight: 700, fontSize: 14 }}>{cfg.label}</span>
       </div>
       {type === "contribution" && (
@@ -2147,12 +2155,12 @@ function MemberSheet({ onSave, onClose, lang }) {
 // ─── BOTTOM NAV ───────────────────────────────────────────────────────────────
 function NavItem({ label, icon, activeIcon, active, onClick }) {
   return (
-    <button className="tbtn" onClick={onClick} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "2px 4px", fontFamily: "inherit" }}>
-      <div style={{ width: 44, height: 32, borderRadius: 16, background: active ? "rgba(45,156,143,0.22)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .18s" }}>
+    <button className="tbtn" onClick={onClick} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "2px 4px", fontFamily: "'Manrope',sans-serif" }}>
+      <div style={{ width: 44, height: 32, borderRadius: 16, background: active ? "rgba(168,213,194,0.18)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .18s" }}>
         {active ? activeIcon : icon}
       </div>
-      <span style={{ fontSize: 9, fontWeight: active ? 700 : 400, color: active ? "#6dcfc4" : "rgba(255,255,255,0.35)", transition: "color .18s", letterSpacing: 0.3 }}>{label}</span>
-      {active && <div style={{ width: 16, height: 2.5, borderRadius: 4, background: "#2d9c8f", marginTop: 1 }} />}
+      <span style={{ fontSize: 9, fontWeight: active ? 700 : 500, color: active ? C.mint : "rgba(255,255,255,0.4)", transition: "color .18s", letterSpacing: 0.3 }}>{label}</span>
+      {active && <div style={{ width: 16, height: 2.5, borderRadius: 4, background: C.mint, marginTop: 1 }} />}
     </button>
   );
 }
@@ -2207,7 +2215,7 @@ const LOGIN_CSS = `
   .ls-bg-gradient {
     position: absolute; inset: 0; pointer-events: none;
     background:
-      radial-gradient(ellipse 70% 55% at 80% 10%, rgba(32,178,150,0.22) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 55% at 80% 10%, rgba(27,107,74,0.20) 0%, transparent 65%),
       radial-gradient(ellipse 55% 45% at 10% 85%, rgba(20,140,120,0.18) 0%, transparent 60%),
       linear-gradient(180deg, #0a1c1f 0%, #0d2624 60%, #0f2f2c 100%);
   }
@@ -2241,7 +2249,7 @@ const LOGIN_CSS = `
     box-shadow:
       0 8px 32px rgba(0,0,0,0.4),
       0 0 0 1px rgba(64,224,208,0.08) inset,
-      0 20px 60px rgba(32,178,150,0.12);
+      0 20px 60px rgba(27,107,74,0.10);
     transition: box-shadow .3s;
   }
   .ls-logo-wrap:hover { animation: pulse-ring 1.8s ease infinite; }
@@ -2345,7 +2353,7 @@ const LOGIN_CSS = `
     color: #0a1c1f;
     letter-spacing: 1.5px; text-transform: uppercase;
     cursor: pointer;
-    box-shadow: 0 6px 24px rgba(32,178,160,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+    box-shadow: 0 6px 24px rgba(27,107,74,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
     transition: all .2s cubic-bezier(.16,1,.3,1);
     display: flex; align-items: center; justify-content: center; gap: 9px;
     margin-top: 4px;
@@ -2576,21 +2584,21 @@ export default function App() {
   if (loading) return (
     <div style={{ background: "#F2EFE9", minHeight: "100vh", maxWidth: 430, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 14 }}>
       <div style={{ width: 36, height: 36, border: `3px solid ${C.mint}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
-      <div style={{ color: C.muted, fontSize: 13, fontWeight: 500 }}>Chargement…</div>
+      <div style={{ color: C.muted, fontSize: 13, fontWeight: 600, fontFamily: "'Manrope',sans-serif" }}>Chargement…</div>
     </div>
   );
 
   return (
-    <div style={{ background: "#F2EFE9", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: "'Times New Roman','Times',serif", color: C.text, position: "relative", paddingBottom: 90, overflowX: "hidden" }}>
+    <div style={{ background: C.surfaceLow, minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: "'Manrope','Segoe UI',sans-serif", color: C.text, position: "relative", paddingBottom: 96, overflowX: "hidden" }}>
       <style>{G}</style>
-      <div style={{ padding: "20px 16px" }}>
+      <div style={{ padding: "20px 20px" }}>
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
         {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onImportMembers={addMember} onImportTxs={addTx} onRefresh={fetchAll} onReset={resetAll} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
-      <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "#1a2b2e", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 32px rgba(26,43,46,0.30)" }}>
+      <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "rgba(1,45,29,0.90)", backdropFilter: "blur(12px)", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 40px rgba(1,45,29,0.30)" }}>
         {TABS.map((tb) => <NavItem key={tb.id} label={tb.label} icon={tb.icon} activeIcon={tb.aicon} active={tab === tb.id} onClick={() => setTab(tb.id)} />)}
       </nav>
       {modal?.kind === "tx"     && <TxSheet type={modal.txType} members={members} onSave={saveTx} onClose={() => setModal(null)} lang={lang} editTx={modal.editTx || null} />}
