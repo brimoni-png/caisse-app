@@ -157,7 +157,7 @@ const T = {
     newMember: "Nouveau membre", fullName: "Nom complet", fullNamePh: "Ex : Fatima Mint Ahmed",
     phone: "Téléphone", phonePh: "Ex : 22234567890", addMemberBtn: "Ajouter",
     exportBtn: "Exporter Excel", exportAll: "Toutes les transactions", exportMonth: "Ce mois", xlsxWait: "Chargement…", resetBtn: "Réinitialiser les données", resetConfirmTitle: "Tout supprimer ?", resetConfirmMsg: "Cette action supprimera TOUS les membres et TOUTES les transactions. Impossible d'annuler.", resetSuccess: "✅ Toutes les données ont été supprimées.",
-    importBtn: "Importer Excel", importDesc: "Charger des transactions depuis un fichier .xlsx", importSuccess: (n) => `✅ ${n} transaction(s) importée(s) avec succès.`, importError: "❌ Erreur lors de la lecture du fichier. Vérifiez le format.", importColsError: "❌ Colonnes introuvables. Le fichier doit contenir : Type, Montant, Date, Membre.", importProcessing: "Importation en cours…",
+    importBtn: "Importer Excel", importDesc: "Charger des transactions depuis un fichier .xlsx", importSuccess: (n, m) => `✅ ${n} transaction(s)${m > 0 ? ` + ${m} membre(s)` : ""} importé(s) avec succès.`, importError: "❌ Erreur lors de la lecture du fichier. Vérifiez le format.", importColsError: "❌ Colonnes introuvables. Le fichier doit contenir : Type, Montant, Date, Membre.", importProcessing: "Importation en cours…",
     settingsTitle: "Paramètres", langLbl: "Langue", themeLbl: "Apparence", secLbl: "Sécurité",
     aboutLbl: "À propos", version: "Version 1.0.0", darkMode: "Mode sombre", changeLang: "Changer la langue",
     changePin: "Changer le PIN", aboutApp: "Caisse Coopérative · Gestion communautaire", logout: "Se déconnecter",
@@ -189,7 +189,7 @@ const T = {
     newMember: "عضو جديد", fullName: "الاسم الكامل", fullNamePh: "مثال: فاطمة بنت أحمد",
     phone: "الهاتف", phonePh: "مثال: 22234567890", addMemberBtn: "إضافة",
     exportBtn: "تصدير Excel", exportAll: "كل العمليات", exportMonth: "هذا الشهر", xlsxWait: "جارٍ التحميل…", resetBtn: "مسح جميع البيانات", resetConfirmTitle: "حذف الكل؟", resetConfirmMsg: "سيتم حذف جميع الأعضاء والمعاملات. لا يمكن التراجع.", resetSuccess: "✅ تم مسح جميع البيانات.",
-    importBtn: "استيراد Excel", importDesc: "تحميل المعاملات من ملف .xlsx", importSuccess: (n) => `✅ تم استيراد ${n} عملية بنجاح.`, importError: "❌ خطأ في قراءة الملف. تحقق من الصيغة.", importColsError: "❌ الأعمدة غير موجودة. يجب أن يحتوي الملف على: Type, Montant, Date, Membre.", importProcessing: "جارٍ الاستيراد…",
+    importBtn: "استيراد Excel", importDesc: "تحميل المعاملات من ملف .xlsx", importSuccess: (n, m) => `✅ تم استيراد ${n} عملية${m > 0 ? ` و ${m} عضو` : ""} بنجاح.`, importError: "❌ خطأ في قراءة الملف. تحقق من الصيغة.", importColsError: "❌ الأعمدة غير موجودة. يجب أن يحتوي الملف على: Type, Montant, Date, Membre.", importProcessing: "جارٍ الاستيراد…",
     settingsTitle: "الإعدادات", langLbl: "اللغة", themeLbl: "المظهر", secLbl: "الأمان",
     aboutLbl: "حول التطبيق", version: "الإصدار 1.0.0", darkMode: "الوضع الداكن", changeLang: "تغيير اللغة",
     changePin: "تغيير رمز PIN", aboutApp: "الصندوق التعاوني · إدارة مجتمعية", logout: "تسجيل الخروج",
@@ -1776,7 +1776,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 }
 
 // ─── REPORTS ──────────────────────────────────────────────────────────────────
-function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx }) {
+function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx, onAddMember }) {
   const t = T[lang];
   const years = getYrs(txs);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -1796,50 +1796,20 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     try {
       const ab = await file.arrayBuffer();
       const wb = XLSX.read(ab, { type: "array", cellDates: true });
-      const ws = wb.Sheets[wb.SheetNames[0]];
 
-      // Convert to array-of-arrays to handle banner rows from our own export format
-      const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-
-      // Find the header row: the first row that contains "type" or "montant" (case-insensitive)
-      const isHeaderRow = (row) => row.some(cell => {
-        const s = String(cell).toLowerCase().trim();
-        return s === "type" || s === "typ" || s.includes("montant") || s.includes("amount") || s === "نوع";
-      });
-      const headerIdx = aoa.findIndex(isHeaderRow);
-      if (headerIdx === -1) { setImportMsg({ ok: false, text: t.importColsError }); setImporting(false); return; }
-
-      const headers = aoa[headerIdx].map(h => String(h).trim());
-      const dataRows = aoa.slice(headerIdx + 1).filter(r => r.some(c => String(c).trim() !== ""));
-
-      if (!dataRows.length) { setImportMsg({ ok: false, text: t.importError }); setImporting(false); return; }
-
-      // Flexible column index finder (case-insensitive substring match)
-      const findCol = (candidates) => {
-        const idx = headers.findIndex(h => candidates.some(c => h.toLowerCase().includes(c.toLowerCase())));
-        return idx === -1 ? null : idx;
+      // ── Helper: find header row in a sheet (returns { headers, dataRows } or null) ──
+      const parseSheet = (ws, isHeaderRow) => {
+        const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+        const headerIdx = aoa.findIndex(isHeaderRow);
+        if (headerIdx === -1) return null;
+        const headers = aoa[headerIdx].map(h => String(h).trim());
+        const dataRows = aoa.slice(headerIdx + 1).filter(r => r.some(c => String(c).trim() !== ""));
+        return { headers, dataRows };
       };
 
-      // "Montant (MRU)", "Membre / Payeur" — our own export headers included
-      const iType   = findCol(["type","typ","نوع"]);
-      const iAmt    = findCol(["montant","amount","مبلغ","amt"]);
-      const iDate   = findCol(["date","تاريخ","dat"]);
-      const iMember = findCol(["membre","member","عضو","payeur","nom","name","اسم"]);
-      const iNote   = findCol(["note","desc","remarque","ملاحظة","وصف"]);
-
-      if (iType === null || iAmt === null || iDate === null) {
-        setImportMsg({ ok: false, text: t.importColsError });
-        setImporting(false);
-        return;
-      }
-
-      // Normalize type values (also handle our own export labels "Contribution", "Don", "Dépense")
-      const typeMap = {
-        "contribution": "contribution", "contrib": "contribution", "مساهمة": "contribution",
-        "don": "don", "donation": "don", "تبرع": "don",
-        "depense": "depense", "dépense": "depense", "expense": "depense", "مصروف": "depense",
-        // exported labels (capitalised)
-        "Contribution": "contribution", "Don": "don", "Dépense": "depense", "Depense": "depense",
+      const findCol = (headers, candidates) => {
+        const idx = headers.findIndex(h => candidates.some(c => h.toLowerCase().includes(c.toLowerCase())));
+        return idx === -1 ? null : idx;
       };
 
       // Parse date helper
@@ -1848,38 +1818,101 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
           return `${rawDate.getFullYear()}-${String(rawDate.getMonth()+1).padStart(2,"0")}-${String(rawDate.getDate()).padStart(2,"0")}`;
         }
         const s = String(rawDate).trim();
-        // DD/MM/YYYY
         const m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
         if (m1) return `${m1[3]}-${m1[2].padStart(2,"0")}-${m1[1].padStart(2,"0")}`;
-        // YYYY-MM-DD already
         if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
-        // Excel serial number
         if (/^\d+$/.test(s)) {
-          const d = XLSX.SSF.parse_date_code(parseInt(s));
-          if (d) return `${d.y}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`;
+          try { const d = XLSX.SSF.parse_date_code(parseInt(s)); if (d) return `${d.y}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`; } catch {}
         }
         return null;
       };
 
-      let count = 0;
-      for (const row of dataRows) {
-        const rawType = String(row[iType] || "").trim();
-        const type = typeMap[rawType] || typeMap[rawType.toLowerCase()];
-        if (!type) continue;
+      let txCount = 0;
+      let mbrCount = 0;
 
-        const rawAmt = parseFloat(String(row[iAmt]).replace(/[^0-9.,-]/g, "").replace(",", "."));
-        if (!rawAmt || isNaN(rawAmt) || rawAmt <= 0) continue;
-
-        const dateStr = parseDate(row[iDate]);
-        if (!dateStr) continue;
-
-        const memberName = iMember !== null ? (String(row[iMember] || "").trim() || "—") : "—";
-        const note = iNote !== null ? String(row[iNote] || "").trim() : "";
-
-        await onAddTx({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note });
-        count++;
+      // ════════════════════════════════════════════════════════════════
+      // 1. IMPORTER LES MEMBRES (feuille "Membres" si elle existe)
+      // ════════════════════════════════════════════════════════════════
+      if (onAddMember) {
+        // Look for sheet named "Membres" or any sheet with a "Nom complet" / "Nom" header
+        const mbrSheetName = wb.SheetNames.find(n =>
+          n.toLowerCase().includes("membre") || n.toLowerCase().includes("member") || n.toLowerCase().includes("عضو")
+        );
+        const mbrWs = mbrSheetName ? wb.Sheets[mbrSheetName] : null;
+        if (mbrWs) {
+          const parsed = parseSheet(mbrWs, row => row.some(c => {
+            const s = String(c).toLowerCase().trim();
+            return s.includes("nom") || s.includes("name") || s.includes("اسم") || s.includes("membre") || s.includes("عضو");
+          }));
+          if (parsed) {
+            const { headers, dataRows } = parsed;
+            const iName  = findCol(headers, ["nom complet","fullname","nom","name","اسم","عضو","membre"]);
+            const iPhone = findCol(headers, ["téléphone","telephone","phone","tél","هاتف","tel"]);
+            if (iName !== null) {
+              // Build set of already-existing member names (lowercase) to avoid duplicates
+              const existingNames = new Set(members.map(m => m.name.toLowerCase().trim()));
+              for (const row of dataRows) {
+                const name = String(row[iName] || "").trim();
+                if (!name || name === "—" || name === "-") continue;
+                // Skip total/summary rows
+                if (name.toLowerCase().startsWith("total") || name.toLowerCase().startsWith("إجمالي")) continue;
+                if (existingNames.has(name.toLowerCase())) continue; // already exists
+                const phone = iPhone !== null ? String(row[iPhone] || "").trim() : "";
+                await onAddMember({ name, phone });
+                existingNames.add(name.toLowerCase());
+                mbrCount++;
+              }
+            }
+          }
+        }
       }
-      setImportMsg({ ok: true, text: t.importSuccess(count) });
+
+      // ════════════════════════════════════════════════════════════════
+      // 2. IMPORTER LES TRANSACTIONS (première feuille avec Type/Montant)
+      // ════════════════════════════════════════════════════════════════
+      // Try "Transactions" sheet first, then fall back to first sheet
+      const txSheetName = wb.SheetNames.find(n =>
+        n.toLowerCase().includes("transaction") || n.toLowerCase().includes("معاملة") || n.toLowerCase().includes("opération")
+      ) || wb.SheetNames[0];
+      const txWs = wb.Sheets[txSheetName];
+
+      const txParsed = parseSheet(txWs, row => row.some(cell => {
+        const s = String(cell).toLowerCase().trim();
+        return s === "type" || s === "typ" || s.includes("montant") || s.includes("amount") || s === "نوع";
+      }));
+
+      if (txParsed) {
+        const { headers, dataRows } = txParsed;
+        const iType   = findCol(headers, ["type","typ","نوع"]);
+        const iAmt    = findCol(headers, ["montant","amount","مبلغ","amt"]);
+        const iDate   = findCol(headers, ["date","تاريخ","dat"]);
+        const iMember = findCol(headers, ["membre","member","عضو","payeur","nom","name","اسم"]);
+        const iNote   = findCol(headers, ["note","desc","remarque","ملاحظة","وصف"]);
+
+        if (iType !== null && iAmt !== null && iDate !== null) {
+          const typeMap = {
+            "contribution": "contribution", "contrib": "contribution", "مساهمة": "contribution",
+            "don": "don", "donation": "don", "تبرع": "don",
+            "depense": "depense", "dépense": "depense", "expense": "depense", "مصروف": "depense",
+            "Contribution": "contribution", "Don": "don", "Dépense": "depense", "Depense": "depense",
+          };
+          for (const row of dataRows) {
+            const rawType = String(row[iType] || "").trim();
+            const type = typeMap[rawType] || typeMap[rawType.toLowerCase()];
+            if (!type) continue;
+            const rawAmt = parseFloat(String(row[iAmt]).replace(/[^0-9.,-]/g, "").replace(",", "."));
+            if (!rawAmt || isNaN(rawAmt) || rawAmt <= 0) continue;
+            const dateStr = parseDate(row[iDate]);
+            if (!dateStr) continue;
+            const memberName = iMember !== null ? (String(row[iMember] || "").trim() || "—") : "—";
+            const note = iNote !== null ? String(row[iNote] || "").trim() : "";
+            await onAddTx({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note });
+            txCount++;
+          }
+        }
+      }
+
+      setImportMsg({ ok: true, text: t.importSuccess(txCount, mbrCount) });
     } catch (e) {
       console.error("Import error:", e);
       setImportMsg({ ok: false, text: t.importError });
@@ -2076,72 +2109,204 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     XLSX.utils.book_append_sheet(wb, wsT, "Transactions");
 
     // ════════════════════════════════════════════════════════════════
-    // FEUILLE 2 — RÉCAPITULATIF MENSUEL
+    // FEUILLE 2 — RÉCAPITULATIF MENSUEL (enrichi)
     // ════════════════════════════════════════════════════════════════
     const txsYear = txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR);
-    const sumAoa = [
-      [`🌿  RÉCAPITULATIF MENSUEL — CAISSE COOPÉRATIVE`,"","","","",""],
-      ["","","","","",""],
-      ["Année :", EXPORT_YEAR,"","","",""],
-      ["","","","","",""],
-      ["Mois","Contributions (MRU)","Dons (MRU)","Dépenses (MRU)","Solde (MRU)","Évolution"],
-    ];
-    let prevSolde = null;
-    MONTHS_FR.forEach((mname, mi) => {
-      const mIdx = mi + 1;
-      const mC = txsYear.filter(tx => tx.type === "contribution" && new Date(tx.date).getMonth() + 1 === mIdx).reduce((a, tx) => a + tx.amount, 0);
-      const mD = txsYear.filter(tx => tx.type === "don"          && new Date(tx.date).getMonth() + 1 === mIdx).reduce((a, tx) => a + tx.amount, 0);
-      const mE = txsYear.filter(tx => tx.type === "depense"      && new Date(tx.date).getMonth() + 1 === mIdx).reduce((a, tx) => a + tx.amount, 0);
-      const mS = mC + mD - mE;
-      const evo = prevSolde !== null && prevSolde !== 0 ? (mS - prevSolde) / Math.abs(prevSolde) : "";
-      prevSolde = mS;
-      sumAoa.push([mname, mC, mD, mE, mS, evo]);
-    });
-    // Total row
     const allC = txsYear.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
     const allD = txsYear.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
     const allE = txsYear.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
-    sumAoa.push(["TOTAL ANNUEL", allC, allD, allE, allC + allD - allE, ""]);
 
-    const wsS = XLSX.utils.aoa_to_sheet(sumAoa);
-    wsS["!cols"] = [{wch:14},{wch:20},{wch:18},{wch:18},{wch:18},{wch:12}];
-    wsS["!merges"] = [{s:{r:0,c:0},e:{r:0,c:5}}];
-
-    // Banner
-    const sA1 = wsS["A1"];
-    if (sA1) styled(sA1, { fill: solidFill(CLR.greenDark), fnt: font(true, 13, CLR.white), aln: align("center","center") });
-    // Year input
-    const sB3 = wsS["B3"];
-    if (sB3) styled(sB3, { fnt: font(true, 11, CLR.blue), aln: align("center","center"), border: thinBorder() });
-    // Header row (row index 4 → Excel row 5)
-    ["A","B","C","D","E","F"].forEach(col => {
-      const c = wsS[`${col}5`];
-      if (c) styled(c, { fill: solidFill(CLR.greenMid), fnt: font(true, 10, CLR.white), aln: align("center","center"), border: thinBorder() });
+    // ── Section 1 : tableau mensuel (lignes 1-19) ──
+    const sumAoa = [
+      [`🌿  RÉCAPITULATIF MENSUEL — CAISSE COOPÉRATIVE ${EXPORT_YEAR}`,"","","","",""],
+      ["Exporté le " + today + "  ·  " + members.length + " membres  ·  " + txsYear.length + " opérations","","","","",""],
+      ["","","","","",""],
+      ["Mois","Contributions (MRU)","Dons (MRU)","Dépenses (MRU)","Solde du mois (MRU)","Δ vs mois préc."],
+    ];
+    let cumul = 0;
+    let prevMonthSolde = null;
+    const monthlyData = MONTHS_FR.map((mname, mi) => {
+      const mIdx = mi + 1;
+      const mC = txsYear.filter(tx => tx.type === "contribution" && new Date(tx.date).getMonth()+1 === mIdx).reduce((a,tx)=>a+tx.amount,0);
+      const mD = txsYear.filter(tx => tx.type === "don"          && new Date(tx.date).getMonth()+1 === mIdx).reduce((a,tx)=>a+tx.amount,0);
+      const mE = txsYear.filter(tx => tx.type === "depense"      && new Date(tx.date).getMonth()+1 === mIdx).reduce((a,tx)=>a+tx.amount,0);
+      const mS = mC + mD - mE;
+      cumul += mS;
+      const evo = prevMonthSolde !== null && prevMonthSolde !== 0 ? (mS - prevMonthSolde) / Math.abs(prevMonthSolde) : "";
+      prevMonthSolde = mS;
+      return { mname, mC, mD, mE, mS, evo };
     });
-    // Data rows (rows 6-17)
-    MONTHS_FR.forEach((_, mi) => {
-      const r = 6 + mi;
+    monthlyData.forEach(({ mname, mC, mD, mE, mS, evo }) => sumAoa.push([mname, mC, mD, mE, mS, evo]));
+    sumAoa.push(["TOTAL ANNUEL", allC, allD, allE, allC + allD - allE, ""]);
+    // blank + solde cumulé
+    sumAoa.push(["","","","","",""]);
+    sumAoa.push(["Solde cumulé fin d'année :", allC + allD - allE,"","","",""]);
+
+    // ── Section 2 : contributions par membre (lignes 22+) ──
+    const MBR_START_ROW = sumAoa.length + 2; // 1-based Excel row where member table starts
+    sumAoa.push(["","","","","",""]);
+    sumAoa.push([`👥  CONTRIBUTIONS PAR MEMBRE — ${EXPORT_YEAR}`,"","","","",""]);
+    const mbrHeaderCols = ["Membre", ...MONTHS_FR, "TOTAL (MRU)", "% du total"];
+    sumAoa.push(mbrHeaderCols);
+
+    const mbrRows = members.map(m => {
+      const monthlyContribs = MONTHS_FR.map((_, mi) => {
+        const mIdx = mi + 1;
+        return txsYear.filter(tx =>
+          tx.type === "contribution" &&
+          new Date(tx.date).getMonth()+1 === mIdx &&
+          (tx.memberName === m.name || tx.memberId === m.id)
+        ).reduce((a,tx)=>a+tx.amount, 0);
+      });
+      const total = monthlyContribs.reduce((a,v)=>a+v, 0);
+      const pct = allC > 0 ? total / allC : 0;
+      return [m.name, ...monthlyContribs, total, pct];
+    });
+    // Also add anonymous donors row if any
+    const anonContribs = MONTHS_FR.map((_, mi) => {
+      const mIdx = mi + 1;
+      return txsYear.filter(tx =>
+        tx.type === "contribution" &&
+        new Date(tx.date).getMonth()+1 === mIdx &&
+        !members.some(m => m.name === tx.memberName || m.id === tx.memberId)
+      ).reduce((a,tx)=>a+tx.amount, 0);
+    });
+    const anonTotal = anonContribs.reduce((a,v)=>a+v, 0);
+    if (anonTotal > 0) mbrRows.push(["(Autres / non identifiés)", ...anonContribs, anonTotal, allC > 0 ? anonTotal/allC : 0]);
+
+    // Total contributions row
+    const totalContribByMonth = MONTHS_FR.map((_, mi) => {
+      const mIdx = mi + 1;
+      return txsYear.filter(tx => tx.type === "contribution" && new Date(tx.date).getMonth()+1 === mIdx).reduce((a,tx)=>a+tx.amount,0);
+    });
+    mbrRows.push(["TOTAL", ...totalContribByMonth, allC, allC > 0 ? 1 : 0]);
+
+    mbrRows.forEach(row => sumAoa.push(row));
+
+    // ── Section 3 : récap dépenses par mois (lignes après membres) ──
+    const DEP_START_ROW = sumAoa.length + 2;
+    sumAoa.push(["","","","","",""]);
+    sumAoa.push([`📋  DÉPENSES PAR MOIS — ${EXPORT_YEAR}`,"","","","",""]);
+    sumAoa.push(["Mois","Nb opérations","Total Dépenses (MRU)","% des recettes",""," "]);
+    MONTHS_FR.forEach((mname, mi) => {
+      const mIdx = mi + 1;
+      const depTxs = txsYear.filter(tx => tx.type === "depense" && new Date(tx.date).getMonth()+1 === mIdx);
+      const mE = depTxs.reduce((a,tx)=>a+tx.amount,0);
+      const recettes = monthlyData[mi].mC + monthlyData[mi].mD;
+      const pct = recettes > 0 ? mE / recettes : 0;
+      sumAoa.push([mname, depTxs.length, mE, pct, "", ""]);
+    });
+    sumAoa.push(["TOTAL", txsYear.filter(tx=>tx.type==="depense").length, allE, (allC+allD)>0?allE/(allC+allD):0,"",""]);
+
+    // ── Build sheet ──
+    const wsS = XLSX.utils.aoa_to_sheet(sumAoa);
+    // Cols: A=Mois/Membre(24), B-M=months or values(12 each), N=Total(18), O=%(10)
+    const mbrTableCols = 14; // Membre + 12 mois + Total + %
+    wsS["!cols"] = [
+      {wch:26},{wch:12},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},
+      {wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:16},{wch:10},
+    ];
+    // Merges
+    const nCols = 5; // A-F for monthly summary (0-5)
+    const mbrNcols = mbrHeaderCols.length - 1; // B to last (0-indexed end)
+    wsS["!merges"] = [
+      {s:{r:0,c:0},e:{r:0,c:nCols}},   // banner
+      {s:{r:1,c:0},e:{r:1,c:nCols}},   // subtitle
+    ];
+
+    // Style banner row 1
+    const sA1 = wsS["A1"]; if (sA1) styled(sA1,{fill:solidFill(CLR.greenDark),fnt:font(true,13,CLR.white),aln:align("center","center")});
+    const sA2 = wsS["A2"]; if (sA2) styled(sA2,{fill:solidFill(CLR.greenMid),fnt:font(false,9,"FFAAAAAA"),aln:align("center","center")});
+
+    // Monthly table header (row 4)
+    ["A","B","C","D","E","F"].forEach(col => {
+      const c = wsS[`${col}4`];
+      if (c) styled(c,{fill:solidFill(CLR.greenMid),fnt:font(true,10,CLR.white),aln:align("center","center"),border:thinBorder()});
+    });
+    // Monthly data rows 5-16
+    monthlyData.forEach(({ mC, mD, mE, mS, evo }, mi) => {
+      const r = 5 + mi;
       const isEven = mi % 2 === 1;
-      ["A","B","C","D","E","F"].forEach((col, ci) => {
-        const cell = wsS[`${col}${r}`];
-        if (!cell) return;
+      ["A","B","C","D","E","F"].forEach((col,ci) => {
+        const cell = wsS[`${col}${r}`]; if (!cell) return;
         let rf = isEven ? solidFill(CLR.greenXl) : solidFill(CLR.white);
-        let cf = CLR.black;
-        let nf = undefined;
-        if      (ci === 0) { cf = CLR.greenMid; }
-        else if (ci === 1) { rf = solidFill(CLR.greenPale);  nf = fmtMoney; }
-        else if (ci === 2) { rf = solidFill(CLR.purplePale); nf = fmtMoney; }
-        else if (ci === 3) { rf = solidFill(CLR.redPale);    nf = fmtMoney; }
-        else if (ci === 4) { cf = CLR.greenDark;             nf = fmtMoney; }
-        else if (ci === 5 && cell.t === "n") { nf = fmtPct; }
-        styled(cell, { fill: rf, fnt: font(ci === 0, 10, cf), aln: align(ci >= 1 && ci <= 4 ? "right" : "center","center"), border: thinBorder(), numFmt: nf });
+        let cf = CLR.black; let nf;
+        if      (ci===0){cf=CLR.greenMid;}
+        else if (ci===1){rf=solidFill(CLR.greenPale);nf=fmtMoney;}
+        else if (ci===2){rf=solidFill(CLR.purplePale);nf=fmtMoney;}
+        else if (ci===3){rf=solidFill(CLR.redPale);nf=fmtMoney;}
+        else if (ci===4){cf=CLR.greenDark;nf=fmtMoney;}
+        else if (ci===5 && cell.t==="n"){nf=fmtPct;}
+        styled(cell,{fill:rf,fnt:font(ci===0,10,cf),aln:align(ci>=1&&ci<=4?"right":"center","center"),border:thinBorder(),numFmt:nf});
       });
     });
-    // Total row (row 18)
-    ["A","B","C","D","E","F"].forEach((col, ci) => {
-      const cell = wsS[`${col}18`];
-      if (!cell) return;
-      styled(cell, { fill: solidFill(CLR.greenDark), fnt: font(true, 10, CLR.white), aln: align(ci >= 1 ? "right":"center","center"), border: thinBorder(), numFmt: ci >= 1 && ci <= 4 ? fmtMoney : undefined });
+    // Total annual row (row 17)
+    ["A","B","C","D","E","F"].forEach((col,ci)=>{
+      const cell=wsS[`${col}17`]; if(!cell)return;
+      styled(cell,{fill:solidFill(CLR.greenDark),fnt:font(true,10,CLR.white),aln:align(ci>=1?"right":"center","center"),border:thinBorder(),numFmt:ci>=1&&ci<=4?fmtMoney:undefined});
+    });
+    // Solde cumulé row (row 19)
+    const sCum=wsS["A19"]; if(sCum)styled(sCum,{fnt:font(true,10,CLR.greenDark),aln:align("right","center")});
+    const sCumV=wsS["B19"]; if(sCumV)styled(sCumV,{fill:solidFill(CLR.greenPale),fnt:font(true,11,CLR.greenDark),aln:align("right","center"),border:thinBorder(),numFmt:fmtMoney});
+
+    // Member section banner (MBR_START_ROW + 1 for the section title)
+    const mbrBannerRow = MBR_START_ROW + 1;
+    const mbrBannerCell = wsS[`A${mbrBannerRow}`];
+    if (mbrBannerCell) styled(mbrBannerCell,{fill:solidFill(CLR.greenMid),fnt:font(true,11,CLR.white),aln:align("left","center")});
+    // Member header row
+    const mbrHdrRow = mbrBannerRow + 1;
+    mbrHeaderCols.forEach((_, ci) => {
+      const col = String.fromCharCode(65+ci);
+      const cell = wsS[`${col}${mbrHdrRow}`];
+      if (cell) styled(cell,{fill:solidFill(CLR.primaryMid||CLR.greenMid),fnt:font(true,9,CLR.white),aln:align("center","center"),border:thinBorder()});
+    });
+    // Member data rows
+    mbrRows.forEach((row, ri) => {
+      const r = mbrHdrRow + 1 + ri;
+      const isTotal = ri === mbrRows.length - 1;
+      const isEven = ri % 2 === 1;
+      row.forEach((_, ci) => {
+        const col = String.fromCharCode(65+ci);
+        const cell = wsS[`${col}${r}`]; if (!cell) return;
+        const isAmt = ci >= 1 && ci < row.length - 1;
+        const isPct = ci === row.length - 1;
+        styled(cell,{
+          fill: isTotal ? solidFill(CLR.greenDark) : isEven ? solidFill(CLR.greenXl) : solidFill(CLR.white),
+          fnt: font(isTotal||ci===0, 9, isTotal?CLR.white:(ci===0?CLR.greenMid:(isAmt&&cell.v>0?CLR.greenLight:CLR.black))),
+          aln: align(ci===0?"left":"right","center"),
+          border: thinBorder(),
+          numFmt: isAmt ? fmtMoney : isPct ? fmtPct : undefined,
+        });
+      });
+    });
+
+    // Depense section banner
+    const depBannerRow = DEP_START_ROW + 1;
+    const depBannerCell = wsS[`A${depBannerRow}`];
+    if (depBannerCell) styled(depBannerCell,{fill:solidFill(CLR.red),fnt:font(true,11,CLR.white),aln:align("left","center")});
+    const depHdrRow = depBannerRow + 1;
+    ["A","B","C","D"].forEach(col => {
+      const cell=wsS[`${col}${depHdrRow}`]; if(!cell)return;
+      styled(cell,{fill:solidFill(CLR.greenMid),fnt:font(true,10,CLR.white),aln:align("center","center"),border:thinBorder()});
+    });
+    MONTHS_FR.forEach((_,mi)=>{
+      const r = depHdrRow+1+mi;
+      ["A","B","C","D"].forEach((col,ci)=>{
+        const cell=wsS[`${col}${r}`]; if(!cell)return;
+        const isEven=mi%2===1;
+        styled(cell,{
+          fill:ci===2?solidFill(CLR.redPale):(isEven?solidFill(CLR.greenXl):solidFill(CLR.white)),
+          fnt:font(false,10,ci===0?CLR.greenMid:(ci===2?CLR.red:CLR.black)),
+          aln:align(ci===0?"center":"right","center"),
+          border:thinBorder(),
+          numFmt:ci===2?fmtMoney:ci===3?fmtPct:undefined,
+        });
+      });
+    });
+    const depTotRow=depHdrRow+13;
+    ["A","B","C","D"].forEach((col,ci)=>{
+      const cell=wsS[`${col}${depTotRow}`]; if(!cell)return;
+      styled(cell,{fill:solidFill(CLR.red),fnt:font(true,10,CLR.white),aln:align(ci===0?"center":"right","center"),border:thinBorder(),numFmt:ci===2?fmtMoney:ci===3?fmtPct:undefined});
     });
 
     XLSX.utils.book_append_sheet(wb, wsS, "Récap. Mensuel");
@@ -2949,7 +3114,7 @@ export default function App() {
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
-        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} />}
+        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} onAddMember={addMember} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "rgba(1,45,29,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 40px rgba(1,45,29,0.25)" }}>
