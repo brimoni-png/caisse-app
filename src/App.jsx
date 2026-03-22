@@ -1782,8 +1782,10 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [importing, setImporting] = useState(false);
-  const [importMsg, setImportMsg] = useState(null); // { ok: bool, text: string }
+  const [importMsg, setImportMsg] = useState(null);
   const importRef = useRef(null);
+
+  useEffect(() => { setImportMsg(null); }, []);
 
   async function doImport(file) {
     if (!file) return;
@@ -2345,8 +2347,9 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
 
         {/* feedback message */}
         {importMsg && (
-          <div style={{ marginBottom: 12, padding: "10px 14px", borderRadius: 12, background: importMsg.ok ? C.goldLt : C.redLt, border: `1px solid ${importMsg.ok ? C.primaryLt : C.red}20`, fontSize: 12, fontWeight: 600, color: importMsg.ok ? C.primaryLt : C.red, display: "flex", alignItems: "center", gap: 8, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-            {importMsg.text}
+          <div style={{ marginBottom: 12, padding: "10px 14px", borderRadius: 12, background: importMsg.ok ? C.goldLt : C.redLt, border: `1px solid ${importMsg.ok ? C.primaryLt : C.red}20`, fontSize: 12, fontWeight: 600, color: importMsg.ok ? C.primaryLt : C.red, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+            <span>{importMsg.text}</span>
+            <button onClick={() => setImportMsg(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", opacity: 0.6, fontSize: 16, lineHeight: 1, padding: "0 2px", flexShrink: 0 }}>✕</button>
           </div>
         )}
 
@@ -2946,7 +2949,7 @@ export default function App() {
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
-        {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} />}
+        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "rgba(1,45,29,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 40px rgba(1,45,29,0.25)" }}>
