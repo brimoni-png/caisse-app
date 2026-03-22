@@ -1853,7 +1853,6 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
     setImporting(true);
     setImportMsg(null);
     try {
-      // Read as Uint8Array — works reliably across browsers
       const arrayBuf = await file.arrayBuffer();
       const uint8 = new Uint8Array(arrayBuf);
       const wb = XLSX.read(uint8, { type: "array", cellDates: true, dateNF: "yyyy-mm-dd" });
@@ -1861,40 +1860,58 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
       const typeMap = {
         "Contribution": "contribution", "contribution": "contribution",
         "Contributions": "contribution", "contributions": "contribution",
+        "Cotisation": "contribution", "cotisation": "contribution",
         "Don": "don", "don": "don", "Dons": "don", "dons": "don",
+        "Donation": "don", "donation": "don",
         "Dépense": "depense", "Depense": "depense", "depense": "depense",
         "Dépenses": "depense", "Depenses": "depense", "depenses": "depense",
+        "Expense": "depense", "expense": "depense",
         "مساهمة": "contribution", "المساهمات": "contribution",
         "تبرع": "don", "التبرعات": "don",
         "مصروف": "depense", "المصروفات": "depense"
       };
 
-      // Helper: normalize sheet name lookup (ignore case/accents)
-      const findSheet = (names, target) => {
-        const t = target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return names.find(n => n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === t);
+      // Normalise un texte : minuscules, sans accents, sans espaces
+      const norm = (s) => String(s || "").toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, "");
+
+      // Trouve une feuille parmi plusieurs noms possibles
+      const findSheet = (names, ...targets) => {
+        const normNames = names.map(n => ({ orig: n, norm: norm(n) }));
+        for (const target of targets) {
+          const found = normNames.find(n => n.norm === norm(target));
+          if (found) return found.orig;
+        }
+        return null;
       };
 
-      // Helper: parse date robustly
+      // Trouve la valeur d'une colonne en cherchant parmi plusieurs noms possibles
+      const getCol = (row, ...keys) => {
+        for (const k of keys) {
+          for (const rowKey of Object.keys(row)) {
+            if (norm(rowKey) === norm(k)) return row[rowKey];
+          }
+        }
+        return undefined;
+      };
+
+      // Parse la date robustement
       const parseDate = (raw) => {
         if (!raw) return new Date().toISOString().split("T")[0];
         if (raw instanceof Date && !isNaN(raw)) return raw.toISOString().split("T")[0];
         if (typeof raw === "number") {
-          // Excel serial date
           const d = new Date(Math.round((raw - 25569) * 86400 * 1000));
           return d.toISOString().split("T")[0];
         }
         const s = String(raw).trim();
-        // YYYY-MM-DD already
         if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-        // DD/MM/YYYY or DD\MM\YYYY or DD-MM-YYYY
         const m = s.match(/^(\d{1,2})[\-\/\\](\d{1,2})[\-\/\\](\d{2,4})$/);
         if (m) {
           const [, d, mo, y] = m;
           const yr = y.length === 2 ? "20" + y : y;
           return `${yr.padStart(4,"0")}-${mo.padStart(2,"0")}-${d.padStart(2,"0")}`;
         }
-        // Try native parse as last resort
         const dt = new Date(s);
         if (!isNaN(dt)) return dt.toISOString().split("T")[0];
         return new Date().toISOString().split("T")[0];
@@ -1902,25 +1919,27 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
 
       // ── Étape 1 : construire un index des membres existants (nom → objet) ──
       const memberIndex = {};
-      members.forEach(m => { memberIndex[m.name.trim().toLowerCase()] = m; });
+      members.forEach(m => { memberIndex[norm(m.name)] = m; });
+      const newMemberIndex = { ...memberIndex };
 
       // ── Étape 2 : importer les membres ──
       let membersImported = 0;
-      const newMemberIndex = { ...memberIndex };
-      const membresSheet = findSheet(wb.SheetNames, "Membres");
-      if (membresSheet) {
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[membresSheet]);
+      const membresSheetName = findSheet(wb.SheetNames,
+        "Membres", "membres", "Members", "member", "Adhérents", "adherents"
+      );
+      if (membresSheetName) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[membresSheetName]);
         for (const row of rows) {
           const name = String(
-            row["Membre"] || row["membre"] || row["Name"] || row["name"] ||
-            row["Nom"] || row["nom"] || ""
+            getCol(row, "Membre", "membre", "Name", "name", "Nom", "nom",
+                   "Nom complet", "NomComplet", "Prenom", "Prénom", "Libelle") || ""
           ).trim();
           const phone = String(
-            row["Téléphone"] || row["Telephone"] || row["telephone"] ||
-            row["Phone"] || row["phone"] || ""
+            getCol(row, "Téléphone", "Telephone", "telephone", "Phone", "phone",
+                   "Tel", "tel", "Mobile", "mobile", "GSM") || ""
           ).trim();
           if (!name) continue;
-          const key = name.toLowerCase();
+          const key = norm(name);
           if (!newMemberIndex[key]) {
             const { data: newM, error: mErr } = await supabase
               .from("members").insert([{ name, phone }]).select().single();
@@ -1934,23 +1953,38 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
 
       // ── Étape 3 : importer les transactions ──
       let txsImported = 0;
-      const txSheet = findSheet(wb.SheetNames, "Transactions");
-      if (txSheet) {
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[txSheet]);
+      const txSheetName = findSheet(wb.SheetNames,
+        "Transactions", "transactions", "Operations", "Opérations", "opérations",
+        "Ops", "ops", "Transaction", "Sheet1", "Feuil1", "Feuille1"
+      );
+      if (txSheetName) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[txSheetName]);
         for (const row of rows) {
-          const rawType = String(row["Type"] || row["type"] || "").trim();
+          const rawType = String(
+            getCol(row, "Type", "type", "Catégorie", "Categorie", "categorie") || ""
+          ).trim();
           const type = typeMap[rawType] || "contribution";
-          const amount = parseFloat(
-            String(row["Montant"] || row["montant"] || row["Amount"] || row["amount"] || "0")
-              .replace(/[^0-9.]/g, "")
-          );
+
+          const rawAmount = getCol(row, "Montant", "montant", "Amount", "amount",
+                                    "Somme", "somme", "Valeur", "valeur");
+          const amount = parseFloat(String(rawAmount || "0").replace(/[^0-9.]/g, ""));
           if (amount <= 0) continue;
 
-          const memberName = String(row["Membre"] || row["membre"] || row["Name"] || "—").trim();
-          const date = parseDate(row["Date"] || row["date"]);
-          const note = String(row["Note"] || row["note"] || row["Description"] || "").trim();
+          const memberName = String(
+            getCol(row, "Membre", "membre", "Name", "name", "Nom", "nom",
+                   "Donateur", "donateur", "Bénéficiaire", "beneficiaire") || "—"
+          ).trim();
 
-          const foundMember = newMemberIndex[memberName.toLowerCase()];
+          const date = parseDate(
+            getCol(row, "Date", "date", "Date opération", "DateOperation")
+          );
+
+          const note = String(
+            getCol(row, "Note", "note", "Description", "description",
+                   "Libellé", "libelle", "Objet", "objet", "Commentaire") || ""
+          ).trim();
+
+          const foundMember = newMemberIndex[norm(memberName)];
           const memberId = foundMember ? foundMember.id : null;
           const finalMemberName = type === "depense" ? "—" : (foundMember ? foundMember.name : memberName);
 
@@ -1968,7 +2002,14 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
 
       // ── Étape 4 : recharger les données ──
       await onRefresh();
-      setImportMsg(t.importSuccess(membersImported, txsImported));
+
+      if (membersImported === 0 && txsImported === 0) {
+        const sheetsFound = wb.SheetNames.join(", ");
+        setImportMsg(`⚠️ Aucune donnée importée. Feuilles détectées : ${sheetsFound}`);
+      } else {
+        setImportMsg(t.importSuccess(membersImported, txsImported));
+      }
+
     } catch(err) {
       console.error("Import error:", err);
       setImportMsg(t.importError + " (" + (err.message || "") + ")");
