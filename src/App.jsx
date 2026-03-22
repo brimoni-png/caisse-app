@@ -33,60 +33,40 @@ function useChartJS() {
   return ready;
 }
 
-// ─── DESIGN TOKENS — Sovereign Ledger ────────────────────────────────────────
+// ─── DESIGN TOKENS — #1a2b2e Teal Dark ──────────────────────────────────────
 const C = {
-  // Primary
-  primary:       "#012d1d",
-  primaryCont:   "#1b4332",
-  onPrimary:     "#ffffff",
-  // Secondary
-  secondary:     "#712edd",
-  secondaryCont: "#e9d8fd",
-  onSecondary:   "#ffffff",
-  // Tertiary
-  tertiary:      "#54001d",
-  // Surfaces
-  surface:       "#f9faf6",
-  surfaceLow:    "#f3f4f0",
-  surfaceLowest: "#ffffff",
-  surfaceHigh:   "#e8eae4",
-  // On-surface
-  text:          "#1a1c1a",
-  muted:         "#4a5248",
-  sub:           "#7a8578",
-  outline:       "#c1c8c2",
-  // Semantic
-  red:           "#c0392b",
-  redLt:         "#fce8e6",
-  gold:          "#1b4332",
-  goldLt:        "#d8f3e8",
-  // Aliases for compatibility
-  forest:        "#012d1d",
-  forestMid:     "#1b4332",
-  forestLt:      "#1b6b4a",
-  mint:          "#a8d5c2",
-  mintLt:        "#d8f3e8",
-  mintPale:      "#edf7f2",
-  lime:          "#4caf8a",
-  sage:          "#2d7a5a",
-  bg:            "#f3f4f0",
-  card:          "#ffffff",
-  // Ambient shadows (no heavy drops)
-  shadow:    "0 2px 24px rgba(1,45,29,0.06)",
-  shadowMd:  "0 6px 32px rgba(1,45,29,0.08)",
-  shadowLg:  "0 16px 48px rgba(1,45,29,0.10)",
+  forest:    "#1a2b2e",
+  forestMid: "#1f3a3e",
+  forestLt:  "#2d9c8f",
+  mint:      "#b2ede7",
+  mintLt:    "#e0f5f3",
+  mintPale:  "#f0faf9",
+  lime:      "#6dcfc4",
+  sage:      "#4db8ab",
+  bg:        "#f0f4f5",
+  card:      "#ffffff",
+  text:      "#1a2b2e",
+  muted:     "#4a6568",
+  sub:       "#7a9ea2",
+  red:       "#e05252",
+  redLt:     "#fde8e8",
+  gold:      "#2d9c8f",
+  goldLt:    "#e6faf8",
+  shadow:    "0 2px 14px rgba(26,43,46,0.08)",
+  shadowMd:  "0 6px 24px rgba(26,43,46,0.12)",
+  shadowLg:  "0 16px 48px rgba(26,43,46,0.16)",
 };
 
-const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');`;
+const FONTS = ``;
 
 const G = `
   ${FONTS}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html,body{height:100%;overscroll-behavior:none;}
-  body{background:#f3f4f0;-webkit-font-smoothing:antialiased;font-family:'Manrope','Segoe UI',sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;font-size:15px;color:#1a1c1a;}
-  #root{height:100%;display:flex;justify-content:center;background:#f3f4f0;}
+  body{background:#f0f4f5;-webkit-font-smoothing:antialiased;font-family:'Times New Roman','Times',serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;font-size:15px;}
+  #root{height:100%;display:flex;justify-content:center;background:#f0f4f5;}
   ::-webkit-scrollbar{width:2px;}
-  ::-webkit-scrollbar-thumb{background:#2d7a5a;border-radius:4px;}
+  ::-webkit-scrollbar-thumb{background:${C.sage};border-radius:4px;}
   @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
   @keyframes sheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
   @keyframes pop{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}
@@ -105,13 +85,13 @@ const G = `
   .fin-in{animation:fin .3s ease both}
   .out{animation:gone .22s ease forwards;overflow:hidden;}
   .tbtn{transition:all .18s cubic-bezier(.16,1,.3,1);cursor:pointer;}
-  .tbtn:active{transform:scale(.97);}
+  .tbtn:active{transform:scale(.96);}
   .txrow:hover .txacts{opacity:1 !important;}
-  .cat-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(1,45,29,0.10) !important;}
-  .eco-btn:hover{filter:brightness(1.05);}
+  .cat-card:hover{transform:translateY(-3px);box-shadow:${C.shadowMd} !important;}
+  .eco-btn:hover{filter:brightness(1.06);}
   input,select{color-scheme:light;}
   input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
-  button{font-family:'Manrope','Segoe UI',sans-serif;}
+  button{font-family:'Times New Roman','Times',serif;}
 `;
 
 // ─── ICONS ────────────────────────────────────────────────────────────────────
@@ -144,7 +124,7 @@ const Ic = {
 // ─── TRANSLATIONS ─────────────────────────────────────────────────────────────
 const T = {
   fr: {
-    dir: "ltr", font: "'Manrope','Segoe UI',sans-serif",
+    dir: "ltr", font: "'Times New Roman','Times',serif",
     greeting: "Resp-Caisse", userName: "Cheikh Brahim", subtitle: "Caisse communautaire",
     balanceGlobal: "Solde Global",
     stats: { contribution: "Contributions", don: "Dons", depense: "Dépenses" },
@@ -175,7 +155,7 @@ const T = {
     categories: "Actions rapides", apercu: "Aperçu du mois",
   },
   ar: {
-    dir: "rtl", font: "'Manrope','Segoe UI',sans-serif",
+    dir: "rtl", font: "'Times New Roman','Times',serif",
     greeting: "مسؤول الصندوق", userName: "الشيخ إبراهيم", subtitle: "صندوق تعاوني",
     balanceGlobal: "الرصيد الإجمالي",
     stats: { contribution: "المساهمات", don: "التبرعات", depense: "المصروفات" },
@@ -220,15 +200,15 @@ const inits = (n) => n.split(" ").slice(0, 2).map((w) => w[0] || "").join("").to
 const getYrs = (txs) => { const s = new Set(txs.map((t) => new Date(t.date).getFullYear())); s.add(new Date().getFullYear()); return [...s].sort((a, b) => b - a); };
 
 const CFG = (lang) => ({
-  contribution: { label: T[lang].txTypes.contribution, color: "#1b6b4a", lt: "rgba(27,107,74,0.10)", icon: () => Ic.up("#1b6b4a"), sign: "" },
-  don:          { label: T[lang].txTypes.don,          color: "#712edd", lt: "rgba(113,46,221,0.10)", icon: () => Ic.heart("#712edd"), sign: "" },
-  depense:      { label: T[lang].txTypes.depense,      color: "#c0392b", lt: "rgba(192,57,43,0.10)",  icon: () => Ic.dn("#c0392b"),   sign: "" },
+  contribution: { label: T[lang].txTypes.contribution, color: C.forestLt, lt: "rgba(200,135,42,0.12)", icon: () => Ic.up(C.forestLt), sign: "" },
+  don:          { label: T[lang].txTypes.don,          color: C.gold,      lt: C.goldLt,              icon: () => Ic.heart(C.gold),   sign: "" },
+  depense:      { label: T[lang].txTypes.depense,      color: C.red,       lt: C.redLt,               icon: () => Ic.dn(C.red),       sign: "" },
 });
 
 const AVC = [
-  ["#1b4332","#ffffff"],["#012d1d","#a8d5c2"],
-  ["#1b6b4a","#ffffff"],["#712edd","#ffffff"],
-  ["#54001d","#ffffff"],["#2d7a5a","#ffffff"],
+  ["rgba(168,230,207,0.35)","#0D3B2E"],["rgba(13,59,46,0.15)","#0D3B2E"],
+  ["rgba(111,207,151,0.25)","#155740"],["rgba(168,230,207,0.50)","#0D3B2E"],
+  ["rgba(200,135,42,0.25)","#0D3B2E"],  ["rgba(183,216,200,0.40)","#155740"],
 ];
 
 // ─── PERSISTED STATE ──────────────────────────────────────────────────────────
@@ -307,11 +287,11 @@ function useSupabaseData() {
 
 // ─── UI ATOMS ─────────────────────────────────────────────────────────────────
 function Card({ children, sx = {}, className = "" }) {
-  return <div className={className} style={{ background: C.surfaceLowest, borderRadius: 24, boxShadow: "0 2px 24px rgba(1,45,29,0.06)", ...sx }}>{children}</div>;
+  return <div className={className} style={{ background: C.card, borderRadius: 20, boxShadow: "0 2px 16px rgba(26,43,46,0.07)", border: "1px solid rgba(26,43,46,0.06)", ...sx }}>{children}</div>;
 }
 
 function Lbl({ c }) {
-  return <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 8, fontFamily: "'Manrope',sans-serif" }}>{c}</div>;
+  return <div style={{ fontSize: 10, fontWeight: 700, color: "#1A1429", letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 8 }}>{c}</div>;
 }
 
 function Inp({ label, dir = "ltr", sx = {}, ...p }) {
@@ -320,7 +300,7 @@ function Inp({ label, dir = "ltr", sx = {}, ...p }) {
     <div style={{ marginBottom: 20 }}>
       {label && <Lbl c={label} />}
       <input {...p} onFocus={(e) => { sf(true); p.onFocus?.(e); }} onBlur={(e) => { sf(false); p.onBlur?.(e); }}
-        style={{ width: "100%", background: f ? C.surfaceLowest : C.surfaceLow, border: "none", borderBottom: `2px solid ${f ? C.forestLt : "transparent"}`, borderRadius: f ? "12px 12px 0 0" : 12, padding: "11px 14px", color: C.text, fontSize: 15, outline: "none", direction: dir, fontFamily: "'Manrope',sans-serif", transition: "all .2s", ...sx }} />
+        style={{ width: "100%", background: "transparent", border: "none", borderBottom: `2px solid ${f ? "#2d9c8f" : "rgba(26,43,46,0.18)"}`, borderRadius: 0, padding: "10px 2px", color: "#1A1429", fontSize: 15, outline: "none", direction: dir, fontFamily: "inherit", transition: "border-color .2s", ...sx }} />
     </div>
   );
 }
@@ -330,8 +310,8 @@ function Sel({ label, dir = "ltr", children, ...p }) {
     <div style={{ marginBottom: 20 }}>
       {label && <Lbl c={label} />}
       <div style={{ position: "relative" }}>
-        <select {...p} style={{ width: "100%", background: C.surfaceLow, border: "none", borderRadius: 12, padding: "11px 36px 11px 14px", color: C.text, fontSize: 15, outline: "none", direction: dir, fontFamily: "'Manrope',sans-serif", appearance: "none", cursor: "pointer" }}>{children}</select>
-        <div style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
+        <select {...p} style={{ width: "100%", background: "transparent", border: "none", borderBottom: "2px solid rgba(107,33,232,0.2)", borderRadius: 0, padding: "10px 28px 10px 2px", color: "#1A1429", fontSize: 15, outline: "none", direction: dir, fontFamily: "inherit", appearance: "none", cursor: "pointer" }}>{children}</select>
+        <div style={{ position: "absolute", right: 2, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev("#6B21E8")}</div>
       </div>
     </div>
   );
@@ -340,7 +320,7 @@ function Sel({ label, dir = "ltr", children, ...p }) {
 function PBtn({ children, onClick, sx = {}, disabled }) {
   return (
     <button className="tbtn eco-btn" disabled={disabled} onClick={onClick}
-      style={{ background: disabled ? "#a8c5b8" : "linear-gradient(135deg, #012d1d, #1b4332)", border: "none", color: "#fff", borderRadius: 24, padding: "16px 20px", fontSize: 15, fontWeight: 700, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginTop: 8, boxShadow: disabled ? "none" : "0 8px 32px rgba(1,45,29,0.22)", fontFamily: "'Manrope',sans-serif", letterSpacing: 0.2, ...sx }}>
+      style={{ background: disabled ? "#7ab5b0" : "#1a2b2e", border: "none", color: "#fff", borderRadius: 50, padding: "16px 20px", fontSize: 15, fontWeight: 700, cursor: disabled ? "not-allowed" : "pointer", width: "100%", marginTop: 8, boxShadow: disabled ? "none" : "0 8px 24px rgba(26,43,46,0.28)", fontFamily: "inherit", letterSpacing: 0.2, ...sx }}>
       {children}
     </button>
   );
@@ -349,7 +329,7 @@ function PBtn({ children, onClick, sx = {}, disabled }) {
 function GBtn({ children, onClick, sx = {} }) {
   return (
     <button className="tbtn" onClick={onClick}
-      style={{ background: C.surfaceHigh, border: "none", color: C.text, borderRadius: 24, padding: "12px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Manrope',sans-serif", ...sx }}>
+      style={{ background: "#F2EFE9", border: "1.5px solid rgba(107,33,232,0.15)", color: "#7A6E8A", borderRadius: 50, padding: "12px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", ...sx }}>
       {children}
     </button>
   );
@@ -357,10 +337,10 @@ function GBtn({ children, onClick, sx = {} }) {
 
 function LangSwitch({ lang, setLang }) {
   return (
-    <div style={{ display: "flex", background: "rgba(255,255,255,0.85)", borderRadius: 20, padding: 3, gap: 2, boxShadow: "0 2px 12px rgba(1,45,29,0.08)" }}>
+    <div style={{ display: "flex", background: "rgba(255,255,255,0.8)", borderRadius: 20, padding: 3, gap: 2, border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
       {["fr", "ar"].map((l) => (
         <button key={l} className="tbtn" onClick={() => setLang(l)}
-          style={{ background: lang === l ? C.primary : "transparent", border: "none", borderRadius: 16, color: lang === l ? "#fff" : C.muted, fontWeight: 700, fontSize: 11, padding: "5px 13px", cursor: "pointer", fontFamily: "'Manrope',sans-serif", transition: "all .18s" }}>
+          style={{ background: lang === l ? "#1A1A1A" : "transparent", border: "none", borderRadius: 16, color: lang === l ? "#fff" : "#6B7A6B", fontWeight: 600, fontSize: 11, padding: "5px 13px", cursor: "pointer", fontFamily: "inherit", transition: "all .18s" }}>
           {l === "fr" ? "FR" : "ع"}
         </button>
       ))}
@@ -370,15 +350,15 @@ function LangSwitch({ lang, setLang }) {
 
 function Sheet({ title, onClose, children, dir = "ltr" }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(1,45,29,0.45)", backdropFilter: "blur(14px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+    <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(26,43,46,0.5)", backdropFilter: "blur(14px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
       onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: C.surface, borderRadius: "28px 28px 0 0", width: "100%", maxWidth: 430, maxHeight: "93vh", overflowY: "auto", padding: "0 24px 48px", animation: "sheet .32s cubic-bezier(.16,1,.3,1)", direction: dir, boxShadow: "0 -16px 60px rgba(1,45,29,0.14)" }}>
-        <div style={{ display: "flex", justifyContent: "center", padding: "14px 0 10px" }}>
-          <div style={{ width: 36, height: 4, background: C.outline, borderRadius: 4 }} />
+      <div style={{ background: "#f0f4f5", borderRadius: "26px 26px 0 0", width: "100%", maxWidth: 430, maxHeight: "93vh", overflowY: "auto", padding: "0 20px 44px", animation: "sheet .32s cubic-bezier(.16,1,.3,1)", direction: dir, boxShadow: "0 -12px 50px rgba(26,20,41,0.18)" }}>
+        <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
+          <div style={{ width: 40, height: 4, background: C.sage, borderRadius: 4 }} />
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexDirection: dir === "rtl" ? "row-reverse" : "row" }}>
-          <span style={{ color: C.text, fontWeight: 800, fontSize: 18, fontFamily: "'Manrope',sans-serif" }}>{title}</span>
-          <button onClick={onClose} className="tbtn" style={{ background: C.surfaceLow, border: "none", color: C.muted, borderRadius: 12, width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>✕</button>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexDirection: dir === "rtl" ? "row-reverse" : "row" }}>
+          <span style={{ color: C.text, fontWeight: 700, fontSize: 17 }}>{title}</span>
+          <button onClick={onClose} className="tbtn" style={{ background: C.mintPale, border: `1px solid ${C.mintLt}`, color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>✕</button>
         </div>
         {children}
       </div>
@@ -388,16 +368,16 @@ function Sheet({ title, onClose, children, dir = "ltr" }) {
 
 function Confirm({ title, message, onConfirm, onCancel, t }) {
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(1,45,29,0.5)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <div style={{ background: C.surfaceLowest, borderRadius: 28, padding: "28px 24px", width: "100%", maxWidth: 310, direction: t.dir, fontFamily: "'Manrope',sans-serif", boxShadow: C.shadowLg, animation: "pop .2s ease both" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(26,43,46,0.55)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div style={{ background: C.card, borderRadius: 22, padding: "28px 22px", width: "100%", maxWidth: 310, direction: t.dir, fontFamily: t.font, boxShadow: C.shadowLg, animation: "pop .2s ease both", border: `1px solid ${C.mintLt}` }}>
         <div style={{ textAlign: "center", marginBottom: 22 }}>
-          <div style={{ width: 54, height: 54, borderRadius: 18, background: C.redLt, margin: "0 auto 14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.trash(C.red, 22)}</div>
-          <div style={{ color: C.text, fontWeight: 800, fontSize: 16, marginBottom: 7 }}>{title}</div>
+          <div style={{ width: 54, height: 54, borderRadius: 16, background: C.redLt, margin: "0 auto 14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.trash(C.red, 22)}</div>
+          <div style={{ color: C.text, fontWeight: 700, fontSize: 16, marginBottom: 7 }}>{title}</div>
           <div style={{ color: C.muted, fontSize: 13, lineHeight: 1.6 }}>{message}</div>
         </div>
         <div style={{ display: "flex", gap: 10, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <GBtn onClick={onCancel} sx={{ flex: 1 }}>{t.cancel}</GBtn>
-          <button className="tbtn" onClick={onConfirm} style={{ flex: 1, background: C.red, border: "none", color: "#fff", borderRadius: 16, padding: "12px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Manrope',sans-serif" }}>{t.delete}</button>
+          <button className="tbtn" onClick={onConfirm} style={{ flex: 1, background: C.red, border: "none", color: "#fff", borderRadius: 12, padding: "12px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t.delete}</button>
         </div>
       </div>
     </div>
@@ -406,10 +386,10 @@ function Confirm({ title, message, onConfirm, onCancel, t }) {
 
 function SHdr({ title, badge, action, dir = "ltr" }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexDirection: dir === "rtl" ? "row-reverse" : "row" }}>
-      <span style={{ color: C.text, fontWeight: 700, fontSize: 14, fontFamily: "'Manrope',sans-serif", letterSpacing: -0.2 }}>{title}</span>
-      {badge && <span style={{ fontSize: 10, fontWeight: 700, color: C.muted, background: C.surfaceLow, borderRadius: 8, padding: "2px 9px" }}>{badge}</span>}
-      {action && <button className="tbtn" onClick={action.fn} style={{ fontSize: 11, fontWeight: 700, color: C.forestLt, background: "none", border: "none", cursor: "pointer", padding: 0 }}>{action.label}</button>}
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexDirection: dir === "rtl" ? "row-reverse" : "row" }}>
+      <span style={{ color: C.text, fontWeight: 600, fontSize: 14 }}>{title}</span>
+      {badge && <span style={{ fontSize: 10, fontWeight: 600, color: C.muted, background: C.mintPale, borderRadius: 8, padding: "2px 9px", border: `1px solid ${C.mintLt}` }}>{badge}</span>}
+      {action && <button className="tbtn" onClick={action.fn} style={{ fontSize: 11, fontWeight: 600, color: C.forestLt, background: "none", border: "none", cursor: "pointer", padding: 0 }}>{action.label}</button>}
     </div>
   );
 }
@@ -419,8 +399,8 @@ function SHdr({ title, badge, action, dir = "ltr" }) {
 function SearchBar({ value, onChange, placeholder, dir = "ltr" }) {
   const [focused, setFocused] = useState(false);
   return (
-    <div style={{ position: "relative", marginBottom: 16 }}>
-      <div style={{ position: "absolute", left: dir === "rtl" ? "auto" : 14, right: dir === "rtl" ? 14 : "auto", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", opacity: focused ? 1 : 0.45, transition: "opacity .2s" }}>
+    <div style={{ position: "relative", marginBottom: 14 }}>
+      <div style={{ position: "absolute", left: dir === "rtl" ? "auto" : 13, right: dir === "rtl" ? 13 : "auto", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", opacity: focused ? 1 : 0.5, transition: "opacity .2s" }}>
         {Ic.search(focused ? C.forestLt : C.muted, 15)}
       </div>
       <input
@@ -430,10 +410,10 @@ function SearchBar({ value, onChange, placeholder, dir = "ltr" }) {
         onBlur={() => setFocused(false)}
         placeholder={placeholder}
         dir={dir}
-        style={{ width: "100%", background: focused ? C.surfaceLowest : C.surfaceLow, border: "none", borderRadius: 16, padding: dir === "rtl" ? "12px 44px 12px 14px" : "12px 14px 12px 40px", fontSize: 13, color: C.text, outline: "none", fontFamily: "'Manrope',sans-serif", transition: "all .2s", boxShadow: focused ? C.shadow : "none" }}
+        style={{ width: "100%", background: focused ? C.card : C.mintPale, border: `1.5px solid ${focused ? C.forestLt : C.mintLt}`, borderRadius: 14, padding: dir === "rtl" ? "11px 42px 11px 14px" : "11px 14px 11px 38px", fontSize: 13, color: C.text, outline: "none", fontFamily: "inherit", transition: "all .2s", boxShadow: focused ? "0 0 0 3px rgba(124,58,237,0.1)" : "none" }}
       />
       {value && (
-        <button onClick={() => onChange("")} style={{ position: "absolute", right: dir === "rtl" ? "auto" : 12, left: dir === "rtl" ? 12 : "auto", top: "50%", transform: "translateY(-50%)", background: C.outline, border: "none", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}>
+        <button onClick={() => onChange("")} style={{ position: "absolute", right: dir === "rtl" ? "auto" : 11, left: dir === "rtl" ? 11 : "auto", top: "50%", transform: "translateY(-50%)", background: C.muted, border: "none", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}>
           {Ic.xcircle(C.muted, 18)}
         </button>
       )}
@@ -451,7 +431,7 @@ function TxRow({ tx, onDelete, onEdit, delay = 0, lang }) {
   return (
     <>
       <div className={`txrow fin-in${out ? " out" : ""}`}
-        style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderRadius: 20, background: C.surfaceLowest, marginBottom: 10, animationDelay: `${delay}ms`, cursor: "default", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 2px 16px rgba(1,45,29,0.05)" }}>
+        style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 15px", borderRadius: 16, background: C.card, border: `1px solid ${C.mintLt}`, marginBottom: 8, animationDelay: `${delay}ms`, cursor: "default", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: C.shadow }}>
         <div style={{ width: 42, height: 42, borderRadius: 13, background: cfg.lt, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>{cfg.icon()}</div>
         <div style={{ flex: 1, minWidth: 0, textAlign: t.dir === "rtl" ? "right" : "left" }}>
           <div style={{ color: C.text, fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tx.memberName}</div>
@@ -464,7 +444,7 @@ function TxRow({ tx, onDelete, onEdit, delay = 0, lang }) {
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <span style={{ color: cfg.color, fontWeight: 700, fontSize: 13 }}>{cfg.sign}{fmtN(tx.amount)}</span>
           <div className="txacts" style={{ display: "flex", gap: 4, opacity: 0, transition: "opacity .15s" }}>
-            <button className="tbtn" onClick={() => onEdit(tx)} style={{ background: C.surfaceLow, border: "none", color: C.forestLt, borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.edit(C.forestLt)}</button>
+            <button className="tbtn" onClick={() => onEdit(tx)} style={{ background: C.mintPale, border: "none", color: C.forestLt, borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.edit(C.forestLt)}</button>
             <button className="tbtn" onClick={() => setConf(true)} style={{ background: C.redLt, border: "none", color: C.red, borderRadius: 8, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.trash(C.red)}</button>
           </div>
         </div>
@@ -479,50 +459,53 @@ function CatPills({ onAdd, lang }) {
   const cats = [
     {
       type: "contribution",
-      color: "#1b6b4a",
-      bg: "rgba(27,107,74,0.10)",
+      color: "#2d9c8f",
+      bg: "rgba(45,156,143,0.10)",
       icon: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="9" fill="rgba(27,107,74,0.12)" stroke="#1b6b4a" strokeWidth="1.7"/>
-          <path d="M12 7v10M9.5 9.5a2.5 2.5 0 015 0c0 1.4-1.2 2.2-2.5 2.5-1.3.3-2.5 1.1-2.5 2.5a2.5 2.5 0 005 0" stroke="#1b6b4a" strokeWidth="1.6"/>
+          {/* Pièce de monnaie avec $ */}
+          <circle cx="12" cy="12" r="9" fill="rgba(45,156,143,0.15)" stroke="#2d9c8f" strokeWidth="1.7"/>
+          <path d="M12 7v10M9.5 9.5a2.5 2.5 0 015 0c0 1.4-1.2 2.2-2.5 2.5-1.3.3-2.5 1.1-2.5 2.5a2.5 2.5 0 005 0" stroke="#2d9c8f" strokeWidth="1.6"/>
         </svg>
       ),
     },
     {
       type: "don",
-      color: "#712edd",
-      bg: "rgba(113,46,221,0.10)",
+      color: "#20b2aa",
+      bg: "rgba(32,178,170,0.10)",
       icon: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 6c0 0-1.5-2-3-2C7.5 4 6 5.3 6 6.8 6 8.6 8 10 12 12c4-2 6-3.4 6-5.2C18 5.3 16.5 4 15 4c-1.5 0-3 2-3 2z" fill="rgba(113,46,221,0.12)" stroke="#712edd" strokeWidth="1.7"/>
-          <path d="M5 15c0-1 .7-1.5 1.5-1.5S8 14 8 15l.5 1h7l.5-1c0-1 .7-1.5 1.5-1.5S19 14 19 15v1.5c0 .8-.7 1.5-1.5 1.5h-11C5.7 18 5 17.3 5 16.5V15z" fill="rgba(113,46,221,0.10)" stroke="#712edd" strokeWidth="1.7"/>
+          {/* Mains ouvertes tendant un cœur */}
+          <path d="M12 6c0 0-1.5-2-3-2C7.5 4 6 5.3 6 6.8 6 8.6 8 10 12 12c4-2 6-3.4 6-5.2C18 5.3 16.5 4 15 4c-1.5 0-3 2-3 2z" fill="rgba(32,178,170,0.18)" stroke="#20b2aa" strokeWidth="1.7"/>
+          <path d="M5 15c0-1 .7-1.5 1.5-1.5S8 14 8 15l.5 1h7l.5-1c0-1 .7-1.5 1.5-1.5S19 14 19 15v1.5c0 .8-.7 1.5-1.5 1.5h-11C5.7 18 5 17.3 5 16.5V15z" fill="rgba(32,178,170,0.18)" stroke="#20b2aa" strokeWidth="1.7"/>
         </svg>
       ),
     },
     {
       type: "depense",
-      color: "#c0392b",
-      bg: "rgba(192,57,43,0.10)",
+      color: "#e05252",
+      bg: "rgba(224,82,82,0.10)",
       icon: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(192,57,43,0.12)" stroke="#c0392b" strokeWidth="1.7"/>
-          <polyline points="14 2 14 8 20 8" stroke="#c0392b" strokeWidth="1.7"/>
-          <line x1="16" y1="13" x2="8" y2="13" stroke="#c0392b" strokeWidth="1.5"/>
-          <line x1="16" y1="17" x2="8" y2="17" stroke="#c0392b" strokeWidth="1.5"/>
-          <line x1="10" y1="9" x2="8" y2="9" stroke="#c0392b" strokeWidth="1.5"/>
+          {/* Reçu / facture */}
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(224,82,82,0.15)" stroke="#e05252" strokeWidth="1.7"/>
+          <polyline points="14 2 14 8 20 8" stroke="#e05252" strokeWidth="1.7"/>
+          <line x1="16" y1="13" x2="8" y2="13" stroke="#e05252" strokeWidth="1.5"/>
+          <line x1="16" y1="17" x2="8" y2="17" stroke="#e05252" strokeWidth="1.5"/>
+          <line x1="10" y1="9" x2="8" y2="9" stroke="#e05252" strokeWidth="1.5"/>
         </svg>
       ),
     },
   ];
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 22 }}>
       {cats.map(cat => (
         <button key={cat.type} className="tbtn cat-card" onClick={() => onAdd(cat.type)}
-          style={{ background: C.surfaceLowest, border: "none", borderRadius: 24, padding: "20px 8px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, boxShadow: "0 2px 16px rgba(1,45,29,0.05)", transition: "all .22s" }}>
-          <div style={{ width: 54, height: 54, borderRadius: 18, background: cat.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          style={{ background: C.card, border: "none", borderRadius: 20, padding: "18px 8px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, boxShadow: C.shadow, transition: "all .22s" }}>
+          <div style={{ width: 54, height: 54, borderRadius: 16, background: cat.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {cat.icon}
           </div>
-          <span style={{ fontSize: 11, fontWeight: 700, color: cat.color, textAlign: "center", letterSpacing: 0.2, fontFamily: "'Manrope',sans-serif" }}>{T[lang].txTypes[cat.type]}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: cat.color, textAlign: "center", letterSpacing: 0.2 }}>{T[lang].txTypes[cat.type]}</span>
         </button>
       ))}
     </div>
@@ -544,19 +527,19 @@ function FinChart({ txs, lang, chartReady }) {
     cRef.current = new window.Chart(ref.current, {
       type: "line",
       data: { labels: ms, datasets: [
-        { label: t.stats.contribution, data: c, borderColor: "#1b6b4a", backgroundColor: "rgba(27,107,74,0.08)", tension: 0.45, fill: true, pointBackgroundColor: "#1b6b4a", pointRadius: 3, borderWidth: 2 },
-        { label: t.stats.don,          data: d, borderColor: "#712edd", backgroundColor: "rgba(113,46,221,0.06)", tension: 0.45, fill: true, pointBackgroundColor: "#712edd", pointRadius: 3, borderWidth: 2 },
-        { label: t.stats.depense,      data: e, borderColor: "#c0392b", backgroundColor: "rgba(192,57,43,0.06)", tension: 0.45, fill: true, pointBackgroundColor: "#c0392b", pointRadius: 3, borderWidth: 2 },
+        { label: t.stats.contribution, data: c, borderColor: "#2d9c8f", backgroundColor: "rgba(45,156,143,0.08)", tension: 0.45, fill: true, pointBackgroundColor: "#2d9c8f", pointRadius: 3, borderWidth: 2 },
+        { label: t.stats.don,          data: d, borderColor: "#20b2aa", backgroundColor: "rgba(32,178,170,0.07)", tension: 0.45, fill: true, pointBackgroundColor: "#20b2aa", pointRadius: 3, borderWidth: 2 },
+        { label: t.stats.depense,      data: e, borderColor: "#e05252", backgroundColor: "rgba(224,82,82,0.06)", tension: 0.45, fill: true, pointBackgroundColor: "#e05252", pointRadius: 3, borderWidth: 2 },
       ]},
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
-          legend: { display: true, position: "bottom", labels: { boxWidth: 9, usePointStyle: true, pointStyle: "circle", color: C.muted, font: { size: 10, family: "Manrope" } } },
-          tooltip: { backgroundColor: C.surfaceLowest, titleColor: C.text, bodyColor: C.muted, borderColor: "transparent", borderWidth: 1, padding: 10, cornerRadius: 10 },
+          legend: { display: true, position: "bottom", labels: { boxWidth: 9, usePointStyle: true, pointStyle: "circle", color: C.muted, font: { size: 10, family: "Times New Roman" } } },
+          tooltip: { backgroundColor: C.card, titleColor: C.text, bodyColor: C.muted, borderColor: C.mintLt, borderWidth: 1, padding: 10, cornerRadius: 10 },
         },
         scales: {
-          x: { grid: { display: false }, ticks: { color: C.sub, font: { size: 9, family: "Manrope" } }, border: { display: false } },
-          y: { grid: { color: C.surfaceLow }, ticks: { color: C.sub, font: { size: 9, family: "Manrope" }, callback: (v) => `${(v / 1000).toFixed(0)}k` }, border: { display: false } },
+          x: { grid: { display: false }, ticks: { color: C.sub, font: { size: 9, family: "Times New Roman" } }, border: { display: false } },
+          y: { grid: { color: C.mintLt }, ticks: { color: C.sub, font: { size: 9, family: "Times New Roman" }, callback: (v) => `${(v / 1000).toFixed(0)}k` }, border: { display: false } },
         },
       },
     });
@@ -568,7 +551,7 @@ function FinChart({ txs, lang, chartReady }) {
       <div style={{ height: 190, position: "relative" }}>
         {chartReady ? <canvas ref={ref} /> : (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: C.sub, fontSize: 12 }}>
-            <div style={{ width: 18, height: 18, border: `2px solid ${C.forestLt}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite", marginRight: 8 }} />Chargement…
+            <div style={{ width: 18, height: 18, border: `2px solid ${C.lime}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite", marginRight: 8 }} />Chargement…
           </div>
         )}
       </div>
@@ -579,7 +562,7 @@ function FinChart({ txs, lang, chartReady }) {
 function Empty({ label }) {
   return (
     <div style={{ textAlign: "center", padding: "48px 24px", color: C.sub }}>
-      <div style={{ width: 58, height: 58, borderRadius: 18, background: C.surfaceLow, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.rcpt(C.forestLt)}</div>
+      <div style={{ width: 58, height: 58, borderRadius: 18, background: C.mintPale, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.rcpt(C.sage)}</div>
       <div style={{ fontSize: 13, fontWeight: 500 }}>{label}</div>
     </div>
   );
@@ -588,13 +571,16 @@ function Empty({ label }) {
 // ─── LOGO CAISSE ─────────────────────────────────────────────────────────────
 function CaisseLogo() {
   return (
-    <div style={{ width: 42, height: 42, borderRadius: 14, background: "linear-gradient(135deg, #012d1d, #1b4332)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 16px rgba(1,45,29,0.35)" }}>
+    <div style={{ width: 40, height: 40, borderRadius: 13, background: "linear-gradient(135deg, #7C3AED, #A855F7)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 14px rgba(124,58,237,0.4)" }}>
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <rect x="2" y="5" width="18" height="13" rx="3" fill="rgba(168,213,194,0.15)" stroke="rgba(168,213,194,0.8)" strokeWidth="1.4" />
-        <circle cx="11" cy="11.5" r="3.2" stroke="rgba(168,213,194,0.9)" strokeWidth="1.4" fill="none" />
-        <circle cx="11" cy="11.5" r="1.2" fill="rgba(168,213,194,0.9)" />
-        <circle cx="5" cy="7.5" r="0.8" fill="rgba(168,213,194,0.6)" />
-        <circle cx="5" cy="15.5" r="0.8" fill="rgba(168,213,194,0.6)" />
+        <rect x="2" y="5" width="18" height="13" rx="3" fill="#1A1A2E" />
+        <circle cx="11" cy="11.5" r="3.5" stroke="#F5C842" strokeWidth="1.4" fill="none" />
+        <circle cx="11" cy="11.5" r="1.3" fill="#F5C842" />
+        <line x1="11" y1="8.5" x2="11" y2="9.8" stroke="#F5C842" strokeWidth="1.4" strokeLinecap="round" />
+        <circle cx="5" cy="7.5" r="0.9" fill="#F5C842" opacity="0.7" />
+        <circle cx="5" cy="15.5" r="0.9" fill="#F5C842" opacity="0.7" />
+        <rect x="5.5" y="17.5" width="2.5" height="1.8" rx="0.9" fill="#1A1A2E" />
+        <rect x="14" y="17.5" width="2.5" height="1.8" rx="0.9" fill="#1A1A2E" />
       </svg>
     </div>
   );
@@ -624,7 +610,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 
   const statsRow = [
     { label: t.stats.contribution, value: contrib, accentColor: C.mint,   sign: "", type: "contribution" },
-    { label: t.stats.don,          value: dons,    accentColor: "#712edd", sign: "", type: "don" },
+    { label: t.stats.don,          value: dons,    accentColor: "#F5C842", sign: "", type: "don" },
     { label: t.stats.depense,      value: dep,     accentColor: "#FF9E9E", sign: "", type: "depense" },
   ];
 
@@ -635,46 +621,47 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
       <div style={{ padding: "16px 4px 0px", marginTop: -20, position: "relative" }}>
 
         {/* Logo + greeting + lang switch */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
             <CaisseLogo />
             <div>
-              <div style={{ color: C.muted, fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase" }}>{t.greeting}</div>
-              <div style={{ color: C.text, fontSize: 16, fontWeight: 800, letterSpacing: -0.3, fontFamily: "'Manrope',sans-serif" }}>{t.userName}</div>
+              <div style={{ color: C.muted, fontSize: 11, fontWeight: 500, letterSpacing: 0.3 }}>{t.greeting}</div>
+              <div style={{ color: C.text, fontSize: 15, fontWeight: 600, letterSpacing: -0.2 }}>{t.userName}</div>
             </div>
           </div>
           <LangSwitch lang={lang} setLang={setLang} />
         </div>
 
-        {/* Balance card — Sovereign Ledger hero */}
-        <div style={{ background: "linear-gradient(135deg, #012d1d 0%, #1b4332 100%)", borderRadius: 28, padding: "28px 24px 24px", marginBottom: 20, position: "relative", overflow: "hidden", boxShadow: "0 12px 40px rgba(1,45,29,0.28)" }}>
-          <div style={{ position: "absolute", top: -40, right: -30, width: 140, height: 140, borderRadius: "50%", background: "rgba(255,255,255,0.04)", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", bottom: -50, left: -20, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,0.03)", pointerEvents: "none" }} />
-          <div style={{ color: "rgba(168,213,194,0.75)", fontSize: 10, fontWeight: 700, letterSpacing: 1.6, textTransform: "uppercase", marginBottom: 10, fontFamily: "'Manrope',sans-serif" }}>{t.balanceGlobal}</div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6 }}>
-            <div style={{ color: "#fff", fontSize: 48, fontWeight: 800, letterSpacing: -3, lineHeight: 1, fontFamily: "'Manrope',sans-serif" }}>
+        {/* Balance card */}
+        <div style={{ background: "linear-gradient(135deg, #1a2b2e 0%, #1f4a4e 50%, #2d9c8f 100%)", borderRadius: 24, padding: "24px 22px 20px", marginBottom: 18, position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: -20, left: -20, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.1)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", bottom: -30, left: 40, width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.07)", pointerEvents: "none" }} />
+
+          <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, fontWeight: 500, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 8 }}>{t.balanceGlobal}</div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 }}>
+            <div style={{ color: "#fff", fontSize: 44, fontWeight: 700, letterSpacing: -2.5, lineHeight: 1, fontFamily: "'DM Serif Display', serif" }}>
               {new Intl.NumberFormat("fr-FR").format(solde)}
             </div>
-            <span style={{ color: "rgba(168,213,194,0.7)", fontSize: 15, fontWeight: 600 }}>MRU</span>
+            <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 16, fontWeight: 500 }}>MRU</span>
           </div>
         </div>
 
         {/* Modal détail stat */}
         {statModal && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(1,45,29,0.5)", backdropFilter: "blur(12px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+          <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(19,17,28,0.55)", backdropFilter: "blur(12px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
             onClick={() => setStatModal(null)}>
-            <div style={{ background: C.surface, borderRadius: "28px 28px 0 0", width: "100%", maxWidth: 430, padding: "0 24px 44px", animation: "sheet .3s cubic-bezier(.16,1,.3,1)" }}
+            <div style={{ background: "#f0f4f5", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 430, padding: "0 20px 40px", animation: "sheet .3s cubic-bezier(.16,1,.3,1)" }}
               onClick={e => e.stopPropagation()}>
-              <div style={{ display: "flex", justifyContent: "center", padding: "14px 0 10px" }}>
-                <div style={{ width: 36, height: 4, background: C.outline, borderRadius: 4 }} />
+              <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
+                <div style={{ width: 40, height: 4, background: "#DEDAE8", borderRadius: 4 }} />
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22, marginTop: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, marginTop: 8 }}>
                 <div>
-                  <div style={{ color: C.text, fontWeight: 800, fontSize: 18, fontFamily: "'Manrope',sans-serif" }}>{statModal.label}</div>
-                  <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>{curYear}</div>
+                  <div style={{ color: C.text, fontWeight: 700, fontSize: 18 }}>{statModal.label}</div>
+                  <div style={{ color: C.muted, fontSize: 13, marginTop: 2 }}>{curYear}</div>
                 </div>
-                <div style={{ background: C.surfaceLow, borderRadius: 16, padding: "8px 16px" }}>
-                  <span style={{ color: C.forestLt, fontSize: 20, fontWeight: 800 }}>{fmtN(statModal.value)}</span>
+                <div style={{ background: "rgba(139,92,246,0.1)", borderRadius: 14, padding: "8px 16px" }}>
+                  <span style={{ color: "#8B5CF6", fontSize: 20, fontWeight: 700 }}>{statModal.sign}{fmtN(statModal.value)}</span>
                 </div>
               </div>
               <div style={{ marginBottom: 8 }}>
@@ -685,11 +672,11 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
                   if (monthVal === 0) return null;
                   return (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                      <div style={{ width: 32, color: C.muted, fontSize: 11, fontWeight: 600, flexShrink: 0 }}>{t.months[i]}</div>
-                      <div style={{ flex: 1, background: C.surfaceLow, borderRadius: 6, height: 8, overflow: "hidden" }}>
-                        <div style={{ width: `${pct}%`, height: "100%", background: statModal.type === "depense" ? C.red : statModal.type === "don" ? C.secondary : C.forestLt, borderRadius: 6, transition: "width .6s" }} />
+                      <div style={{ width: 32, color: C.muted, fontSize: 11, fontWeight: 500, flexShrink: 0 }}>{t.months[i]}</div>
+                      <div style={{ flex: 1, background: "#EDEDF5", borderRadius: 6, height: 8, overflow: "hidden" }}>
+                        <div style={{ width: `${pct}%`, height: "100%", background: statModal.type === "depense" ? "#EF4444" : statModal.type === "don" ? "#DB2777" : "#8B5CF6", borderRadius: 6, transition: "width .6s" }} />
                       </div>
-                      <div style={{ width: 70, textAlign: "right", color: C.text, fontSize: 12, fontWeight: 700 }}>{fmtN(monthVal)}</div>
+                      <div style={{ width: 70, textAlign: "right", color: C.text, fontSize: 12, fontWeight: 600 }}>{fmtN(monthVal)}</div>
                     </div>
                   );
                 })}
@@ -702,54 +689,57 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
         )}
 
         {/* 4 CARTES STATS (2x2) */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 4 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 4 }}>
           {/* Contributions */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[0])}
-            style={{ background: C.surfaceLowest, border: "none", borderRadius: 24, padding: "18px 16px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 10, boxShadow: "0 2px 16px rgba(1,45,29,0.05)", transition: "all .2s" }}>
-            <div style={{ width: 40, height: 40, borderRadius: 14, background: "rgba(27,107,74,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1b6b4a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M9.5 10.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5c0 1.5-2.5 3-2.5 3s-2.5-1.5-2.5-3z" fill="rgba(27,107,74,0.15)"/><path d="M9.5 13.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5"/></svg>
+            style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(45,156,143,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {/* Icône pièce/contribution */}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2d9c8f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M9.5 10.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5c0 1.5-2.5 3-2.5 3s-2.5-1.5-2.5-3z" fill="rgba(45,156,143,0.18)"/><path d="M9.5 13.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5"/></svg>
             </div>
             <div>
-              <div style={{ color: C.sub, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 3 }}>{t.stats.contribution}</div>
-              <div style={{ color: "#1b6b4a", fontSize: 16, fontWeight: 800, letterSpacing: -0.5 }}>{fmtN(contrib)}</div>
+              <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.contribution}</div>
+              <div style={{ color: "#2d9c8f", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(contrib)}</div>
             </div>
           </button>
           {/* Dons */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[1])}
-            style={{ background: C.surfaceLowest, border: "none", borderRadius: 24, padding: "18px 16px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 10, boxShadow: "0 2px 16px rgba(1,45,29,0.05)", transition: "all .2s" }}>
-            <div style={{ width: 40, height: 40, borderRadius: 14, background: "rgba(113,46,221,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#712edd" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 4.02 3.268 2 6 2c1.657 0 3.15.817 4 2.07C10.85 2.817 12.343 2 14 2c2.732 0 5 2.02 5 5.191 0 4.105-5.37 8.863-11 14.402z" fill="rgba(113,46,221,0.12)"/></svg>
+            style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(32,178,170,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {/* Icône mains offrantes / don */}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#20b2aa" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 4.02 3.268 2 6 2c1.657 0 3.15.817 4 2.07C10.85 2.817 12.343 2 14 2c2.732 0 5 2.02 5 5.191 0 4.105-5.37 8.863-11 14.402z" fill="rgba(32,178,170,0.18)"/></svg>
             </div>
             <div>
-              <div style={{ color: C.sub, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 3 }}>{t.stats.don}</div>
-              <div style={{ color: "#712edd", fontSize: 16, fontWeight: 800, letterSpacing: -0.5 }}>{fmtN(dons)}</div>
+              <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.don}</div>
+              <div style={{ color: "#20b2aa", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(dons)}</div>
             </div>
           </button>
           {/* Dépenses */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[2])}
-            style={{ background: C.surfaceLowest, border: "none", borderRadius: 24, padding: "18px 16px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 10, boxShadow: "0 2px 16px rgba(1,45,29,0.05)", transition: "all .2s" }}>
-            <div style={{ width: 40, height: 40, borderRadius: 14, background: "rgba(192,57,43,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c0392b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(192,57,43,0.10)"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(224,82,82,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {/* Icône facture / dépense */}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e05252" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(224,82,82,0.12)"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
             </div>
             <div>
-              <div style={{ color: C.sub, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 3 }}>{t.stats.depense}</div>
-              <div style={{ color: "#c0392b", fontSize: 16, fontWeight: 800, letterSpacing: -0.5 }}>{fmtN(dep)}</div>
+              <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.depense}</div>
+              <div style={{ color: "#e05252", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(dep)}</div>
             </div>
           </button>
           {/* Solde année passée — cliquable */}
           <button className="tbtn" onClick={() => { setEditPrevVal(String(soldePrev)); setEditPrevModal(true); }}
-            style={{ background: soldePrev >= 0 ? "rgba(27,107,74,0.08)" : "rgba(192,57,43,0.07)", border: "none", borderRadius: 24, padding: "18px 16px 16px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 10, cursor: "pointer", width: "100%", boxShadow: "0 2px 16px rgba(1,45,29,0.05)" }}>
+            style={{ background: soldePrev >= 0 ? "linear-gradient(135deg,rgba(45,156,143,0.08),rgba(45,156,143,0.15))" : "rgba(254,226,226,0.6)", border: `1.5px solid ${soldePrev >= 0 ? "rgba(45,156,143,0.3)" : "#FECACA"}`, borderRadius: 18, padding: "16px 14px 14px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, cursor: "pointer", width: "100%" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
-              <div style={{ width: 40, height: 40, borderRadius: 14, background: soldePrev >= 0 ? "rgba(27,107,74,0.12)" : "rgba(192,57,43,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={soldePrev >= 0 ? "#1b6b4a" : "#c0392b"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: soldePrev >= 0 ? "rgba(45,156,143,0.12)" : "rgba(239,68,68,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={soldePrev >= 0 ? "#2d9c8f" : "#EF4444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
               </div>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.sub} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, marginTop: 2 }}><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.sub} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6, marginTop: 2 }}><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </div>
             <div>
-              <div style={{ color: C.sub, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 3 }}>
+              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>
                 {lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}
               </div>
-              <div style={{ color: soldePrev >= 0 ? "#1b6b4a" : "#c0392b", fontSize: 16, fontWeight: 800, letterSpacing: -0.5 }}>
+              <div style={{ color: soldePrev >= 0 ? "#2d9c8f" : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>
                 {fmtN(Math.abs(soldePrev))}
               </div>
               {soldePrevManual !== null && <div style={{ fontSize: 8, color: C.sub, marginTop: 2 }}>✏️ {lang === "ar" ? "معدّل" : "modifié"}</div>}
@@ -759,33 +749,35 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 
         {/* ── Modal édition Solde année passée ── */}
         {editPrevModal && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(1,45,29,0.55)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
+          <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(26,43,46,0.6)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
             onClick={e => e.target === e.currentTarget && setEditPrevModal(false)}>
-            <div style={{ background: C.surfaceLowest, borderRadius: 28, padding: "28px 24px", width: "100%", maxWidth: 320, boxShadow: C.shadowLg, animation: "pop .2s ease both" }}>
-              <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 16, background: C.surfaceLow, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ background: C.card, borderRadius: 22, padding: "26px 22px", width: "100%", maxWidth: 320, boxShadow: C.shadowLg, animation: "pop .2s ease both", border: `1px solid ${C.mintLt}` }}>
+              <div style={{ textAlign: "center", marginBottom: 18 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: C.mintLt, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.forestLt} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </div>
-                <div style={{ color: C.text, fontWeight: 800, fontSize: 15, marginBottom: 4, fontFamily: "'Manrope',sans-serif" }}>
+                <div style={{ color: C.text, fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
                   {lang === "ar" ? `تعديل رصيد ${prevYear}` : `Modifier le solde ${prevYear}`}
                 </div>
                 <div style={{ color: C.muted, fontSize: 12 }}>{lang === "ar" ? "سيُضاف إلى الرصيد الإجمالي" : "Sera ajouté au solde global"}</div>
               </div>
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 8 }}>{lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7 }}>{lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}</div>
                 <input type="number" value={editPrevVal} onChange={e => setEditPrevVal(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") { setSoldePrevManual(Number(editPrevVal)); setEditPrevModal(false); } }}
                   placeholder="0" autoFocus
-                  style={{ width: "100%", background: C.surfaceLow, border: "none", borderRadius: 14, padding: "14px", fontSize: 20, color: C.text, outline: "none", fontFamily: "'Manrope',sans-serif", textAlign: "center", fontWeight: 800 }}
+                  style={{ width: "100%", background: C.mintLt, border: `1.5px solid ${C.mintLt}`, borderRadius: 12, padding: "12px 14px", fontSize: 18, color: C.text, outline: "none", fontFamily: "inherit", textAlign: "center", fontWeight: 700, transition: "border-color .2s" }}
+                  onFocus={e => e.target.style.borderColor = C.forestLt}
+                  onBlur={e => e.target.style.borderColor = C.mintLt}
                 />
               </div>
               <div style={{ display: "flex", gap: 10 }}>
                 <button className="tbtn" onClick={() => { setSoldePrevManual(null); setEditPrevModal(false); }}
-                  style={{ flex: 1, background: C.surfaceLow, border: "none", borderRadius: 14, padding: "12px", fontSize: 12, fontWeight: 600, color: C.muted, cursor: "pointer", fontFamily: "'Manrope',sans-serif" }}>
+                  style={{ flex: 1, background: C.mintLt, border: "none", borderRadius: 12, padding: "11px", fontSize: 12, fontWeight: 600, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>
                   {lang === "ar" ? "إعادة ضبط" : "Réinitialiser"}
                 </button>
                 <button className="tbtn" onClick={() => { setSoldePrevManual(Number(editPrevVal)); setEditPrevModal(false); }}
-                  style={{ flex: 2, background: "linear-gradient(135deg,#012d1d,#1b4332)", border: "none", borderRadius: 14, padding: "12px", fontSize: 13, fontWeight: 700, color: "#fff", cursor: "pointer", fontFamily: "'Manrope',sans-serif", boxShadow: "0 4px 16px rgba(1,45,29,0.25)" }}>
+                  style={{ flex: 2, background: C.forestLt, border: "none", borderRadius: 12, padding: "11px", fontSize: 13, fontWeight: 700, color: "#fff", cursor: "pointer", fontFamily: "inherit", boxShadow: `0 4px 14px rgba(45,156,143,0.35)` }}>
                   {lang === "ar" ? "حفظ" : "Enregistrer"}
                 </button>
               </div>
@@ -811,16 +803,16 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 
         {/* Aperçu membres */}
         <div className="a6">
-          <Card sx={{ padding: "18px", marginTop: 6 }}>
+          <Card sx={{ padding: "16px", marginTop: 6 }}>
             <SHdr title={t.activeMembers} badge={`${members.length}`} dir={t.dir} />
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
               <div style={{ display: "flex" }}>
                 {members.slice(0, 4).map((m, i) => {
-                  const colors = ["#1b4332","#712edd","#54001d","#1b6b4a"];
-                  return <div key={m.id} style={{ width: 38, height: 38, borderRadius: 12, background: colors[i % colors.length], border: `2px solid ${C.surfaceLowest}`, marginLeft: i === 0 ? 0 : -9, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700, zIndex: 10 - i }}>{inits(m.name)}</div>;
+                  const [bg, fg] = AVC[i % AVC.length];
+                  return <div key={m.id} style={{ width: 38, height: 38, borderRadius: 12, background: bg, border: `2px solid ${C.card}`, marginLeft: i === 0 ? 0 : -9, display: "flex", alignItems: "center", justifyContent: "center", color: fg, fontSize: 12, fontWeight: 700, zIndex: 10 - i }}>{inits(m.name)}</div>;
                 })}
               </div>
-              <button className="tbtn" onClick={() => onTabChange("members")} style={{ fontSize: 11, fontWeight: 700, color: C.forestLt, background: C.surfaceLow, border: "none", borderRadius: 12, padding: "7px 14px", cursor: "pointer", fontFamily: "'Manrope',sans-serif" }}>{t.seeMembers}</button>
+              <button className="tbtn" onClick={() => onTabChange("members")} style={{ fontSize: 11, fontWeight: 600, color: C.forestLt, background: C.mintPale, border: `1px solid rgba(200,135,42,0.2)`, borderRadius: 9, padding: "7px 13px", cursor: "pointer" }}>{t.seeMembers}</button>
             </div>
           </Card>
         </div>
@@ -846,12 +838,12 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 
   const pillStyle = (active, color) => ({
-    background: active ? (color || C.primary) : C.surfaceLowest,
-    border: "none",
+    background: active ? (color || C.forest) : C.card,
+    border: `1.5px solid ${active ? (color || C.forest) : C.mintLt}`,
     color: active ? "#fff" : C.muted,
-    borderRadius: 20, padding: "8px 16px", fontSize: 11, fontWeight: 700,
-    cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'Manrope',sans-serif",
-    boxShadow: active ? "0 4px 16px rgba(1,45,29,0.18)" : C.shadow, transition: "all .18s",
+    borderRadius: 20, padding: "7px 15px", fontSize: 11, fontWeight: 600,
+    cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit",
+    boxShadow: C.shadow, transition: "all .18s",
   });
 
   const activeLabel = [
@@ -906,7 +898,7 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang }) {
       <div style={{ fontSize: 11, color: C.muted, marginBottom: 10, paddingLeft: 2, display: "flex", alignItems: "center", gap: 8 }}>
         <span>{sorted.length} {lang === "ar" ? "معاملة" : `transaction${sorted.length !== 1 ? "s" : ""}`}</span>
         {activeLabel && (
-          <span style={{ background: C.surfaceLow, borderRadius: 6, padding: "2px 9px", border: "none", color: C.forestLt, fontWeight: 600 }}>
+          <span style={{ background: C.mintPale, borderRadius: 6, padding: "2px 9px", border: `1px solid ${C.mintLt}`, color: C.forestLt, fontWeight: 600 }}>
             {activeLabel}
           </span>
         )}
@@ -949,13 +941,13 @@ function MemberDetailModal({ member, txs, lang, onClose }) {
 
         {/* Handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
-          <div style={{ width: 40, height: 4, background: C.primary, borderRadius: 4 }} />
+          <div style={{ width: 40, height: 4, background: C.sage, borderRadius: 4 }} />
         </div>
 
         {/* Header membre */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 13 }}>
-            <div style={{ width: 50, height: 50, borderRadius: 15, background: "linear-gradient(135deg,#012d1d,#1b4332)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 17, fontWeight: 700, flexShrink: 0 }}>
+            <div style={{ width: 50, height: 50, borderRadius: 15, background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 17, fontWeight: 700, flexShrink: 0 }}>
               {inits(member.name)}
             </div>
             <div>
@@ -963,11 +955,11 @@ function MemberDetailModal({ member, txs, lang, onClose }) {
               {member.phone && <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>{member.phone}</div>}
             </div>
           </div>
-          <button onClick={onClose} className="tbtn" style={{ background: C.surfaceLow, border: "none", color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, cursor: "pointer" }}>✕</button>
+          <button onClick={onClose} className="tbtn" style={{ background: C.mintPale, border: `1px solid ${C.mintLt}`, color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, cursor: "pointer" }}>✕</button>
         </div>
 
         {/* Carte total 2026 */}
-        <div style={{ background: "linear-gradient(135deg,#012d1d,#1b4332)", borderRadius: 18, padding: "18px 20px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: C.shadowMd }}>
+        <div style={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", borderRadius: 18, padding: "18px 20px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: C.shadowMd }}>
           <div>
             <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11, fontWeight: 500, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 4 }}>
               {lang === "ar" ? `إجمالي مساهمات ${YEAR}` : `Total contributions ${YEAR}`}
@@ -993,8 +985,8 @@ function MemberDetailModal({ member, txs, lang, onClose }) {
                     <span style={{ color: C.text, fontSize: 13, fontWeight: 500 }}>{MONTHS_FULL[Number(mIdx)]}</span>
                     <span style={{ color: C.forestLt, fontSize: 13, fontWeight: 700 }}>{fmtN(val)}</span>
                   </div>
-                  <div style={{ background: C.surfaceLow, borderRadius: 6, height: 7, overflow: "hidden" }}>
-                    <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg,#1b6b4a,#4caf8a)", borderRadius: 6, transition: "width .6s cubic-bezier(.16,1,.3,1)" }} />
+                  <div style={{ background: C.mintPale, borderRadius: 6, height: 7, overflow: "hidden" }}>
+                    <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg,#7C3AED,#C084FC)", borderRadius: 6, transition: "width .6s cubic-bezier(.16,1,.3,1)" }} />
                   </div>
                 </div>
               );
@@ -1004,12 +996,12 @@ function MemberDetailModal({ member, txs, lang, onClose }) {
               {lang === "ar" ? "جميع العمليات" : "Toutes les opérations"}
             </div>
             {contribTxs.map(tx => (
-              <div key={tx.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 13px", background: C.surfaceLowest, borderRadius: 12, marginBottom: 8, border: "none" }}>
+              <div key={tx.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 13px", background: C.card, borderRadius: 12, marginBottom: 8, border: `1px solid ${C.mintLt}` }}>
                 <div>
                   <div style={{ color: C.text, fontSize: 12, fontWeight: 600 }}>{fmtDt(tx.date, lang)}</div>
                   {tx.note && <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{tx.note}</div>}
                 </div>
-                <div style={{ color: "#1b6b4a", fontWeight: 700, fontSize: 13 }}>{fmtN(tx.amount)}</div>
+                <div style={{ color: "#8B5CF6", fontWeight: 700, fontSize: 13 }}>{fmtN(tx.amount)}</div>
               </div>
             ))}
           </div>
@@ -1105,10 +1097,10 @@ function DonutChart({ contrib, dons, dep, lang, chartReady }) {
         labels: [t.stats.contribution, t.stats.don, t.stats.depense],
         datasets: [{
           data: [contrib, dons, dep],
-          backgroundColor: ["rgba(27,107,74,0.85)", "rgba(113,46,221,0.85)", "rgba(192,57,43,0.85)"],
+          backgroundColor: ["rgba(124,58,237,0.85)", "rgba(219,39,119,0.85)", "rgba(239,68,68,0.85)"],
           borderRadius: 10,
           borderSkipped: false,
-          hoverBackgroundColor: ["#1b6b4a", "#712edd", "#c0392b"],
+          hoverBackgroundColor: ["#7C3AED", "#DB2777", "#EF4444"],
         }]
       },
       options: {
@@ -1117,19 +1109,19 @@ function DonutChart({ contrib, dons, dep, lang, chartReady }) {
           legend: { display: false },
           tooltip: {
             backgroundColor: "#fff", titleColor: "#1A1A2E", bodyColor: "#6B5E8A",
-            borderColor: C.surfaceLow, borderWidth: 0, padding: 10, cornerRadius: 10,
+            borderColor: "#EDE9FE", borderWidth: 1, padding: 10, cornerRadius: 10,
             callbacks: { label: ctx => " " + new Intl.NumberFormat("fr-FR").format(ctx.parsed.y) }
           },
         },
         scales: {
           x: {
             grid: { display: false },
-            ticks: { color: "#6B5E8A", font: { size: 11, family: "Manrope", weight: "600" } },
+            ticks: { color: "#6B5E8A", font: { size: 11, family: "Times New Roman", weight: "600" } },
             border: { display: false },
           },
           y: {
-            grid: { color: C.surfaceLow },
-            ticks: { color: "#9D8BC0", font: { size: 9, family: "Manrope" }, callback: v => v >= 1000 ? (v/1000).toFixed(0)+"k" : v },
+            grid: { color: "#EDE9FE" },
+            ticks: { color: "#9D8BC0", font: { size: 9, family: "Times New Roman" }, callback: v => v >= 1000 ? (v/1000).toFixed(0)+"k" : v },
             border: { display: false },
           },
         },
@@ -1139,7 +1131,7 @@ function DonutChart({ contrib, dons, dep, lang, chartReady }) {
   }, [chartReady, contrib, dons, dep, lang]);
 
   return (
-    <div style={{ background: C.surfaceLowest, borderRadius: 24, boxShadow: C.shadow, padding: "16px", marginBottom: 16 }}>
+    <div style={{ background: "#fff", borderRadius: 20, boxShadow: "0 2px 16px rgba(124,58,237,0.08)", border: "1px solid #EDE9FE", padding: "16px", marginBottom: 16 }}>
       <div style={{ marginBottom: 14 }}>
         <span style={{ color: "#1A1A2E", fontWeight: 600, fontSize: 14 }}>{lang === "ar" ? "توزيع المالية" : "Répartition financière"}</span>
       </div>
@@ -1169,13 +1161,13 @@ function TopMembers({ members, txs, lang }) {
   if (ranked.length === 0) return null;
   const medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"];
   const maxVal = ranked[0].total;
-  const AVC2 = ["#012d1d","#1b4332","#1b6b4a","#712edd","#a8d5c2"];
+  const AVC2 = ["#7C3AED","#A855F7","#C084FC","#DDD6FE","#EDE9FE"];
   return (
-    <div style={{ background: C.surfaceLowest, borderRadius: 24, boxShadow: C.shadow, padding: "16px", marginBottom: 16 }}>
+    <div style={{ background: "#fff", borderRadius: 20, boxShadow: "0 2px 16px rgba(124,58,237,0.08)", border: "1px solid #EDE9FE", padding: "16px", marginBottom: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-        {Ic.trophy("#1b6b4a", 16)}
+        {Ic.trophy("#F5C842", 16)}
         <span style={{ color: "#1A1A2E", fontWeight: 600, fontSize: 14 }}>{lang === "ar" ? "أكبر المساهمين" : "Top contributeurs"}</span>
-        <span style={{ fontSize: 10, fontWeight: 600, color: C.muted, background: C.surfaceLow, borderRadius: 8, padding: "2px 9px", marginLeft: "auto" }}>Top {ranked.length}</span>
+        <span style={{ fontSize: 10, fontWeight: 600, color: "#6B5E8A", background: "#F5F3FF", borderRadius: 8, padding: "2px 9px", border: "1px solid #EDE9FE", marginLeft: "auto" }}>Top {ranked.length}</span>
       </div>
       {ranked.map((m, i) => (
         <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: i < ranked.length - 1 ? 10 : 0, direction: t.dir }}>
@@ -1185,7 +1177,7 @@ function TopMembers({ members, txs, lang }) {
               <span style={{ color: "#1A1A2E", fontSize: 12, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60%" }}>{m.name}</span>
               <span style={{ color: AVC2[i], fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{new Intl.NumberFormat("fr-FR").format(m.total)}</span>
             </div>
-            <div style={{ background: C.surfaceLow, borderRadius: 4, height: 5, overflow: "hidden" }}>
+            <div style={{ background: "#F5F3FF", borderRadius: 4, height: 5, overflow: "hidden" }}>
               <div style={{ width: `${(m.total / maxVal) * 100}%`, height: "100%", background: `linear-gradient(90deg, ${AVC2[i]}, ${AVC2[Math.min(i+1, 4)]})`, borderRadius: 4, transition: "width .7s cubic-bezier(.16,1,.3,1)" }} />
             </div>
           </div>
@@ -1241,9 +1233,9 @@ function PdfReportModal({ txs, members, onClose, year }) {
     return `<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${color}" opacity="0.9"/>`;
   }
   let sa = 0;
-  const pieC = pieSlice(totalC, pieTotal, sa, "#1b6b4a"); sa += (totalC / (pieTotal || 1)) * 2 * Math.PI;
-  const pieD = pieSlice(totalD, pieTotal, sa, "#712edd"); sa += (totalD / (pieTotal || 1)) * 2 * Math.PI;
-  const pieE = pieSlice(totalE, pieTotal, sa, "#c0392b");
+  const pieC = pieSlice(totalC, pieTotal, sa, "#2d9c8f"); sa += (totalC / (pieTotal || 1)) * 2 * Math.PI;
+  const pieD = pieSlice(totalD, pieTotal, sa, "#20b2aa"); sa += (totalD / (pieTotal || 1)) * 2 * Math.PI;
+  const pieE = pieSlice(totalE, pieTotal, sa, "#e05252");
 
   // Top 5 members
   const topMembers = members
@@ -1259,8 +1251,8 @@ function PdfReportModal({ txs, members, onClose, year }) {
 
 
   const pdfStyles = `
-    .pdf-wrap{font-family:'Manrope','Segoe UI',sans-serif;direction:rtl;background:#fff;color:#1a2b2e;padding:32px;max-width:860px;margin:0 auto;font-size:14px;}
-    .pdf-header{background:linear-gradient(135deg,#012d1d,#1b4332);color:#fff;border-radius:18px;padding:28px 32px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;}
+    .pdf-wrap{font-family:'Times New Roman','Times',serif;direction:rtl;background:#fff;color:#1a2b2e;padding:32px;max-width:860px;margin:0 auto;font-size:14px;}
+    .pdf-header{background:linear-gradient(135deg,#1a2b2e,#2d9c8f);color:#fff;border-radius:18px;padding:28px 32px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;}
     .pdf-title{font-size:22px;font-weight:800;margin-bottom:4px;}
     .pdf-sub{font-size:14px;opacity:0.7;}
     .pdf-date{font-size:12px;opacity:0.6;text-align:left;}
@@ -1269,9 +1261,9 @@ function PdfReportModal({ txs, members, onClose, year }) {
     .pdf-kpi-label{font-size:11px;font-weight:600;color:#7a9ea2;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
     .pdf-kpi-value{font-size:18px;font-weight:800;}
     .pdf-section{background:#fff;border:1.5px solid #e0f5f3;border-radius:16px;padding:20px;margin-bottom:20px;}
-    .pdf-section-title{font-size:14px;font-weight:700;color:#1a2b2e;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #d8f3e8;display:flex;align-items:center;gap:8px;}
+    .pdf-section-title{font-size:14px;font-weight:700;color:#1a2b2e;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e0f5f3;display:flex;align-items:center;gap:8px;}
     .pdf-table{width:100%;border-collapse:collapse;}
-    .pdf-table th{background:#edf7f2;color:#1b6b4a;font-size:13px;font-weight:700;padding:9px 12px;text-align:right;border-bottom:2px solid #d8f3e8;}
+    .pdf-table th{background:#f0faf9;color:#2d9c8f;font-size:13px;font-weight:700;padding:9px 12px;text-align:right;border-bottom:2px solid #e0f5f3;}
     .pdf-table td{padding:8px 12px;font-size:13px;border-bottom:1px solid #f0faf9;text-align:right;color:#1a2b2e;}
     .pdf-table tr:last-child td{border-bottom:none;}
     .pdf-badge{display:inline-block;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:600;}
@@ -1279,13 +1271,13 @@ function PdfReportModal({ txs, members, onClose, year }) {
   `;
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 3000, background: "rgba(1,45,29,0.65)", backdropFilter: "blur(16px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+    <div style={{ position: "fixed", inset: 0, zIndex: 3000, background: "rgba(26,43,46,0.65)", backdropFilter: "blur(16px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
       onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={{ background: C.bg, borderRadius: "26px 26px 0 0", width: "100%", maxWidth: 430, maxHeight: "95vh", overflowY: "auto", padding: "0 0 44px", animation: "sheet .32s cubic-bezier(.16,1,.3,1)", direction: "rtl" }}>
 
         {/* Handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "13px 0 8px" }}>
-          <div style={{ width: 40, height: 4, background: C.primary, borderRadius: 4 }} />
+          <div style={{ width: 40, height: 4, background: C.sage, borderRadius: 4 }} />
         </div>
 
         {/* Header */}
@@ -1294,7 +1286,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
             <div style={{ color: C.text, fontWeight: 800, fontSize: 17 }}>تقرير الصندوق {year}</div>
             <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>تقرير مالي شامل — معاينة</div>
           </div>
-          <button onClick={onClose} className="tbtn" style={{ background: C.surfaceLow, border: "none", color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, cursor: "pointer", flexShrink: 0 }}>✕</button>
+          <button onClick={onClose} className="tbtn" style={{ background: C.mintPale, border: `1px solid ${C.mintLt}`, color: C.muted, borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, cursor: "pointer", flexShrink: 0 }}>✕</button>
         </div>
 
         {/* Preview card */}
@@ -1303,10 +1295,10 @@ function PdfReportModal({ txs, members, onClose, year }) {
           {/* KPI summary */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
             {[
-              { label: "المساهمات", val: totalC, color: "#1b6b4a", bg: "rgba(27,107,74,0.07)", sign: "" },
-              { label: "التبرعات",  val: totalD, color: "#712edd", bg: "rgba(113,46,221,0.07)", sign: "" },
-              { label: "المصروفات", val: totalE, color: "#c0392b", bg: "rgba(192,57,43,0.07)",  sign: "" },
-              { label: "الرصيد الصافي", val: Math.abs(solde), color: solde >= 0 ? "#1b6b4a" : "#c0392b", bg: solde >= 0 ? "rgba(27,107,74,0.07)" : "rgba(192,57,43,0.07)", sign: "" },
+              { label: "المساهمات", val: totalC, color: "#2d9c8f", bg: "rgba(45,156,143,0.07)", sign: "" },
+              { label: "التبرعات",  val: totalD, color: "#20b2aa", bg: "rgba(32,178,170,0.07)", sign: "" },
+              { label: "المصروفات", val: totalE, color: "#e05252", bg: "rgba(224,82,82,0.07)",  sign: "" },
+              { label: "الرصيد الصافي", val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", bg: solde >= 0 ? "rgba(45,156,143,0.07)" : "rgba(224,82,82,0.07)", sign: "" },
             ].map(k => (
               <div key={k.label} style={{ background: k.bg, borderRadius: 14, padding: "14px 12px", border: `1.5px solid ${k.color}22` }}>
                 <div style={{ color: C.muted, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 5 }}>{k.label}</div>
@@ -1316,7 +1308,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
           </div>
 
           {/* Mini bar chart preview */}
-          <div style={{ background: C.surfaceLowest, borderRadius: 16, padding: "14px", border: "none", marginBottom: 14 }}>
+          <div style={{ background: C.card, borderRadius: 16, padding: "14px", border: `1px solid ${C.mintLt}`, marginBottom: 14 }}>
             <div style={{ color: C.text, fontWeight: 700, fontSize: 12, marginBottom: 10 }}>📊 الحركة الشهرية</div>
             <svg width="100%" viewBox={`0 0 ${BAR_W} ${BAR_H + 30}`} style={{ display: "block" }}>
               {byMonth.map((m, i) => {
@@ -1327,9 +1319,9 @@ function PdfReportModal({ txs, members, onClose, year }) {
                 const bw = barW * 0.28;
                 return (
                   <g key={i}>
-                    <rect x={x + 2} y={BAR_H - hC - 10} width={bw} height={hC || 1} fill="#1b6b4a" rx="2" opacity="0.85" />
-                    <rect x={x + bw + 4} y={BAR_H - hD - 10} width={bw} height={hD || 1} fill="#712edd" rx="2" opacity="0.75" />
-                    <rect x={x + bw * 2 + 6} y={BAR_H - hE - 10} width={bw} height={hE || 1} fill="#c0392b" rx="2" opacity="0.75" />
+                    <rect x={x + 2} y={BAR_H - hC - 10} width={bw} height={hC || 1} fill="#2d9c8f" rx="2" opacity="0.85" />
+                    <rect x={x + bw + 4} y={BAR_H - hD - 10} width={bw} height={hD || 1} fill="#20b2aa" rx="2" opacity="0.75" />
+                    <rect x={x + bw * 2 + 6} y={BAR_H - hE - 10} width={bw} height={hE || 1} fill="#e05252" rx="2" opacity="0.75" />
                     <text x={x + barW / 2} y={BAR_H + 20} textAnchor="middle" fontSize="9" fill="#7a9ea2" fontFamily="sans-serif">
                       {MONTHS_AR[i].slice(0, 3)}
                     </text>
@@ -1338,7 +1330,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
               })}
             </svg>
             <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 4 }}>
-              {[["#1b6b4a","مساهمات"],["#712edd","تبرعات"],["#c0392b","مصروفات"]].map(([c, l]) => (
+              {[["#2d9c8f","مساهمات"],["#20b2aa","تبرعات"],["#e05252","مصروفات"]].map(([c, l]) => (
                 <div key={l} style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <div style={{ width: 8, height: 8, background: c, borderRadius: 2 }} />
                   <span style={{ fontSize: 9, color: C.muted, fontFamily: "sans-serif" }}>{l}</span>
@@ -1348,7 +1340,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
           </div>
 
           {/* Pie preview */}
-          <div style={{ background: C.surfaceLowest, borderRadius: 16, padding: "14px", border: "none", marginBottom: 14, display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{ background: C.card, borderRadius: 16, padding: "14px", border: `1px solid ${C.mintLt}`, marginBottom: 14, display: "flex", alignItems: "center", gap: 16 }}>
             <svg width="100" height="100" viewBox="0 0 160 160" style={{ flexShrink: 0 }}>
               {pieTotal === 0
                 ? <circle cx="80" cy="80" r="72" fill="#e0f5f3" />
@@ -1360,9 +1352,9 @@ function PdfReportModal({ txs, members, onClose, year }) {
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 12, color: C.text, marginBottom: 10 }}>📈 توزيع المالية</div>
               {[
-                { label: "المساهمات", val: totalC, color: "#1b6b4a", pct: pieTotal ? Math.round(totalC / pieTotal * 100) : 0 },
-                { label: "التبرعات",  val: totalD, color: "#712edd", pct: pieTotal ? Math.round(totalD / pieTotal * 100) : 0 },
-                { label: "المصروفات", val: totalE, color: "#c0392b", pct: pieTotal ? Math.round(totalE / pieTotal * 100) : 0 },
+                { label: "المساهمات", val: totalC, color: "#2d9c8f", pct: pieTotal ? Math.round(totalC / pieTotal * 100) : 0 },
+                { label: "التبرعات",  val: totalD, color: "#20b2aa", pct: pieTotal ? Math.round(totalD / pieTotal * 100) : 0 },
+                { label: "المصروفات", val: totalE, color: "#e05252", pct: pieTotal ? Math.round(totalE / pieTotal * 100) : 0 },
               ].map(s => (
                 <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                   <div style={{ width: 8, height: 8, background: s.color, borderRadius: 2, flexShrink: 0 }} />
@@ -1382,7 +1374,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 
           {/* Top members preview */}
           {topMembers.length > 0 && (
-            <div style={{ background: C.surfaceLowest, borderRadius: 16, padding: "14px", border: "none", marginBottom: 14 }}>
+            <div style={{ background: C.card, borderRadius: 16, padding: "14px", border: `1px solid ${C.mintLt}`, marginBottom: 14 }}>
               <div style={{ color: C.text, fontWeight: 700, fontSize: 12, marginBottom: 10 }}>🏆 أكبر المساهمين</div>
               {topMembers.map((m, i) => (
                 <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -1390,10 +1382,10 @@ function PdfReportModal({ txs, members, onClose, year }) {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                       <span style={{ fontSize: 11, fontWeight: 600 }}>{m.name}</span>
-                      <span style={{ fontSize: 10, color: "#1b6b4a", fontWeight: 700 }}>{fmtAR(m.total)}</span>
+                      <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(m.total)}</span>
                     </div>
-                    <div style={{ background: C.surfaceLow, borderRadius: 3, height: 4, overflow: "hidden" }}>
-                      <div style={{ width: `${(m.total / (topMembers[0]?.total || 1)) * 100}%`, height: "100%", background: "#1b6b4a", borderRadius: 3 }} />
+                    <div style={{ background: C.mintPale, borderRadius: 3, height: 4, overflow: "hidden" }}>
+                      <div style={{ width: `${(m.total / (topMembers[0]?.total || 1)) * 100}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
                     </div>
                   </div>
                 </div>
@@ -1402,7 +1394,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
           )}
 
           {/* Info */}
-          <div style={{ background: C.surfaceLow, borderRadius: 12, padding: "11px 14px", marginBottom: 16, fontSize: 11, color: C.muted, lineHeight: 1.6 }}>
+          <div style={{ background: C.mintPale, borderRadius: 12, padding: "11px 14px", marginBottom: 16, fontSize: 11, color: C.muted, lineHeight: 1.6 }}>
             📄 سيتم إنشاء تقرير PDF شامل يتضمن جميع العمليات المسجلة ({allTxsSorted.length} عملية)، الرسوم البيانية، قائمة الأعضاء وتقرير مالي مفصل.
           </div>
 
@@ -1425,10 +1417,10 @@ function PdfReportModal({ txs, members, onClose, year }) {
               {/* KPIs */}
               <div className="pdf-kpi-row">
                 {[
-                  { label: "إجمالي المساهمات", val: totalC, color: "#1b6b4a", sign: "" },
-                  { label: "إجمالي التبرعات",  val: totalD, color: "#712edd", sign: "" },
-                  { label: "إجمالي المصروفات", val: totalE, color: "#c0392b", sign: "" },
-                  { label: "الرصيد الصافي",    val: Math.abs(solde), color: solde >= 0 ? "#1b6b4a" : "#c0392b", sign: "" },
+                  { label: "إجمالي المساهمات", val: totalC, color: "#2d9c8f", sign: "" },
+                  { label: "إجمالي التبرعات",  val: totalD, color: "#20b2aa", sign: "" },
+                  { label: "إجمالي المصروفات", val: totalE, color: "#e05252", sign: "" },
+                  { label: "الرصيد الصافي",    val: Math.abs(solde), color: solde >= 0 ? "#2d9c8f" : "#e05252", sign: "" },
                 ].map(k => (
                   <div key={k.label} className="pdf-kpi" style={{ background: k.color + "0d" }}>
                     <div className="pdf-kpi-label">{k.label}</div>
@@ -1461,9 +1453,9 @@ function PdfReportModal({ txs, members, onClose, year }) {
                     const bw = barW * 0.28;
                     return (
                       <g key={i}>
-                        <rect x={x + 2}           y={BAR_H - hC - 10} width={bw} height={hC || 1} fill="#1b6b4a" rx="2" />
-                        <rect x={x + bw + 4}       y={BAR_H - hD - 10} width={bw} height={hD || 1} fill="#712edd" rx="2" />
-                        <rect x={x + bw * 2 + 6}   y={BAR_H - hE - 10} width={bw} height={hE || 1} fill="#c0392b" rx="2" />
+                        <rect x={x + 2}           y={BAR_H - hC - 10} width={bw} height={hC || 1} fill="#2d9c8f" rx="2" />
+                        <rect x={x + bw + 4}       y={BAR_H - hD - 10} width={bw} height={hD || 1} fill="#20b2aa" rx="2" />
+                        <rect x={x + bw * 2 + 6}   y={BAR_H - hE - 10} width={bw} height={hE || 1} fill="#e05252" rx="2" />
                         <text x={x + barW / 2} y={BAR_H + 22} textAnchor="middle" fontSize="8" fill="#7a9ea2" fontFamily="sans-serif">
                           {MONTHS_AR[i].slice(0, 3)}
                         </text>
@@ -1472,7 +1464,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                   })}
                 </svg>
                 <div style={{ display: "flex", gap: 20, justifyContent: "center", marginTop: 8 }}>
-                  {[["#1b6b4a","المساهمات"],["#712edd","التبرعات"],["#c0392b","المصروفات"]].map(([c, l]) => (
+                  {[["#2d9c8f","المساهمات"],["#20b2aa","التبرعات"],["#e05252","المصروفات"]].map(([c, l]) => (
                     <div key={l} style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <div style={{ width: 12, height: 12, background: c, borderRadius: 3 }} />
                       <span style={{ fontSize: 11, color: "#4a6568" }}>{l}</span>
@@ -1499,9 +1491,9 @@ function PdfReportModal({ txs, members, onClose, year }) {
                     </svg>
                     <div>
                       {[
-                        { label: "مساهمات", val: totalC, color: "#1b6b4a" },
-                        { label: "تبرعات",  val: totalD, color: "#712edd" },
-                        { label: "مصروفات", val: totalE, color: "#c0392b" },
+                        { label: "مساهمات", val: totalC, color: "#2d9c8f" },
+                        { label: "تبرعات",  val: totalD, color: "#20b2aa" },
+                        { label: "مصروفات", val: totalE, color: "#e05252" },
                       ].map(s => (
                         <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
                           <div style={{ width: 10, height: 10, background: s.color, borderRadius: 2 }} />
@@ -1526,10 +1518,10 @@ function PdfReportModal({ txs, members, onClose, year }) {
                         <div style={{ flex: 1 }}>
                           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                             <span style={{ fontSize: 11, fontWeight: 600 }}>{m.name}</span>
-                            <span style={{ fontSize: 10, color: "#1b6b4a", fontWeight: 700 }}>{fmtAR(m.total)}</span>
+                            <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700 }}>{fmtAR(m.total)}</span>
                           </div>
                           <div style={{ background: "#e0f5f3", borderRadius: 3, height: 5 }}>
-                            <div style={{ width: `${(m.total / maxMem) * 100}%`, height: "100%", background: "#1b6b4a", borderRadius: 3 }} />
+                            <div style={{ width: `${(m.total / maxMem) * 100}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
                           </div>
                         </div>
                       </div>
@@ -1558,19 +1550,19 @@ function PdfReportModal({ txs, members, onClose, year }) {
                       return (
                         <tr key={i}>
                           <td style={{ fontWeight: 600 }}>{MONTHS_AR[i]}</td>
-                          <td style={{ color: "#1b6b4a" }}>{m.c > 0 ? fmtAR(m.c) : "—"}</td>
-                          <td style={{ color: "#712edd" }}>{m.d > 0 ? fmtAR(m.d) : "—"}</td>
-                          <td style={{ color: "#c0392b" }}>{m.e > 0 ? fmtAR(m.e) : "—"}</td>
-                          <td style={{ fontWeight: 700, color: net >= 0 ? "#1b6b4a" : "#c0392b" }}>{net >= 0 ? "" : ""}{fmtAR(net)}</td>
+                          <td style={{ color: "#2d9c8f" }}>{m.c > 0 ? fmtAR(m.c) : "—"}</td>
+                          <td style={{ color: "#20b2aa" }}>{m.d > 0 ? fmtAR(m.d) : "—"}</td>
+                          <td style={{ color: "#e05252" }}>{m.e > 0 ? fmtAR(m.e) : "—"}</td>
+                          <td style={{ fontWeight: 700, color: net >= 0 ? "#2d9c8f" : "#e05252" }}>{net >= 0 ? "" : ""}{fmtAR(net)}</td>
                         </tr>
                       );
                     })}
                     <tr style={{ background: "#f0faf9", fontWeight: 700 }}>
                       <td style={{ fontWeight: 800 }}>الإجمالي</td>
-                      <td style={{ color: "#1b6b4a", fontWeight: 800 }}>{fmtAR(totalC)}</td>
-                      <td style={{ color: "#712edd", fontWeight: 800 }}>{fmtAR(totalD)}</td>
-                      <td style={{ color: "#c0392b", fontWeight: 800 }}>{fmtAR(totalE)}</td>
-                      <td style={{ color: solde >= 0 ? "#1b6b4a" : "#c0392b", fontWeight: 800 }}>{solde >= 0 ? "" : ""}{fmtAR(Math.abs(solde))}</td>
+                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>{fmtAR(totalC)}</td>
+                      <td style={{ color: "#20b2aa", fontWeight: 800 }}>{fmtAR(totalD)}</td>
+                      <td style={{ color: "#e05252", fontWeight: 800 }}>{fmtAR(totalE)}</td>
+                      <td style={{ color: solde >= 0 ? "#2d9c8f" : "#e05252", fontWeight: 800 }}>{solde >= 0 ? "" : ""}{fmtAR(Math.abs(solde))}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1602,16 +1594,16 @@ function PdfReportModal({ txs, members, onClose, year }) {
                           <tr key={m.id}>
                             <td style={{ color: "#7a9ea2", fontWeight: 600 }}>{i + 1}</td>
                             <td style={{ fontWeight: 600 }}>{m.name}</td>
-                            <td style={{ color: m.total > 0 ? "#1b6b4a" : "#7a9ea2", fontWeight: 700 }}>
+                            <td style={{ color: m.total > 0 ? "#2d9c8f" : "#7a9ea2", fontWeight: 700 }}>
                               {m.total > 0 ? `${fmtAR(m.total)}` : "—"}
                             </td>
                             <td>
                               {m.total > 0 ? (
                                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                                   <div style={{ flex: 1, background: "#e0f5f3", borderRadius: 3, height: 6 }}>
-                                    <div style={{ width: `${pct}%`, height: "100%", background: "#1b6b4a", borderRadius: 3 }} />
+                                    <div style={{ width: `${pct}%`, height: "100%", background: "#2d9c8f", borderRadius: 3 }} />
                                   </div>
-                                  <span style={{ fontSize: 10, color: "#1b6b4a", fontWeight: 700, minWidth: 28 }}>{pct}%</span>
+                                  <span style={{ fontSize: 10, color: "#2d9c8f", fontWeight: 700, minWidth: 28 }}>{pct}%</span>
                                 </div>
                               ) : "—"}
                             </td>
@@ -1621,8 +1613,8 @@ function PdfReportModal({ txs, members, onClose, year }) {
                     })()}
                     <tr style={{ background: "#f0faf9", fontWeight: 700 }}>
                       <td colSpan={2} style={{ fontWeight: 800 }}>الإجمالي</td>
-                      <td style={{ color: "#1b6b4a", fontWeight: 800 }}>{fmtAR(totalC)}</td>
-                      <td style={{ color: "#1b6b4a", fontWeight: 800 }}>100%</td>
+                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>{fmtAR(totalC)}</td>
+                      <td style={{ color: "#2d9c8f", fontWeight: 800 }}>100%</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1646,7 +1638,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Manrope','Segoe UI',sans-serif;background:#fff;color:#1a2b2e;direction:rtl;font-size:14px;}
+  body{font-family:'Times New Roman','Times',serif;background:#fff;color:#1a2b2e;direction:rtl;font-size:14px;}
   @media print{
     body{margin:0;padding:0;}
     .pdf-wrap{padding:16px !important;max-width:100% !important;}
@@ -1670,7 +1662,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
             }
             setTimeout(() => URL.revokeObjectURL(url), 10000);
           }}
-            style={{ width: "100%", background: "linear-gradient(135deg,#012d1d,#1b4332)", border: "none", color: "#fff", borderRadius: 50, padding: "16px", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "'Manrope',sans-serif", boxShadow: "0 8px 24px rgba(1,45,29,0.28)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+            style={{ width: "100%", background: "linear-gradient(135deg,#1a2b2e,#2d9c8f)", border: "none", color: "#fff", borderRadius: 50, padding: "16px", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 8px 24px rgba(26,43,46,0.28)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
             <span style={{ fontSize: 20 }}>📥</span>
             <span>تنزيل التقرير</span>
           </button>
@@ -1946,13 +1938,13 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
     <div style={{ direction: t.dir, padding: "10px 0" }}>
       {/* TITRE STATS */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-        <div style={{ width: 4, height: 20, background: "linear-gradient(180deg,#012d1d,#1b6b4a)", borderRadius: 2 }} />
+        <div style={{ width: 4, height: 20, background: "linear-gradient(180deg,#7C3AED,#C084FC)", borderRadius: 2 }} />
         <span style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>{lang === "ar" ? `إحصائيات ${YEAR_STATS}` : `Statistiques ${YEAR_STATS}`}</span>
       </div>
 
       {/* BOUTON RAPPORT PDF */}
       <button className="tbtn" onClick={() => setShowPdf(true)}
-        style={{ width: "100%", background: "linear-gradient(135deg,#012d1d,#1b4332)", border: "none", color: "#fff", borderRadius: 16, padding: "14px 18px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Manrope',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16, boxShadow: "0 6px 20px rgba(1,45,29,0.25)", letterSpacing: 0.2 }}>
+        style={{ width: "100%", background: "linear-gradient(135deg,#1a2b2e,#2d9c8f)", border: "none", color: "#fff", borderRadius: 16, padding: "14px 18px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16, boxShadow: "0 6px 20px rgba(26,43,46,0.25)", letterSpacing: 0.2 }}>
         <span style={{ fontSize: 18 }}>📄</span>
         <span>{lang === "ar" ? "تقرير الوضعية المالية" : "Rapport de situation"}</span>
         <span style={{ marginRight: "auto", background: "rgba(255,255,255,0.18)", borderRadius: 8, padding: "2px 8px", fontSize: 10, fontWeight: 600, letterSpacing: 0.5 }}>{lang === "ar" ? "عربي" : "AR"}</span>
@@ -1961,8 +1953,8 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
       {/* 3 CARTES STATS 2026 */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
         {[
-          { label: t.stats.contribution, value: yC, color: "#1b6b4a", bg: "rgba(27,107,74,0.08)", icon: Ic.up("#1b6b4a", 15), sign: "" },
-          { label: t.stats.don,          value: yD, color: "#712edd", bg: "rgba(113,46,221,0.08)", icon: Ic.heart("#712edd", 15), sign: "" },
+          { label: t.stats.contribution, value: yC, color: "#8B5CF6", bg: "rgba(139,92,246,0.08)", icon: Ic.up("#8B5CF6", 15), sign: "" },
+          { label: t.stats.don,          value: yD, color: "#DB2777", bg: "rgba(219,39,119,0.08)", icon: Ic.heart("#DB2777", 15), sign: "" },
           { label: t.stats.depense,      value: yE, color: C.red,     bg: C.redLt,                icon: Ic.dn(C.red, 15), sign: "" },
         ].map(s => (
           <Card key={s.label} sx={{ padding: "12px 10px" }}>
@@ -1979,24 +1971,24 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
       <FinChart txs={txs2026} lang={lang} chartReady={chartReady} />
 
       {/* RESET */}
-      <div style={{ marginTop: 20, borderTop: "none", paddingTop:, paddingTop: 20 }}>
+      <div style={{ marginTop: 20, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: C.redLt, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🗑️</div>
           <span style={{ color: C.red, fontWeight: 700, fontSize: 14 }}>{t.resetBtn}</span>
         </div>
         {!resetConfirm ? (
           <button className="tbtn" onClick={() => setResetConfirm(true)}
-            style={{ width: "100%", background: C.redLt, border: "none", borderRadius: 14, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: "'Manrope',sans-serif" }}>
-            <span style={{ fontSize: 16 }}>⚠️</span>
+            style={{ width: "100%", background: C.redLt, border: `1.5px solid rgba(224,82,82,0.3)`, borderRadius: 14, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: "inherit" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.red} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             <span style={{ fontSize: 13, fontWeight: 600, color: C.red }}>{t.resetBtn}</span>
           </button>
         ) : (
-          <div style={{ background: C.redLt, border: "none", borderRadius: 14, padding: "16px" }}>
+          <div style={{ background: C.redLt, border: `1.5px solid rgba(224,82,82,0.3)`, borderRadius: 14, padding: "16px" }}>
             <div style={{ color: C.red, fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{t.resetConfirmTitle}</div>
             <div style={{ color: C.muted, fontSize: 12, marginBottom: 14, lineHeight: 1.5 }}>{t.resetConfirmMsg}</div>
             <div style={{ display: "flex", gap: 10 }}>
-              <button className="tbtn" onClick={() => setResetConfirm(false)} style={{ flex: 1, background: C.surfaceLowest, border: "none", borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 500, color: C.muted, cursor: "pointer", fontFamily: "'Manrope',sans-serif" }}>{t.cancel}</button>
-              <button className="tbtn" onClick={doReset} disabled={resetting} style={{ flex: 1, background: C.red, border: "none", borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 600, color: "#fff", cursor: resetting ? "not-allowed" : "pointer", fontFamily: "'Manrope',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <button className="tbtn" onClick={() => setResetConfirm(false)} style={{ flex: 1, background: C.card, border: `1.5px solid ${C.mintLt}`, borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 500, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>{t.cancel}</button>
+              <button className="tbtn" onClick={doReset} disabled={resetting} style={{ flex: 1, background: C.red, border: "none", borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 600, color: "#fff", cursor: resetting ? "not-allowed" : "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                 {resetting ? <><div style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} />...</> : t.delete}
               </button>
             </div>
@@ -2005,18 +1997,18 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
       </div>
 
       {/* IMPORT */}
-      <div style={{ marginTop: 20, borderTop: "none", paddingTop:, paddingTop: 20, marginBottom: 10 }}>
+      <div style={{ marginTop: 20, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20, marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: "#EFF8FF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>📂</div>
           <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{t.importBtn}</span>
-          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.surfaceLow, borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
+          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.mintPale, borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
         </div>
         <div style={{ fontSize: 10, color: C.muted, marginBottom: 10, lineHeight: 1.5 }}>{t.importInfo}</div>
         <label style={{ display: "block", cursor: xlsxReady ? "pointer" : "not-allowed" }}>
           <input type="file" accept=".xlsx,.xls" onChange={doImport} disabled={!xlsxReady || importing} style={{ display: "none" }} />
-          <div style={{ background: importing ? C.surfaceLow : "#EFF8FF", border: `1.5px dashed ${importing ? C.surfaceLow : "#93C5FD"}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: xlsxReady ? 1 : 0.5 }}>
+          <div style={{ background: importing ? C.mintPale : "#EFF8FF", border: `1.5px dashed ${importing ? C.mintLt : "#93C5FD"}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: xlsxReady ? 1 : 0.5 }}>
             {importing
-              ? <><div style={{ width: 16, height: 16, border: `2px solid ${C.forestLt}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} /><span style={{ fontSize: 13, color: C.muted }}>Importation...</span></>
+              ? <><div style={{ width: 16, height: 16, border: `2px solid ${C.lime}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} /><span style={{ fontSize: 13, color: C.muted }}>Importation...</span></>
               : <><span style={{ fontSize: 18 }}>📥</span><span style={{ fontSize: 13, fontWeight: 600, color: "#2563EB" }}>{t.importBtn}</span></>
             }
           </div>
@@ -2025,18 +2017,18 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
       </div>
 
       {/* EXPORT */}
-      <div style={{ marginTop: 6, borderTop: "none", paddingTop:, paddingTop: 20 }}>
+      <div style={{ marginTop: 6, borderTop: `1px solid ${C.mintLt}`, paddingTop: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 13, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: C.surfaceLow, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.dl(C.forestLt)}</div>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: C.mintPale, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.dl(C.forestLt)}</div>
           <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{t.exportBtn}</span>
-          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.surfaceLow, border: "none", borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
+          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.mintPale, border: `1px solid ${C.mintLt}`, borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
         </div>
         {[
-          { mode: "month", label: t.exportMonth, sub: `${t.monthsFull[month - 1]} ${year}`, color: C.forestLt, lt: C.surfaceLow, icon: "📊" },
-          { mode: "all",   label: lang === "ar" ? "كل السنوات" : "Toutes les années", sub: `${txs.length} op · ${[...new Set(txs.map(tx => new Date(tx.date).getFullYear()))].length} an(s)`, color: C.forestLt, lt: C.surfaceLow, icon: "📥" },
+          { mode: "month", label: t.exportMonth, sub: `${t.monthsFull[month - 1]} ${year}`, color: C.forestLt, lt: C.mintPale, icon: "📊" },
+          { mode: "all",   label: lang === "ar" ? "كل السنوات" : "Toutes les années", sub: `${txs.length} op · ${[...new Set(txs.map(tx => new Date(tx.date).getFullYear()))].length} an(s)`, color: C.gold, lt: C.goldLt, icon: "📥" },
         ].map((btn) => (
           <button key={btn.mode} className="tbtn" onClick={() => doExport(btn.mode)} disabled={!xlsxReady}
-            style={{ width: "100%", background: xlsxReady ? btn.lt : C.surfaceLow, border: `1.5px solid ${xlsxReady ? C.surfaceLow : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: xlsxReady ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "'Manrope',sans-serif", marginBottom: 10, opacity: xlsxReady ? 1 : 0.5, boxShadow: xlsxReady ? C.shadow : "none" }}>
+            style={{ width: "100%", background: xlsxReady ? btn.lt : C.mintPale, border: `1.5px solid ${xlsxReady ? C.mintLt : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: xlsxReady ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "inherit", marginBottom: 10, opacity: xlsxReady ? 1 : 0.5, boxShadow: xlsxReady ? C.shadow : "none" }}>
             <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
               <div style={{ color: xlsxReady ? btn.color : C.muted, fontWeight: 600, fontSize: 13 }}>{btn.label}</div>
               <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{btn.sub}</div>
@@ -2050,7 +2042,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
   );
 }
 // ─── SETTINGS ─────────────────────────────────────────────────────────────────
-const PROFILE_IMG = "data:image/jpeg;base64,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";
+const PROFILE_IMG = "/profile.png";
 
 function Settings({ lang, setLang, t, onLogout }) {
   const groups = [
@@ -2058,12 +2050,12 @@ function Settings({ lang, setLang, t, onLogout }) {
       { icon: Ic.globe(C.forestLt), label: t.langLbl, value: lang === "fr" ? "Français" : "عربي", action: () => setLang(lang === "fr" ? "ar" : "fr") },
       { icon: Ic.moon(C.muted),    label: t.themeLbl, value: t.darkMode, action: () => {} },
     ]},
-    { title: t.secLbl, items: [{ icon: Ic.lock(C.forestLt), label: t.changePin, value: "****", action: () => {} }] },
+    { title: t.secLbl, items: [{ icon: Ic.lock(C.gold), label: t.changePin, value: "****", action: () => {} }] },
     { title: t.aboutLbl, items: [{ icon: Ic.info(C.forestLt), label: t.aboutLbl, value: t.version, action: () => {} }] },
   ];
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
-      <div className="a1" style={{ background: "linear-gradient(135deg, #012d1d, #1b4332)", borderRadius: 22, padding: "22px 20px", marginBottom: 20, boxShadow: C.shadowMd }}>
+      <div className="a1" style={{ background: "linear-gradient(135deg, #4C1D95, #7C3AED)", borderRadius: 22, padding: "22px 20px", marginBottom: 20, boxShadow: C.shadowMd }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <div style={{ width: 56, height: 56, borderRadius: 18, overflow: "hidden", flexShrink: 0, border: "2px solid rgba(255,255,255,0.35)", boxShadow: "0 4px 14px rgba(0,0,0,0.3)" }}>
             <img src={PROFILE_IMG} alt="Profil" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
@@ -2080,9 +2072,9 @@ function Settings({ lang, setLang, t, onLogout }) {
           <Card sx={{ overflow: "hidden" }}>
             {g.items.map((item, ii) => (
               <button key={ii} className="tbtn" onClick={item.action}
-                style={{ width: "100%", background: "none", border: "none", borderTop: ii > 0 ? `1px solid ${C.surfaceLow}` : "none", padding: "13px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, justifyContent: "space-between", fontFamily: "'Manrope',sans-serif", flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+                style={{ width: "100%", background: "none", border: "none", borderTop: ii > 0 ? `1px solid ${C.mintLt}` : "none", padding: "13px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 13, justifyContent: "space-between", fontFamily: "inherit", flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 11, background: C.surfaceLow, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>{item.icon}</div>
+                  <div style={{ width: 36, height: 36, borderRadius: 11, background: C.mintPale, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>{item.icon}</div>
                   <span style={{ color: C.text, fontSize: 13, fontWeight: 500 }}>{item.label}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
@@ -2095,7 +2087,7 @@ function Settings({ lang, setLang, t, onLogout }) {
         </div>
       ))}
       <div className="a5">
-        <button className="tbtn" onClick={onLogout} style={{ width: "100%", background: C.redLt, border: "none", borderRadius: 14, padding: "14px", color: C.red, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'Manrope',sans-serif" }}>{t.logout}</button>
+        <button className="tbtn" onClick={onLogout} style={{ width: "100%", background: C.redLt, border: `1.5px solid rgba(224,82,82,0.2)`, borderRadius: 14, padding: "14px", color: C.red, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{t.logout}</button>
       </div>
     </div>
   );
@@ -2120,8 +2112,8 @@ function TxSheet({ type, members, onSave, onClose, lang, editTx }) {
   };
   return (
     <Sheet title={editTx ? t.editTx(type) : t.newTx(type)} onClose={onClose} dir={t.dir}>
-      <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 20, padding: "12px 14px", background: cfg.lt, borderRadius: 14, border: "none", flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-        <div style={{ width: 36, height: 36, borderRadius: 11, background: C.surfaceLowest, boxShadow: C.shadow, display: "flex", alignItems: "center", justifyContent: "center" }}>{cfg.icon()}</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 20, padding: "12px 14px", background: cfg.lt, borderRadius: 14, border: `1.5px solid ${C.mintLt}`, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+        <div style={{ width: 36, height: 36, borderRadius: 11, background: C.card, boxShadow: C.shadow, display: "flex", alignItems: "center", justifyContent: "center" }}>{cfg.icon()}</div>
         <span style={{ color: cfg.color, fontWeight: 700, fontSize: 14 }}>{cfg.label}</span>
       </div>
       {type === "contribution" && (
@@ -2155,12 +2147,12 @@ function MemberSheet({ onSave, onClose, lang }) {
 // ─── BOTTOM NAV ───────────────────────────────────────────────────────────────
 function NavItem({ label, icon, activeIcon, active, onClick }) {
   return (
-    <button className="tbtn" onClick={onClick} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "2px 4px", fontFamily: "'Manrope',sans-serif" }}>
-      <div style={{ width: 44, height: 32, borderRadius: 16, background: active ? "rgba(168,213,194,0.18)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .18s" }}>
+    <button className="tbtn" onClick={onClick} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "2px 4px", fontFamily: "inherit" }}>
+      <div style={{ width: 44, height: 32, borderRadius: 16, background: active ? "rgba(45,156,143,0.22)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .18s" }}>
         {active ? activeIcon : icon}
       </div>
-      <span style={{ fontSize: 9, fontWeight: active ? 700 : 500, color: active ? C.mint : "rgba(255,255,255,0.4)", transition: "color .18s", letterSpacing: 0.3 }}>{label}</span>
-      {active && <div style={{ width: 16, height: 2.5, borderRadius: 4, background: C.mint, marginTop: 1 }} />}
+      <span style={{ fontSize: 9, fontWeight: active ? 700 : 400, color: active ? "#6dcfc4" : "rgba(255,255,255,0.35)", transition: "color .18s", letterSpacing: 0.3 }}>{label}</span>
+      {active && <div style={{ width: 16, height: 2.5, borderRadius: 4, background: "#2d9c8f", marginTop: 1 }} />}
     </button>
   );
 }
@@ -2215,7 +2207,7 @@ const LOGIN_CSS = `
   .ls-bg-gradient {
     position: absolute; inset: 0; pointer-events: none;
     background:
-      radial-gradient(ellipse 70% 55% at 80% 10%, rgba(27,107,74,0.20) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 55% at 80% 10%, rgba(32,178,150,0.22) 0%, transparent 65%),
       radial-gradient(ellipse 55% 45% at 10% 85%, rgba(20,140,120,0.18) 0%, transparent 60%),
       linear-gradient(180deg, #0a1c1f 0%, #0d2624 60%, #0f2f2c 100%);
   }
@@ -2249,7 +2241,7 @@ const LOGIN_CSS = `
     box-shadow:
       0 8px 32px rgba(0,0,0,0.4),
       0 0 0 1px rgba(64,224,208,0.08) inset,
-      0 20px 60px rgba(27,107,74,0.10);
+      0 20px 60px rgba(32,178,150,0.12);
     transition: box-shadow .3s;
   }
   .ls-logo-wrap:hover { animation: pulse-ring 1.8s ease infinite; }
@@ -2353,7 +2345,7 @@ const LOGIN_CSS = `
     color: #0a1c1f;
     letter-spacing: 1.5px; text-transform: uppercase;
     cursor: pointer;
-    box-shadow: 0 6px 24px rgba(27,107,74,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+    box-shadow: 0 6px 24px rgba(32,178,160,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
     transition: all .2s cubic-bezier(.16,1,.3,1);
     display: flex; align-items: center; justify-content: center; gap: 9px;
     margin-top: 4px;
@@ -2584,21 +2576,21 @@ export default function App() {
   if (loading) return (
     <div style={{ background: "#F2EFE9", minHeight: "100vh", maxWidth: 430, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 14 }}>
       <div style={{ width: 36, height: 36, border: `3px solid ${C.mint}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
-      <div style={{ color: C.muted, fontSize: 13, fontWeight: 600, fontFamily: "'Manrope',sans-serif" }}>Chargement…</div>
+      <div style={{ color: C.muted, fontSize: 13, fontWeight: 500 }}>Chargement…</div>
     </div>
   );
 
   return (
-    <div style={{ background: C.surfaceLow, minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: "'Manrope','Segoe UI',sans-serif", color: C.text, position: "relative", paddingBottom: 96, overflowX: "hidden" }}>
+    <div style={{ background: "#F2EFE9", minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: "'Times New Roman','Times',serif", color: C.text, position: "relative", paddingBottom: 90, overflowX: "hidden" }}>
       <style>{G}</style>
-      <div style={{ padding: "20px 20px" }}>
+      <div style={{ padding: "20px 16px" }}>
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
         {tab === "reports"  && <Reports txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onImportMembers={addMember} onImportTxs={addTx} onRefresh={fetchAll} onReset={resetAll} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
-      <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "rgba(1,45,29,0.90)", backdropFilter: "blur(12px)", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 40px rgba(1,45,29,0.30)" }}>
+      <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "#1a2b2e", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 32px rgba(26,43,46,0.30)" }}>
         {TABS.map((tb) => <NavItem key={tb.id} label={tb.label} icon={tb.icon} activeIcon={tb.aicon} active={tab === tb.id} onClick={() => setTab(tb.id)} />)}
       </nav>
       {modal?.kind === "tx"     && <TxSheet type={modal.txType} members={members} onSave={saveTx} onClose={() => setModal(null)} lang={lang} editTx={modal.editTx || null} />}
