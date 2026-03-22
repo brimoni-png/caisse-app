@@ -2076,72 +2076,204 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     XLSX.utils.book_append_sheet(wb, wsT, "Transactions");
 
     // ════════════════════════════════════════════════════════════════
-    // FEUILLE 2 — RÉCAPITULATIF MENSUEL
+    // FEUILLE 2 — RÉCAPITULATIF MENSUEL (enrichi)
     // ════════════════════════════════════════════════════════════════
     const txsYear = txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR);
-    const sumAoa = [
-      [`🌿  RÉCAPITULATIF MENSUEL — CAISSE COOPÉRATIVE`,"","","","",""],
-      ["","","","","",""],
-      ["Année :", EXPORT_YEAR,"","","",""],
-      ["","","","","",""],
-      ["Mois","Contributions (MRU)","Dons (MRU)","Dépenses (MRU)","Solde (MRU)","Évolution"],
-    ];
-    let prevSolde = null;
-    MONTHS_FR.forEach((mname, mi) => {
-      const mIdx = mi + 1;
-      const mC = txsYear.filter(tx => tx.type === "contribution" && new Date(tx.date).getMonth() + 1 === mIdx).reduce((a, tx) => a + tx.amount, 0);
-      const mD = txsYear.filter(tx => tx.type === "don"          && new Date(tx.date).getMonth() + 1 === mIdx).reduce((a, tx) => a + tx.amount, 0);
-      const mE = txsYear.filter(tx => tx.type === "depense"      && new Date(tx.date).getMonth() + 1 === mIdx).reduce((a, tx) => a + tx.amount, 0);
-      const mS = mC + mD - mE;
-      const evo = prevSolde !== null && prevSolde !== 0 ? (mS - prevSolde) / Math.abs(prevSolde) : "";
-      prevSolde = mS;
-      sumAoa.push([mname, mC, mD, mE, mS, evo]);
-    });
-    // Total row
     const allC = txsYear.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
     const allD = txsYear.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
     const allE = txsYear.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
-    sumAoa.push(["TOTAL ANNUEL", allC, allD, allE, allC + allD - allE, ""]);
 
-    const wsS = XLSX.utils.aoa_to_sheet(sumAoa);
-    wsS["!cols"] = [{wch:14},{wch:20},{wch:18},{wch:18},{wch:18},{wch:12}];
-    wsS["!merges"] = [{s:{r:0,c:0},e:{r:0,c:5}}];
-
-    // Banner
-    const sA1 = wsS["A1"];
-    if (sA1) styled(sA1, { fill: solidFill(CLR.greenDark), fnt: font(true, 13, CLR.white), aln: align("center","center") });
-    // Year input
-    const sB3 = wsS["B3"];
-    if (sB3) styled(sB3, { fnt: font(true, 11, CLR.blue), aln: align("center","center"), border: thinBorder() });
-    // Header row (row index 4 → Excel row 5)
-    ["A","B","C","D","E","F"].forEach(col => {
-      const c = wsS[`${col}5`];
-      if (c) styled(c, { fill: solidFill(CLR.greenMid), fnt: font(true, 10, CLR.white), aln: align("center","center"), border: thinBorder() });
+    // ── Section 1 : tableau mensuel (lignes 1-19) ──
+    const sumAoa = [
+      [`🌿  RÉCAPITULATIF MENSUEL — CAISSE COOPÉRATIVE ${EXPORT_YEAR}`,"","","","",""],
+      ["Exporté le " + today + "  ·  " + members.length + " membres  ·  " + txsYear.length + " opérations","","","","",""],
+      ["","","","","",""],
+      ["Mois","Contributions (MRU)","Dons (MRU)","Dépenses (MRU)","Solde du mois (MRU)","Δ vs mois préc."],
+    ];
+    let cumul = 0;
+    let prevMonthSolde = null;
+    const monthlyData = MONTHS_FR.map((mname, mi) => {
+      const mIdx = mi + 1;
+      const mC = txsYear.filter(tx => tx.type === "contribution" && new Date(tx.date).getMonth()+1 === mIdx).reduce((a,tx)=>a+tx.amount,0);
+      const mD = txsYear.filter(tx => tx.type === "don"          && new Date(tx.date).getMonth()+1 === mIdx).reduce((a,tx)=>a+tx.amount,0);
+      const mE = txsYear.filter(tx => tx.type === "depense"      && new Date(tx.date).getMonth()+1 === mIdx).reduce((a,tx)=>a+tx.amount,0);
+      const mS = mC + mD - mE;
+      cumul += mS;
+      const evo = prevMonthSolde !== null && prevMonthSolde !== 0 ? (mS - prevMonthSolde) / Math.abs(prevMonthSolde) : "";
+      prevMonthSolde = mS;
+      return { mname, mC, mD, mE, mS, evo };
     });
-    // Data rows (rows 6-17)
-    MONTHS_FR.forEach((_, mi) => {
-      const r = 6 + mi;
+    monthlyData.forEach(({ mname, mC, mD, mE, mS, evo }) => sumAoa.push([mname, mC, mD, mE, mS, evo]));
+    sumAoa.push(["TOTAL ANNUEL", allC, allD, allE, allC + allD - allE, ""]);
+    // blank + solde cumulé
+    sumAoa.push(["","","","","",""]);
+    sumAoa.push(["Solde cumulé fin d'année :", allC + allD - allE,"","","",""]);
+
+    // ── Section 2 : contributions par membre (lignes 22+) ──
+    const MBR_START_ROW = sumAoa.length + 2; // 1-based Excel row where member table starts
+    sumAoa.push(["","","","","",""]);
+    sumAoa.push([`👥  CONTRIBUTIONS PAR MEMBRE — ${EXPORT_YEAR}`,"","","","",""]);
+    const mbrHeaderCols = ["Membre", ...MONTHS_FR, "TOTAL (MRU)", "% du total"];
+    sumAoa.push(mbrHeaderCols);
+
+    const mbrRows = members.map(m => {
+      const monthlyContribs = MONTHS_FR.map((_, mi) => {
+        const mIdx = mi + 1;
+        return txsYear.filter(tx =>
+          tx.type === "contribution" &&
+          new Date(tx.date).getMonth()+1 === mIdx &&
+          (tx.memberName === m.name || tx.memberId === m.id)
+        ).reduce((a,tx)=>a+tx.amount, 0);
+      });
+      const total = monthlyContribs.reduce((a,v)=>a+v, 0);
+      const pct = allC > 0 ? total / allC : 0;
+      return [m.name, ...monthlyContribs, total, pct];
+    });
+    // Also add anonymous donors row if any
+    const anonContribs = MONTHS_FR.map((_, mi) => {
+      const mIdx = mi + 1;
+      return txsYear.filter(tx =>
+        tx.type === "contribution" &&
+        new Date(tx.date).getMonth()+1 === mIdx &&
+        !members.some(m => m.name === tx.memberName || m.id === tx.memberId)
+      ).reduce((a,tx)=>a+tx.amount, 0);
+    });
+    const anonTotal = anonContribs.reduce((a,v)=>a+v, 0);
+    if (anonTotal > 0) mbrRows.push(["(Autres / non identifiés)", ...anonContribs, anonTotal, allC > 0 ? anonTotal/allC : 0]);
+
+    // Total contributions row
+    const totalContribByMonth = MONTHS_FR.map((_, mi) => {
+      const mIdx = mi + 1;
+      return txsYear.filter(tx => tx.type === "contribution" && new Date(tx.date).getMonth()+1 === mIdx).reduce((a,tx)=>a+tx.amount,0);
+    });
+    mbrRows.push(["TOTAL", ...totalContribByMonth, allC, allC > 0 ? 1 : 0]);
+
+    mbrRows.forEach(row => sumAoa.push(row));
+
+    // ── Section 3 : récap dépenses par mois (lignes après membres) ──
+    const DEP_START_ROW = sumAoa.length + 2;
+    sumAoa.push(["","","","","",""]);
+    sumAoa.push([`📋  DÉPENSES PAR MOIS — ${EXPORT_YEAR}`,"","","","",""]);
+    sumAoa.push(["Mois","Nb opérations","Total Dépenses (MRU)","% des recettes",""," "]);
+    MONTHS_FR.forEach((mname, mi) => {
+      const mIdx = mi + 1;
+      const depTxs = txsYear.filter(tx => tx.type === "depense" && new Date(tx.date).getMonth()+1 === mIdx);
+      const mE = depTxs.reduce((a,tx)=>a+tx.amount,0);
+      const recettes = monthlyData[mi].mC + monthlyData[mi].mD;
+      const pct = recettes > 0 ? mE / recettes : 0;
+      sumAoa.push([mname, depTxs.length, mE, pct, "", ""]);
+    });
+    sumAoa.push(["TOTAL", txsYear.filter(tx=>tx.type==="depense").length, allE, (allC+allD)>0?allE/(allC+allD):0,"",""]);
+
+    // ── Build sheet ──
+    const wsS = XLSX.utils.aoa_to_sheet(sumAoa);
+    // Cols: A=Mois/Membre(24), B-M=months or values(12 each), N=Total(18), O=%(10)
+    const mbrTableCols = 14; // Membre + 12 mois + Total + %
+    wsS["!cols"] = [
+      {wch:26},{wch:12},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},
+      {wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:16},{wch:10},
+    ];
+    // Merges
+    const nCols = 5; // A-F for monthly summary (0-5)
+    const mbrNcols = mbrHeaderCols.length - 1; // B to last (0-indexed end)
+    wsS["!merges"] = [
+      {s:{r:0,c:0},e:{r:0,c:nCols}},   // banner
+      {s:{r:1,c:0},e:{r:1,c:nCols}},   // subtitle
+    ];
+
+    // Style banner row 1
+    const sA1 = wsS["A1"]; if (sA1) styled(sA1,{fill:solidFill(CLR.greenDark),fnt:font(true,13,CLR.white),aln:align("center","center")});
+    const sA2 = wsS["A2"]; if (sA2) styled(sA2,{fill:solidFill(CLR.greenMid),fnt:font(false,9,"FFAAAAAA"),aln:align("center","center")});
+
+    // Monthly table header (row 4)
+    ["A","B","C","D","E","F"].forEach(col => {
+      const c = wsS[`${col}4`];
+      if (c) styled(c,{fill:solidFill(CLR.greenMid),fnt:font(true,10,CLR.white),aln:align("center","center"),border:thinBorder()});
+    });
+    // Monthly data rows 5-16
+    monthlyData.forEach(({ mC, mD, mE, mS, evo }, mi) => {
+      const r = 5 + mi;
       const isEven = mi % 2 === 1;
-      ["A","B","C","D","E","F"].forEach((col, ci) => {
-        const cell = wsS[`${col}${r}`];
-        if (!cell) return;
+      ["A","B","C","D","E","F"].forEach((col,ci) => {
+        const cell = wsS[`${col}${r}`]; if (!cell) return;
         let rf = isEven ? solidFill(CLR.greenXl) : solidFill(CLR.white);
-        let cf = CLR.black;
-        let nf = undefined;
-        if      (ci === 0) { cf = CLR.greenMid; }
-        else if (ci === 1) { rf = solidFill(CLR.greenPale);  nf = fmtMoney; }
-        else if (ci === 2) { rf = solidFill(CLR.purplePale); nf = fmtMoney; }
-        else if (ci === 3) { rf = solidFill(CLR.redPale);    nf = fmtMoney; }
-        else if (ci === 4) { cf = CLR.greenDark;             nf = fmtMoney; }
-        else if (ci === 5 && cell.t === "n") { nf = fmtPct; }
-        styled(cell, { fill: rf, fnt: font(ci === 0, 10, cf), aln: align(ci >= 1 && ci <= 4 ? "right" : "center","center"), border: thinBorder(), numFmt: nf });
+        let cf = CLR.black; let nf;
+        if      (ci===0){cf=CLR.greenMid;}
+        else if (ci===1){rf=solidFill(CLR.greenPale);nf=fmtMoney;}
+        else if (ci===2){rf=solidFill(CLR.purplePale);nf=fmtMoney;}
+        else if (ci===3){rf=solidFill(CLR.redPale);nf=fmtMoney;}
+        else if (ci===4){cf=CLR.greenDark;nf=fmtMoney;}
+        else if (ci===5 && cell.t==="n"){nf=fmtPct;}
+        styled(cell,{fill:rf,fnt:font(ci===0,10,cf),aln:align(ci>=1&&ci<=4?"right":"center","center"),border:thinBorder(),numFmt:nf});
       });
     });
-    // Total row (row 18)
-    ["A","B","C","D","E","F"].forEach((col, ci) => {
-      const cell = wsS[`${col}18`];
-      if (!cell) return;
-      styled(cell, { fill: solidFill(CLR.greenDark), fnt: font(true, 10, CLR.white), aln: align(ci >= 1 ? "right":"center","center"), border: thinBorder(), numFmt: ci >= 1 && ci <= 4 ? fmtMoney : undefined });
+    // Total annual row (row 17)
+    ["A","B","C","D","E","F"].forEach((col,ci)=>{
+      const cell=wsS[`${col}17`]; if(!cell)return;
+      styled(cell,{fill:solidFill(CLR.greenDark),fnt:font(true,10,CLR.white),aln:align(ci>=1?"right":"center","center"),border:thinBorder(),numFmt:ci>=1&&ci<=4?fmtMoney:undefined});
+    });
+    // Solde cumulé row (row 19)
+    const sCum=wsS["A19"]; if(sCum)styled(sCum,{fnt:font(true,10,CLR.greenDark),aln:align("right","center")});
+    const sCumV=wsS["B19"]; if(sCumV)styled(sCumV,{fill:solidFill(CLR.greenPale),fnt:font(true,11,CLR.greenDark),aln:align("right","center"),border:thinBorder(),numFmt:fmtMoney});
+
+    // Member section banner (MBR_START_ROW + 1 for the section title)
+    const mbrBannerRow = MBR_START_ROW + 1;
+    const mbrBannerCell = wsS[`A${mbrBannerRow}`];
+    if (mbrBannerCell) styled(mbrBannerCell,{fill:solidFill(CLR.greenMid),fnt:font(true,11,CLR.white),aln:align("left","center")});
+    // Member header row
+    const mbrHdrRow = mbrBannerRow + 1;
+    mbrHeaderCols.forEach((_, ci) => {
+      const col = String.fromCharCode(65+ci);
+      const cell = wsS[`${col}${mbrHdrRow}`];
+      if (cell) styled(cell,{fill:solidFill(CLR.primaryMid||CLR.greenMid),fnt:font(true,9,CLR.white),aln:align("center","center"),border:thinBorder()});
+    });
+    // Member data rows
+    mbrRows.forEach((row, ri) => {
+      const r = mbrHdrRow + 1 + ri;
+      const isTotal = ri === mbrRows.length - 1;
+      const isEven = ri % 2 === 1;
+      row.forEach((_, ci) => {
+        const col = String.fromCharCode(65+ci);
+        const cell = wsS[`${col}${r}`]; if (!cell) return;
+        const isAmt = ci >= 1 && ci < row.length - 1;
+        const isPct = ci === row.length - 1;
+        styled(cell,{
+          fill: isTotal ? solidFill(CLR.greenDark) : isEven ? solidFill(CLR.greenXl) : solidFill(CLR.white),
+          fnt: font(isTotal||ci===0, 9, isTotal?CLR.white:(ci===0?CLR.greenMid:(isAmt&&cell.v>0?CLR.greenLight:CLR.black))),
+          aln: align(ci===0?"left":"right","center"),
+          border: thinBorder(),
+          numFmt: isAmt ? fmtMoney : isPct ? fmtPct : undefined,
+        });
+      });
+    });
+
+    // Depense section banner
+    const depBannerRow = DEP_START_ROW + 1;
+    const depBannerCell = wsS[`A${depBannerRow}`];
+    if (depBannerCell) styled(depBannerCell,{fill:solidFill(CLR.red),fnt:font(true,11,CLR.white),aln:align("left","center")});
+    const depHdrRow = depBannerRow + 1;
+    ["A","B","C","D"].forEach(col => {
+      const cell=wsS[`${col}${depHdrRow}`]; if(!cell)return;
+      styled(cell,{fill:solidFill(CLR.greenMid),fnt:font(true,10,CLR.white),aln:align("center","center"),border:thinBorder()});
+    });
+    MONTHS_FR.forEach((_,mi)=>{
+      const r = depHdrRow+1+mi;
+      ["A","B","C","D"].forEach((col,ci)=>{
+        const cell=wsS[`${col}${r}`]; if(!cell)return;
+        const isEven=mi%2===1;
+        styled(cell,{
+          fill:ci===2?solidFill(CLR.redPale):(isEven?solidFill(CLR.greenXl):solidFill(CLR.white)),
+          fnt:font(false,10,ci===0?CLR.greenMid:(ci===2?CLR.red:CLR.black)),
+          aln:align(ci===0?"center":"right","center"),
+          border:thinBorder(),
+          numFmt:ci===2?fmtMoney:ci===3?fmtPct:undefined,
+        });
+      });
+    });
+    const depTotRow=depHdrRow+13;
+    ["A","B","C","D"].forEach((col,ci)=>{
+      const cell=wsS[`${col}${depTotRow}`]; if(!cell)return;
+      styled(cell,{fill:solidFill(CLR.red),fnt:font(true,10,CLR.white),aln:align(ci===0?"center":"right","center"),border:thinBorder(),numFmt:ci===2?fmtMoney:ci===3?fmtPct:undefined});
     });
 
     XLSX.utils.book_append_sheet(wb, wsS, "Récap. Mensuel");
