@@ -1141,8 +1141,9 @@ function DonutChart({ contrib, dons, dep, lang, chartReady }) {
 
   return (
     <div style={{ background: C.card, borderRadius: 24, boxShadow: C.shadowMd, padding: "16px", marginBottom: 16 }}>
-      <div style={{ marginBottom: 14 }}>
-        <span style={{ color: C.text, fontWeight: 600, fontSize: 14 }}>{lang === "ar" ? "توزيع المالية" : "Répartition financière"}</span>
+      <div style={{ marginBottom: 14, display: "flex", alignItems: "center", gap: 9 }}>
+        <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAIAAgADASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAj/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AIyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB//9k=" alt="distribution" style={{ width: 22, height: 22, objectFit: "contain", opacity: 0.85 }} />
+        <span style={{ color: C.text, fontWeight: 700, fontSize: 14, letterSpacing: -0.2 }}>{lang === "ar" ? "توزيع المالية" : "Répartition financière"}</span>
       </div>
       <div style={{ height: 180, position: "relative" }}>
         {!chartReady ? (
@@ -1852,91 +1853,125 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
     setImporting(true);
     setImportMsg(null);
     try {
-      const data = await file.arrayBuffer();
-      const wb = XLSX.read(data);
+      // Read as Uint8Array — works reliably across browsers
+      const arrayBuf = await file.arrayBuffer();
+      const uint8 = new Uint8Array(arrayBuf);
+      const wb = XLSX.read(uint8, { type: "array", cellDates: true, dateNF: "yyyy-mm-dd" });
+
       const typeMap = {
         "Contribution": "contribution", "contribution": "contribution",
         "Contributions": "contribution", "contributions": "contribution",
         "Don": "don", "don": "don", "Dons": "don", "dons": "don",
-        "Dépense": "depense", "depense": "depense",
-        "Dépenses": "depense", "depenses": "depense",
+        "Dépense": "depense", "Depense": "depense", "depense": "depense",
+        "Dépenses": "depense", "Depenses": "depense", "depenses": "depense",
         "مساهمة": "contribution", "المساهمات": "contribution",
         "تبرع": "don", "التبرعات": "don",
         "مصروف": "depense", "المصروفات": "depense"
       };
 
-      // ── Étape 1 : construire un index des membres existants (nom → id) ──
+      // Helper: normalize sheet name lookup (ignore case/accents)
+      const findSheet = (names, target) => {
+        const t = target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return names.find(n => n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === t);
+      };
+
+      // Helper: parse date robustly
+      const parseDate = (raw) => {
+        if (!raw) return new Date().toISOString().split("T")[0];
+        if (raw instanceof Date && !isNaN(raw)) return raw.toISOString().split("T")[0];
+        if (typeof raw === "number") {
+          // Excel serial date
+          const d = new Date(Math.round((raw - 25569) * 86400 * 1000));
+          return d.toISOString().split("T")[0];
+        }
+        const s = String(raw).trim();
+        // YYYY-MM-DD already
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        // DD/MM/YYYY or DD\MM\YYYY or DD-MM-YYYY
+        const m = s.match(/^(\d{1,2})[\-\/\\](\d{1,2})[\-\/\\](\d{2,4})$/);
+        if (m) {
+          const [, d, mo, y] = m;
+          const yr = y.length === 2 ? "20" + y : y;
+          return `${yr.padStart(4,"0")}-${mo.padStart(2,"0")}-${d.padStart(2,"0")}`;
+        }
+        // Try native parse as last resort
+        const dt = new Date(s);
+        if (!isNaN(dt)) return dt.toISOString().split("T")[0];
+        return new Date().toISOString().split("T")[0];
+      };
+
+      // ── Étape 1 : construire un index des membres existants (nom → objet) ──
       const memberIndex = {};
       members.forEach(m => { memberIndex[m.name.trim().toLowerCase()] = m; });
 
-      // ── Étape 2 : importer les membres de la feuille Membres ──
+      // ── Étape 2 : importer les membres ──
       let membersImported = 0;
       const newMemberIndex = { ...memberIndex };
-      if (wb.SheetNames.includes("Membres")) {
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets["Membres"]);
+      const membresSheet = findSheet(wb.SheetNames, "Membres");
+      if (membresSheet) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[membresSheet]);
         for (const row of rows) {
-          const name = String(row["Membre"] || row["membre"] || row["Name"] || row["name"] || "").trim();
-          const phone = String(row["Téléphone"] || row["telephone"] || row["Phone"] || "").trim();
+          const name = String(
+            row["Membre"] || row["membre"] || row["Name"] || row["name"] ||
+            row["Nom"] || row["nom"] || ""
+          ).trim();
+          const phone = String(
+            row["Téléphone"] || row["Telephone"] || row["telephone"] ||
+            row["Phone"] || row["phone"] || ""
+          ).trim();
           if (!name) continue;
           const key = name.toLowerCase();
           if (!newMemberIndex[key]) {
-            // Créer le membre dans Supabase et récupérer son ID
-            const { data: newM } = await supabase.from("members").insert([{ name, phone }]).select().single();
-            if (newM) {
-              const m = { id: newM.id, name: newM.name, phone: newM.phone || "" };
-              newMemberIndex[key] = m;
+            const { data: newM, error: mErr } = await supabase
+              .from("members").insert([{ name, phone }]).select().single();
+            if (!mErr && newM) {
+              newMemberIndex[key] = { id: newM.id, name: newM.name, phone: newM.phone || "" };
               membersImported++;
             }
           }
         }
       }
 
-      // ── Étape 3 : importer les transactions en liant l'ID du membre ──
+      // ── Étape 3 : importer les transactions ──
       let txsImported = 0;
-      if (wb.SheetNames.includes("Transactions")) {
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets["Transactions"]);
+      const txSheet = findSheet(wb.SheetNames, "Transactions");
+      if (txSheet) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[txSheet]);
         for (const row of rows) {
-          const type = typeMap[row["Type"] || row["type"]] || "contribution";
-          const amount = parseFloat(row["Montant"] || row["montant"] || row["Amount"] || 0);
-          const memberName = String(row["Membre"] || row["membre"] || "—").trim();
-          let date = row["Date"] || row["date"];
-          if (date instanceof Date) date = date.toISOString().split("T")[0];
-          else if (typeof date === "number") { const d = new Date(Math.round((date - 25569)*86400*1000)); date = d.toISOString().split("T")[0]; }
-          else {
-            date = String(date || "").trim();
-            // Handle formats: "01\03\2026", "01/03/2026", "2026-03-01"
-            if (date.includes("\\") || date.includes("/")) {
-              const parts = date.split(/[\\/]/);
-              if (parts.length === 3) {
-                // DD/MM/YYYY → YYYY-MM-DD
-                const [d, m, y] = parts;
-                date = `${y.padStart(4,"0")}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
-              }
-            }
-            if (!date || date === "undefined") date = new Date().toISOString().split("T")[0];
-          }
-          const note = String(row["Note"] || row["note"] || "");
+          const rawType = String(row["Type"] || row["type"] || "").trim();
+          const type = typeMap[rawType] || "contribution";
+          const amount = parseFloat(
+            String(row["Montant"] || row["montant"] || row["Amount"] || row["amount"] || "0")
+              .replace(/[^0-9.]/g, "")
+          );
           if (amount <= 0) continue;
 
-          // Chercher l'ID du membre par son nom
+          const memberName = String(row["Membre"] || row["membre"] || row["Name"] || "—").trim();
+          const date = parseDate(row["Date"] || row["date"]);
+          const note = String(row["Note"] || row["note"] || row["Description"] || "").trim();
+
           const foundMember = newMemberIndex[memberName.toLowerCase()];
           const memberId = foundMember ? foundMember.id : null;
           const finalMemberName = type === "depense" ? "—" : (foundMember ? foundMember.name : memberName);
 
-          const { data: newTx } = await supabase.from("transactions").insert([{
-            type, member_id: memberId, member_name: finalMemberName,
-            amount, date, note
+          const { data: newTx, error: txErr } = await supabase.from("transactions").insert([{
+            type,
+            member_id: memberId,
+            member_name: finalMemberName,
+            amount,
+            date,
+            note
           }]).select().single();
-          if (newTx) txsImported++;
+          if (!txErr && newTx) txsImported++;
         }
       }
 
-      // ── Étape 4 : recharger toutes les données depuis Supabase (silencieux) ──
-      await onRefresh(true);
+      // ── Étape 4 : recharger les données ──
+      await onRefresh();
       setImportMsg(t.importSuccess(membersImported, txsImported));
     } catch(err) {
-      console.error(err);
-      setImportMsg(t.importError);
+      console.error("Import error:", err);
+      setImportMsg(t.importError + " (" + (err.message || "") + ")");
     }
     setImporting(false);
     e.target.value = "";
