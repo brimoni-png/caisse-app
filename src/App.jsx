@@ -1793,134 +1793,65 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
     const XLSX = window.XLSX;
     if (!XLSX) return alert(t.xlsxWait);
 
-    const EXPORT_YEAR = 2026;
+    const EXPORT_YEAR = year;
     const wb = window.XLSX.utils.book_new();
-    const MONTHS_FR = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 
-    // Transactions 2026 uniquement
-    const txs2026all = txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR);
-
-    // ── Feuille 1 : Contributions 2026 — matrice Membre × Mois ──
-    const contribTxs = txs2026all.filter(tx => tx.type === "contribution");
-
-    // Construire la matrice : pour chaque membre, montant par mois
-    const contribMatrix = {}; // { memberName: { 0: montant, 1: montant, ... } }
-    contribTxs.forEach(tx => {
-      const key = tx.memberName || "—";
-      const mIdx = new Date(tx.date).getMonth(); // 0-11
-      if (!contribMatrix[key]) contribMatrix[key] = {};
-      contribMatrix[key][mIdx] = (contribMatrix[key][mIdx] || 0) + tx.amount;
-    });
-
-    // Membres triés alphabétiquement (ou par total décroissant)
-    const memberNames = members.map(m => m.name);
-    // Ajouter membres qui ont contribué mais pas dans la liste
-    contribTxs.forEach(tx => { if (!memberNames.includes(tx.memberName)) memberNames.push(tx.memberName || "—"); });
-
-    // En-tête : Membre | janvier | février | ... | décembre | TOTAL
-    const contribHeader = ["Membre", ...MONTHS_FR, "TOTAL"];
-    const contribRows = [contribHeader];
-
-    let grandTotal = 0;
-    const totalsPerMonth = new Array(12).fill(0);
-
-    memberNames.forEach(name => {
-      const monthData = contribMatrix[name] || {};
-      const rowTotal = Object.values(monthData).reduce((a, v) => a + v, 0);
-      if (rowTotal === 0) {
-        // Membre sans contribution — inclure quand même avec 0
-        contribRows.push([name, ...new Array(12).fill(""), 0]);
-        return;
-      }
-      grandTotal += rowTotal;
-      const row = [name];
-      for (let m = 0; m < 12; m++) {
-        const val = monthData[m] || "";
-        row.push(val);
-        if (monthData[m]) totalsPerMonth[m] += monthData[m];
-      }
-      row.push(rowTotal);
-      contribRows.push(row);
-    });
-
-    // Ligne totaux par mois
-    const totalRow = ["TOTAL", ...totalsPerMonth.map(v => v || ""), grandTotal];
-    contribRows.push([]);
-    contribRows.push(totalRow);
-
-    const wsC = window.XLSX.utils.aoa_to_sheet(contribRows);
-    wsC["!cols"] = [{wch:28}, ...new Array(12).fill({wch:10}), {wch:12}];
-    window.XLSX.utils.book_append_sheet(wb, wsC, `Contributions ${EXPORT_YEAR}`);
-
-    // ── Feuille 2 : Dons 2026 — matrice Donateur × Mois ──
-    const donTxs = txs2026all.filter(tx => tx.type === "don");
-    const donMatrix = {};
-    donTxs.forEach(tx => {
-      const key = tx.memberName || "Anonyme";
-      const mIdx = new Date(tx.date).getMonth();
-      if (!donMatrix[key]) donMatrix[key] = {};
-      donMatrix[key][mIdx] = (donMatrix[key][mIdx] || 0) + tx.amount;
-    });
-
-    const donHeader = ["Donateur", ...MONTHS_FR, "TOTAL"];
-    const donRows = [donHeader];
-    let grandTotalDon = 0;
-    const donTotalsPerMonth = new Array(12).fill(0);
-
-    Object.entries(donMatrix).forEach(([name, monthData]) => {
-      const rowTotal = Object.values(monthData).reduce((a, v) => a + v, 0);
-      grandTotalDon += rowTotal;
-      const row = [name];
-      for (let m = 0; m < 12; m++) {
-        const val = monthData[m] || "";
-        row.push(val);
-        if (monthData[m]) donTotalsPerMonth[m] += monthData[m];
-      }
-      row.push(rowTotal);
-      donRows.push(row);
-    });
-
-    donRows.push([]);
-    donRows.push(["TOTAL", ...donTotalsPerMonth.map(v => v || ""), grandTotalDon]);
-
-    const wsD = window.XLSX.utils.aoa_to_sheet(donRows);
-    wsD["!cols"] = [{wch:28}, ...new Array(12).fill({wch:10}), {wch:12}];
-    window.XLSX.utils.book_append_sheet(wb, wsD, `Dons ${EXPORT_YEAR}`);
-
-    // ── Feuille 3 : Dépenses 2026 — liste détaillée ──
-    const depTxs = txs2026all.filter(tx => tx.type === "depense").sort((a,b) => new Date(a.date) - new Date(b.date));
-    const depRows = [
-      ["Description / Objet", "Date", "Mois", "Montant", "Note"],
-      ...depTxs.map(tx => {
-        const d = new Date(tx.date);
-        return [tx.note || tx.memberName || "—", tx.date, MONTHS_FR[d.getMonth()], tx.amount, tx.note || ""];
-      }),
-      [],
-      ["TOTAL DÉPENSES", "", "", depTxs.reduce((a, tx) => a + tx.amount, 0), ""]
+    // ── Feuille 1 : Membres ──
+    const membresRows = [
+      ["Membre", "Téléphone"],
+      ...members.map(m => [m.name, m.phone || ""])
     ];
-    const wsE = window.XLSX.utils.aoa_to_sheet(depRows);
-    wsE["!cols"] = [{wch:32},{wch:13},{wch:12},{wch:16},{wch:32}];
-    window.XLSX.utils.book_append_sheet(wb, wsE, `Dépenses ${EXPORT_YEAR}`);
+    const wsM = XLSX.utils.aoa_to_sheet(membresRows);
+    wsM["!cols"] = [{wch: 32}, {wch: 18}];
+    XLSX.utils.book_append_sheet(wb, wsM, "Membres");
 
-    // ── Feuille 4 : Résumé 2026 ──
-    const totalC = contribTxs.reduce((a, tx) => a + tx.amount, 0);
-    const totalD = donTxs.reduce((a, tx) => a + tx.amount, 0);
-    const totalE = depTxs.reduce((a, tx) => a + tx.amount, 0);
+    // ── Feuille 2 : Transactions (toutes années ou filtrées) ──
+    const txsToExport = mode === "month"
+      ? txs.filter(tx => {
+          const d = new Date(tx.date);
+          return d.getFullYear() === year && d.getMonth() + 1 === month;
+        })
+      : txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR);
+
+    const typeLabels = { contribution: "Contribution", don: "Don", depense: "Dépense" };
+
+    const txRows = [
+      ["Date", "Type", "Membre", "Montant", "Note"],
+      ...txsToExport
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .map(tx => [
+          tx.date,
+          typeLabels[tx.type] || tx.type,
+          tx.memberName || "—",
+          tx.amount,
+          tx.note || ""
+        ])
+    ];
+    const wsT = XLSX.utils.aoa_to_sheet(txRows);
+    wsT["!cols"] = [{wch:14},{wch:14},{wch:28},{wch:14},{wch:36}];
+    XLSX.utils.book_append_sheet(wb, wsT, "Transactions");
+
+    // ── Feuille 3 : Résumé ──
+    const txsYear = txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR);
+    const totalC = txsYear.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
+    const totalD = txsYear.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
+    const totalE = txsYear.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
     const resumeRows = [
-      ["Indicateur", "Montant"],
+      ["Indicateur", `Montant ${EXPORT_YEAR}`],
       ["Total Contributions", totalC],
       ["Total Dons", totalD],
       ["Total Dépenses", totalE],
-      ["Solde net (Contributions + Dons − Dépenses)", totalC + totalD - totalE],
+      ["Solde net", totalC + totalD - totalE],
       [],
-      ["Membres ayant contribué", Object.keys(contribMatrix).length],
-      ["Nombre total d'opérations 2026", txs2026all.length],
+      ["Nombre de membres", members.length],
+      ["Nombre de transactions", txsYear.length],
     ];
-    const wsR = window.XLSX.utils.aoa_to_sheet(resumeRows);
-    wsR["!cols"] = [{wch:46},{wch:18}];
-    window.XLSX.utils.book_append_sheet(wb, wsR, `Résumé ${EXPORT_YEAR}`);
+    const wsR = XLSX.utils.aoa_to_sheet(resumeRows);
+    wsR["!cols"] = [{wch: 32}, {wch: 18}];
+    XLSX.utils.book_append_sheet(wb, wsR, `Résumé ${EXPORT_YEAR}`);
 
-    window.XLSX.writeFile(wb, `caisse_${EXPORT_YEAR}.xlsx`);
+    const suffix = mode === "month" ? `_${year}-${String(month).padStart(2,"0")}` : `_${EXPORT_YEAR}`;
+    XLSX.writeFile(wb, `caisse${suffix}.xlsx`);
   }
   const [showPdf, setShowPdf] = useState(false);
   const [importing, setImporting] = useState(false);
