@@ -1794,64 +1794,333 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     if (!XLSX) return alert(t.xlsxWait);
 
     const EXPORT_YEAR = year;
-    const wb = window.XLSX.utils.book_new();
-
-    // ── Feuille 1 : Membres ──
-    const membresRows = [
-      ["Membre", "Téléphone"],
-      ...members.map(m => [m.name, m.phone || ""])
-    ];
-    const wsM = XLSX.utils.aoa_to_sheet(membresRows);
-    wsM["!cols"] = [{wch: 32}, {wch: 18}];
-    XLSX.utils.book_append_sheet(wb, wsM, "Membres");
-
-    // ── Feuille 2 : Transactions (toutes années ou filtrées) ──
-    const txsToExport = mode === "month"
-      ? txs.filter(tx => {
-          const d = new Date(tx.date);
-          return d.getFullYear() === year && d.getMonth() + 1 === month;
-        })
-      : txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR);
-
+    const today = new Date().toLocaleDateString("fr-FR");
     const typeLabels = { contribution: "Contribution", don: "Don", depense: "Dépense" };
+    const MONTHS_FR = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 
-    const txRows = [
-      ["Date", "Type", "Membre", "Montant", "Note"],
-      ...txsToExport
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
-        .map(tx => [
+    // ── Palette couleurs (ARGB sans #) ──
+    const CLR = {
+      greenDark:  "FF012D1D", greenMid:   "FF1B4332", greenLight: "FF2D6A4F",
+      greenPale:  "FFD8F3DC", greenXl:    "FFEEF7EF",
+      purple:     "FF712EDD", purplePale: "FFEDE8F9",
+      red:        "FFC0392B", redPale:    "FFFDECEA",
+      white:      "FFFFFFFF", grayLight:  "FFF3F4F0",
+      grayMid:    "FFCBD5E0", grayDark:   "FF4A5568",
+      black:      "FF1A1C1A", blue:       "FF0000FF",
+    };
+
+    // ── Helpers styles ──
+    const solidFill  = (argb)     => ({ patternFill: { patternType: "solid", fgColor: { rgb: argb } } });
+    const font       = (bold, sz, argb, name = "Arial") => ({ name, sz: sz || 11, bold: !!bold, color: { rgb: argb || CLR.black } });
+    const align      = (h, v, wrap) => ({ horizontal: h || "left", vertical: v || "center", wrapText: !!wrap });
+    const thinBorder = () => {
+      const s = { style: "thin", color: { rgb: CLR.grayMid } };
+      return { top: s, bottom: s, left: s, right: s };
+    };
+    const fmtMoney = '#,##0.00\\ "MRU"';
+    const fmtDate  = "DD/MM/YYYY";
+    const fmtPct   = "0.0%";
+
+    // Apply style helper (sets fill, font, alignment, border, numFmt on a cell object)
+    function styled(cell, { fill, fnt, aln, border, numFmt }) {
+      if (!cell) return;
+      cell.s = {};
+      if (fill)   cell.s.fill   = fill;
+      if (fnt)    cell.s.font   = fnt;
+      if (aln)    cell.s.alignment = aln;
+      if (border) cell.s.border = border;
+      if (numFmt) { cell.s.numFmt = numFmt; cell.z = numFmt; }
+    }
+
+    const wb = XLSX.utils.book_new();
+
+    // ════════════════════════════════════════════════════════════════
+    // FEUILLE 1 — TRANSACTIONS
+    // ════════════════════════════════════════════════════════════════
+    const txsToExport = (mode === "month"
+      ? txs.filter(tx => { const d = new Date(tx.date); return d.getFullYear() === year && d.getMonth() + 1 === month; })
+      : txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR)
+    ).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const TX_START = 5; // data rows start at row index 4 (0-based) → Excel row 5
+    const txAoa = [
+      // Row 1 – Banner
+      [`🌿  CAISSE COOPÉRATIVE — REGISTRE DES TRANSACTIONS`,"","","","","","","","",""],
+      // Row 2 – subtitle
+      [`Modèle de saisie — Exporté le ${today}`,"","","","","","","","",""],
+      // Row 3 – legend
+      ["  ■ Contribution (vert)    ■ Don (violet)    ■ Dépense (rouge)","","","","","","","","",""],
+      // Row 4 – headers
+      ["#","Date","Type","Membre / Payeur","Montant (MRU)","Description / Note","Mois","Année","Statut","Réf."],
+      // Data rows
+      ...txsToExport.map((tx, i) => {
+        const d = new Date(tx.date);
+        const mon = isNaN(d) ? "" : d.getMonth() + 1;
+        const yr  = isNaN(d) ? "" : d.getFullYear();
+        const ref = `TXN-${String(i + 1).padStart(3, "0")}`;
+        return [
+          i + 1,
           tx.date,
           typeLabels[tx.type] || tx.type,
           tx.memberName || "—",
           tx.amount,
-          tx.note || ""
-        ])
+          tx.note || "",
+          mon,
+          yr,
+          "Confirmé",
+          ref,
+        ];
+      }),
     ];
-    const wsT = XLSX.utils.aoa_to_sheet(txRows);
-    wsT["!cols"] = [{wch:14},{wch:14},{wch:28},{wch:14},{wch:36}];
+
+    // Add totals block (3 rows gap + 4 rows)
+    const dataEndRow = TX_START + txsToExport.length; // 1-based last data row
+    const totRow = dataEndRow + 2;
+    // Pad aoa to reach totRow
+    while (txAoa.length < totRow - 1) txAoa.push(["","","","","","","","","",""]);
+    const totalC_tx = txsToExport.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
+    const totalD_tx = txsToExport.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
+    const totalE_tx = txsToExport.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
+    txAoa.push(["","","","Total Contributions :","", totalC_tx,"","","",""]);
+    txAoa.push(["","","","Total Dons :","",          totalD_tx,"","","",""]);
+    txAoa.push(["","","","Total Dépenses :","",       totalE_tx,"","","",""]);
+    txAoa.push(["","","","","","","","","",""]);
+    txAoa.push(["","","","SOLDE NET :","",            totalC_tx + totalD_tx - totalE_tx,"","","",""]);
+
+    const wsT = XLSX.utils.aoa_to_sheet(txAoa);
+    wsT["!cols"] = [{wch:5},{wch:14},{wch:16},{wch:22},{wch:18},{wch:32},{wch:10},{wch:9},{wch:13},{wch:14}];
+
+    // Merges: banner rows span A:J (cols 0-9)
+    wsT["!merges"] = [
+      {s:{r:0,c:0},e:{r:0,c:9}},
+      {s:{r:1,c:0},e:{r:1,c:9}},
+      {s:{r:2,c:0},e:{r:2,c:9}},
+      {s:{r:totRow-1,c:3},e:{r:totRow-1,c:4}},
+      {s:{r:totRow  ,c:3},e:{r:totRow  ,c:4}},
+      {s:{r:totRow+1,c:3},e:{r:totRow+1,c:4}},
+      {s:{r:totRow+3,c:3},e:{r:totRow+3,c:4}},
+    ];
+
+    // Style banner row 1
+    const cellA1 = wsT["A1"] || (wsT["A1"] = {t:"s", v:txAoa[0][0]});
+    styled(cellA1, { fill: solidFill(CLR.greenDark), fnt: font(true, 14, CLR.white), aln: align("center","center"), border: thinBorder() });
+
+    // Style banner row 2
+    const cellA2 = wsT["A2"] || (wsT["A2"] = {t:"s", v:txAoa[1][0]});
+    styled(cellA2, { fill: solidFill(CLR.greenMid), fnt: font(false, 9, "FFAAAAAA"), aln: align("center","center") });
+
+    // Style legend row 3
+    const cellA3 = wsT["A3"] || (wsT["A3"] = {t:"s", v:txAoa[2][0]});
+    styled(cellA3, { fill: solidFill(CLR.grayLight), fnt: font(false, 9, CLR.grayDark), aln: align("left","center") });
+
+    // Style header row 4
+    const txHdrs = ["A","B","C","D","E","F","G","H","I","J"];
+    txHdrs.forEach(col => {
+      const c = wsT[`${col}4`];
+      if (c) styled(c, { fill: solidFill(CLR.greenMid), fnt: font(true, 10, CLR.white), aln: align("center","center"), border: thinBorder() });
+    });
+
+    // Style data rows
+    txsToExport.forEach((tx, i) => {
+      const r = TX_START + i; // 1-based Excel row
+      const isEven = i % 2 === 1;
+      const rowFill = isEven ? solidFill(CLR.greenXl) : solidFill(CLR.white);
+      let typeFill = rowFill;
+      let typeFnt  = font(false, 10, CLR.black);
+      if (tx.type === "contribution") { typeFill = solidFill(CLR.greenPale);  typeFnt = font(false, 10, CLR.greenLight); }
+      if (tx.type === "don")          { typeFill = solidFill(CLR.purplePale); typeFnt = font(false, 10, CLR.purple); }
+      if (tx.type === "depense")      { typeFill = solidFill(CLR.redPale);    typeFnt = font(false, 10, CLR.red); }
+
+      txHdrs.forEach((col, ci) => {
+        const addr = `${col}${r}`;
+        const cell = wsT[addr];
+        if (!cell) return;
+        const isAmount = col === "E";
+        const isDate   = col === "B";
+        styled(cell, {
+          fill:   typeFill,
+          fnt:    ci === 6 || ci === 7 ? font(false, 9, CLR.greenLight) : typeFnt,
+          aln:    align(isAmount ? "right" : col === "A" || isDate || col === "G" || col === "H" || col === "I" || col === "J" ? "center" : "left", "center"),
+          border: thinBorder(),
+          numFmt: isAmount ? fmtMoney : isDate ? fmtDate : undefined,
+        });
+      });
+    });
+
+    // Style totals
+    const totColors = [CLR.greenLight, CLR.purple, CLR.red, undefined, CLR.greenDark];
+    [0,1,2,4].forEach((offset, idx) => {
+      const r = totRow + offset;
+      const clr = totColors[idx] || CLR.greenDark;
+      ["D","E","F"].forEach(col => {
+        const cell = wsT[`${col}${r}`];
+        if (!cell) return;
+        styled(cell, {
+          fill: solidFill(clr),
+          fnt:  font(true, offset === 4 ? 13 : 10, CLR.white),
+          aln:  align("right","center"),
+          border: thinBorder(),
+          numFmt: col === "F" ? fmtMoney : undefined,
+        });
+      });
+    });
+
     XLSX.utils.book_append_sheet(wb, wsT, "Transactions");
 
-    // ── Feuille 3 : Résumé ──
+    // ════════════════════════════════════════════════════════════════
+    // FEUILLE 2 — RÉCAPITULATIF MENSUEL
+    // ════════════════════════════════════════════════════════════════
     const txsYear = txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR);
-    const totalC = txsYear.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
-    const totalD = txsYear.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
-    const totalE = txsYear.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
-    const resumeRows = [
-      ["Indicateur", `Montant ${EXPORT_YEAR}`],
-      ["Total Contributions", totalC],
-      ["Total Dons", totalD],
-      ["Total Dépenses", totalE],
-      ["Solde net", totalC + totalD - totalE],
-      [],
-      ["Nombre de membres", members.length],
-      ["Nombre de transactions", txsYear.length],
+    const sumAoa = [
+      [`🌿  RÉCAPITULATIF MENSUEL — CAISSE COOPÉRATIVE`,"","","","",""],
+      ["","","","","",""],
+      ["Année :", EXPORT_YEAR,"","","",""],
+      ["","","","","",""],
+      ["Mois","Contributions (MRU)","Dons (MRU)","Dépenses (MRU)","Solde (MRU)","Évolution"],
     ];
-    const wsR = XLSX.utils.aoa_to_sheet(resumeRows);
-    wsR["!cols"] = [{wch: 32}, {wch: 18}];
-    XLSX.utils.book_append_sheet(wb, wsR, `Résumé ${EXPORT_YEAR}`);
+    let prevSolde = null;
+    MONTHS_FR.forEach((mname, mi) => {
+      const mIdx = mi + 1;
+      const mC = txsYear.filter(tx => tx.type === "contribution" && new Date(tx.date).getMonth() + 1 === mIdx).reduce((a, tx) => a + tx.amount, 0);
+      const mD = txsYear.filter(tx => tx.type === "don"          && new Date(tx.date).getMonth() + 1 === mIdx).reduce((a, tx) => a + tx.amount, 0);
+      const mE = txsYear.filter(tx => tx.type === "depense"      && new Date(tx.date).getMonth() + 1 === mIdx).reduce((a, tx) => a + tx.amount, 0);
+      const mS = mC + mD - mE;
+      const evo = prevSolde !== null && prevSolde !== 0 ? (mS - prevSolde) / Math.abs(prevSolde) : "";
+      prevSolde = mS;
+      sumAoa.push([mname, mC, mD, mE, mS, evo]);
+    });
+    // Total row
+    const allC = txsYear.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
+    const allD = txsYear.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
+    const allE = txsYear.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
+    sumAoa.push(["TOTAL ANNUEL", allC, allD, allE, allC + allD - allE, ""]);
 
+    const wsS = XLSX.utils.aoa_to_sheet(sumAoa);
+    wsS["!cols"] = [{wch:14},{wch:20},{wch:18},{wch:18},{wch:18},{wch:12}];
+    wsS["!merges"] = [{s:{r:0,c:0},e:{r:0,c:5}}];
+
+    // Banner
+    const sA1 = wsS["A1"];
+    if (sA1) styled(sA1, { fill: solidFill(CLR.greenDark), fnt: font(true, 13, CLR.white), aln: align("center","center") });
+    // Year input
+    const sB3 = wsS["B3"];
+    if (sB3) styled(sB3, { fnt: font(true, 11, CLR.blue), aln: align("center","center"), border: thinBorder() });
+    // Header row (row index 4 → Excel row 5)
+    ["A","B","C","D","E","F"].forEach(col => {
+      const c = wsS[`${col}5`];
+      if (c) styled(c, { fill: solidFill(CLR.greenMid), fnt: font(true, 10, CLR.white), aln: align("center","center"), border: thinBorder() });
+    });
+    // Data rows (rows 6-17)
+    MONTHS_FR.forEach((_, mi) => {
+      const r = 6 + mi;
+      const isEven = mi % 2 === 1;
+      ["A","B","C","D","E","F"].forEach((col, ci) => {
+        const cell = wsS[`${col}${r}`];
+        if (!cell) return;
+        let rf = isEven ? solidFill(CLR.greenXl) : solidFill(CLR.white);
+        let cf = CLR.black;
+        let nf = undefined;
+        if      (ci === 0) { cf = CLR.greenMid; }
+        else if (ci === 1) { rf = solidFill(CLR.greenPale);  nf = fmtMoney; }
+        else if (ci === 2) { rf = solidFill(CLR.purplePale); nf = fmtMoney; }
+        else if (ci === 3) { rf = solidFill(CLR.redPale);    nf = fmtMoney; }
+        else if (ci === 4) { cf = CLR.greenDark;             nf = fmtMoney; }
+        else if (ci === 5 && cell.t === "n") { nf = fmtPct; }
+        styled(cell, { fill: rf, fnt: font(ci === 0, 10, cf), aln: align(ci >= 1 && ci <= 4 ? "right" : "center","center"), border: thinBorder(), numFmt: nf });
+      });
+    });
+    // Total row (row 18)
+    ["A","B","C","D","E","F"].forEach((col, ci) => {
+      const cell = wsS[`${col}18`];
+      if (!cell) return;
+      styled(cell, { fill: solidFill(CLR.greenDark), fnt: font(true, 10, CLR.white), aln: align(ci >= 1 ? "right":"center","center"), border: thinBorder(), numFmt: ci >= 1 && ci <= 4 ? fmtMoney : undefined });
+    });
+
+    XLSX.utils.book_append_sheet(wb, wsS, "Récap. Mensuel");
+
+    // ════════════════════════════════════════════════════════════════
+    // FEUILLE 3 — MEMBRES
+    // ════════════════════════════════════════════════════════════════
+    const mbAoa = [
+      ["👥  REGISTRE DES MEMBRES — CAISSE COOPÉRATIVE","","","","","",""],
+      ["","","","","","",""],
+      ["#","Nom complet","Téléphone","Email","Date d'adhésion","Total Contributions (MRU)","Statut"],
+      ...members.map((m, i) => {
+        const mTotal = txs.filter(tx => tx.type === "contribution" && (tx.memberName === m.name || tx.memberId === m.id)).reduce((a, tx) => a + tx.amount, 0);
+        return [i + 1, m.name, m.phone || "", "", "", mTotal, "Actif"];
+      }),
+    ];
+    const wsM = XLSX.utils.aoa_to_sheet(mbAoa);
+    wsM["!cols"] = [{wch:5},{wch:28},{wch:16},{wch:26},{wch:16},{wch:26},{wch:12}];
+    wsM["!merges"] = [{s:{r:0,c:0},e:{r:0,c:6}}];
+
+    const mA1 = wsM["A1"];
+    if (mA1) styled(mA1, { fill: solidFill(CLR.greenDark), fnt: font(true, 13, CLR.white), aln: align("center","center") });
+    ["A","B","C","D","E","F","G"].forEach(col => {
+      const c = wsM[`${col}3`];
+      if (c) styled(c, { fill: solidFill(CLR.greenMid), fnt: font(true, 10, CLR.white), aln: align("center","center"), border: thinBorder() });
+    });
+    members.forEach((_, i) => {
+      const r = 4 + i;
+      const isEven = i % 2 === 1;
+      ["A","B","C","D","E","F","G"].forEach((col, ci) => {
+        const cell = wsM[`${col}${r}`];
+        if (!cell) return;
+        styled(cell, {
+          fill: isEven ? solidFill(CLR.greenXl) : solidFill(CLR.white),
+          fnt: font(false, 10, ci === 5 ? CLR.greenMid : CLR.black),
+          aln: align(ci === 5 ? "right" : ci === 0 || ci >= 4 ? "center" : "left","center"),
+          border: thinBorder(),
+          numFmt: ci === 5 ? fmtMoney : undefined,
+        });
+      });
+    });
+
+    XLSX.utils.book_append_sheet(wb, wsM, "Membres");
+
+    // ════════════════════════════════════════════════════════════════
+    // FEUILLE 4 — MODE D'EMPLOI
+    // ════════════════════════════════════════════════════════════════
+    const helpData = [
+      ["📖  MODE D'EMPLOI — CAISSE COOPÉRATIVE","","",""],
+      ["","","",""],
+      ["ONGLET : Transactions","","",""],
+      ["Date","Format JJ/MM/AAAA. Obligatoire.","",""],
+      ["Type","Contribution, Don ou Dépense.","",""],
+      ["Membre / Payeur","Nom du membre ou du donateur.","",""],
+      ["Montant (MRU)","Montant en Ouguiya. Toujours positif.","",""],
+      ["Description","Objet de la transaction (optionnel).","",""],
+      ["Mois / Année","Extraits automatiquement de la date.","",""],
+      ["Statut","En attente → Confirmé après validation.","",""],
+      ["","","",""],
+      ["ONGLET : Récap. Mensuel","","",""],
+      ["Totaux par mois","Contributions + Dons − Dépenses = Solde.","",""],
+      ["Évolution","Variation % du solde vs mois précédent.","",""],
+      ["","","",""],
+      ["CODES COULEUR","","",""],
+      ["Vert","Transaction de type Contribution.","",""],
+      ["Violet","Transaction de type Don.","",""],
+      ["Rouge","Transaction de type Dépense.","",""],
+      ["Texte bleu","Valeur à saisir manuellement (input).","",""],
+      ["Texte vert","Valeur calculée automatiquement.","",""],
+    ];
+    const wsH = XLSX.utils.aoa_to_sheet(helpData);
+    wsH["!cols"] = [{wch:5},{wch:28},{wch:48},{wch:18}];
+    wsH["!merges"] = [{s:{r:0,c:0},e:{r:0,c:3}}];
+    const hA1 = wsH["A1"];
+    if (hA1) styled(hA1, { fill: solidFill(CLR.greenDark), fnt: font(true, 13, CLR.white), aln: align("center","center") });
+    const sectionRows = [2,11,15];
+    const sectionColors = [CLR.greenMid, CLR.greenLight, CLR.purple];
+    sectionRows.forEach((ri, si) => {
+      const cell = wsH[`A${ri + 1}`];
+      if (cell) styled(cell, { fill: solidFill(sectionColors[si]), fnt: font(true, 11, CLR.white), aln: align("left","center") });
+    });
+
+    XLSX.utils.book_append_sheet(wb, wsH, "Mode d'emploi");
+
+    // ── Write file ──
     const suffix = mode === "month" ? `_${year}-${String(month).padStart(2,"0")}` : `_${EXPORT_YEAR}`;
-    XLSX.writeFile(wb, `caisse${suffix}.xlsx`);
+    XLSX.writeFile(wb, `CaisseCooperative${suffix}.xlsx`);
   }
   const [showPdf, setShowPdf] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
