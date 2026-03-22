@@ -11,8 +11,8 @@ function useSheetJS() {
     if (typeof window === "undefined") return;
     if (window.XLSX) { setReady(true); return; }
     const s = document.createElement("script");
-    s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
-    s.onload = () => setReady(true);
+    s.src = "https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js";
+    s.onload = () => { window.XLSX = window.XLSXStyle || window.XLSX; setReady(true); };
     s.onerror = () => console.warn("SheetJS failed to load");
     document.head.appendChild(s);
   }, []);
@@ -2120,7 +2120,16 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
 
     // ── Write file ──
     const suffix = mode === "month" ? `_${year}-${String(month).padStart(2,"0")}` : `_${EXPORT_YEAR}`;
-    XLSX.writeFile(wb, `CaisseCooperative${suffix}.xlsx`);
+    // Write with cellStyles support
+    const wbOut = XLSX.write(wb, { bookType: "xlsx", type: "binary", cellStyles: true });
+    const buf = new ArrayBuffer(wbOut.length);
+    const view = new Uint8Array(buf);
+    for (let i = 0; i < wbOut.length; i++) view[i] = wbOut.charCodeAt(i) & 0xFF;
+    const blob = new Blob([buf], { type: "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `CaisseCooperative${suffix}.xlsx`; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   const [showPdf, setShowPdf] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
