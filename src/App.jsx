@@ -469,24 +469,24 @@ function CatPills({ onAdd, lang }) {
     {
       type: "contribution",
       color: C.primaryLt,
-      bg: "rgba(45,156,143,0.10)",
+      bg: "rgba(1,45,29,0.08)",
       icon: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
           {/* Pièce de monnaie avec $ */}
-          <circle cx="12" cy="12" r="9" fill="rgba(1,45,29,0.12)" stroke=C.primaryLt strokeWidth="1.7"/>
-          <path d="M12 7v10M9.5 9.5a2.5 2.5 0 015 0c0 1.4-1.2 2.2-2.5 2.5-1.3.3-2.5 1.1-2.5 2.5a2.5 2.5 0 005 0" stroke=C.primaryLt strokeWidth="1.6"/>
+          <circle cx="12" cy="12" r="9" fill="rgba(1,45,29,0.12)" stroke={C.primaryLt} strokeWidth="1.7"/>
+          <path d="M12 7v10M9.5 9.5a2.5 2.5 0 015 0c0 1.4-1.2 2.2-2.5 2.5-1.3.3-2.5 1.1-2.5 2.5a2.5 2.5 0 005 0" stroke={C.primaryLt} strokeWidth="1.6"/>
         </svg>
       ),
     },
     {
       type: "don",
       color: C.secondary,
-      bg: C.secondaryCnt,
+      bg: "rgba(113,46,221,0.10)",
       icon: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
           {/* Mains ouvertes tendant un cœur */}
-          <path d="M12 6c0 0-1.5-2-3-2C7.5 4 6 5.3 6 6.8 6 8.6 8 10 12 12c4-2 6-3.4 6-5.2C18 5.3 16.5 4 15 4c-1.5 0-3 2-3 2z" fill="rgba(113,46,221,0.12)" stroke=C.secondary strokeWidth="1.7"/>
-          <path d="M5 15c0-1 .7-1.5 1.5-1.5S8 14 8 15l.5 1h7l.5-1c0-1 .7-1.5 1.5-1.5S19 14 19 15v1.5c0 .8-.7 1.5-1.5 1.5h-11C5.7 18 5 17.3 5 16.5V15z" fill="rgba(113,46,221,0.12)" stroke=C.secondary strokeWidth="1.7"/>
+          <path d="M12 6c0 0-1.5-2-3-2C7.5 4 6 5.3 6 6.8 6 8.6 8 10 12 12c4-2 6-3.4 6-5.2C18 5.3 16.5 4 15 4c-1.5 0-3 2-3 2z" fill="rgba(113,46,221,0.12)" stroke={C.secondary} strokeWidth="1.7"/>
+          <path d="M5 15c0-1 .7-1.5 1.5-1.5S8 14 8 15l.5 1h7l.5-1c0-1 .7-1.5 1.5-1.5S19 14 19 15v1.5c0 .8-.7 1.5-1.5 1.5h-11C5.7 18 5 17.3 5 16.5V15z" fill="rgba(113,46,221,0.12)" stroke={C.secondary} strokeWidth="1.7"/>
         </svg>
       ),
     },
@@ -582,14 +582,14 @@ function CaisseLogo() {
   return (
     <div style={{ width: 40, height: 40, borderRadius: 13, background: "linear-gradient(135deg, #7C3AED, #A855F7)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 14px rgba(124,58,237,0.4)" }}>
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <rect x="2" y="5" width="18" height="13" rx="3" fill=C.text />
+        <rect x="2" y="5" width="18" height="13" rx="3" fill={C.text} />
         <circle cx="11" cy="11.5" r="3.5" stroke="#F5C842" strokeWidth="1.4" fill="none" />
         <circle cx="11" cy="11.5" r="1.3" fill="#F5C842" />
         <line x1="11" y1="8.5" x2="11" y2="9.8" stroke="#F5C842" strokeWidth="1.4" strokeLinecap="round" />
         <circle cx="5" cy="7.5" r="0.9" fill="#F5C842" opacity="0.7" />
         <circle cx="5" cy="15.5" r="0.9" fill="#F5C842" opacity="0.7" />
-        <rect x="5.5" y="17.5" width="2.5" height="1.8" rx="0.9" fill=C.text />
-        <rect x="14" y="17.5" width="2.5" height="1.8" rx="0.9" fill=C.text />
+        <rect x="5.5" y="17.5" width="2.5" height="1.8" rx="0.9" fill={C.text} />
+        <rect x="14" y="17.5" width="2.5" height="1.8" rx="0.9" fill={C.text} />
       </svg>
     </div>
   );
@@ -704,7 +704,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
             <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(1,45,29,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {/* Icône pièce/contribution */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke=C.primaryLt strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M9.5 10.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5c0 1.5-2.5 3-2.5 3s-2.5-1.5-2.5-3z" fill="rgba(45,156,143,0.18)"/><path d="M9.5 13.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.primaryLt} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M9.5 10.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5c0 1.5-2.5 3-2.5 3s-2.5-1.5-2.5-3z" fill="rgba(45,156,143,0.18)"/><path d="M9.5 13.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5"/></svg>
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.contribution}</div>
@@ -716,7 +716,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
             <div style={{ width: 38, height: 38, borderRadius: 12, background: C.secondaryCnt, display: "flex", alignItems: "center", justifyContent: "center" }}>
               {/* Icône mains offrantes / don */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke=C.secondary strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 4.02 3.268 2 6 2c1.657 0 3.15.817 4 2.07C10.85 2.817 12.343 2 14 2c2.732 0 5 2.02 5 5.191 0 4.105-5.37 8.863-11 14.402z" fill="rgba(113,46,221,0.12)"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.secondary} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 4.02 3.268 2 6 2c1.657 0 3.15.817 4 2.07C10.85 2.817 12.343 2 14 2c2.732 0 5 2.02 5 5.191 0 4.105-5.37 8.863-11 14.402z" fill="rgba(113,46,221,0.12)"/></svg>
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.don}</div>
@@ -1328,8 +1328,8 @@ function PdfReportModal({ txs, members, onClose, year }) {
                 const bw = barW * 0.28;
                 return (
                   <g key={i}>
-                    <rect x={x + 2} y={BAR_H - hC - 10} width={bw} height={hC || 1} fill=C.primaryLt rx="2" opacity="0.85" />
-                    <rect x={x + bw + 4} y={BAR_H - hD - 10} width={bw} height={hD || 1} fill=C.secondary rx="2" opacity="0.75" />
+                    <rect x={x + 2} y={BAR_H - hC - 10} width={bw} height={hC || 1} fill={C.primaryLt} rx="2" opacity="0.85" />
+                    <rect x={x + bw + 4} y={BAR_H - hD - 10} width={bw} height={hD || 1} fill={C.secondary} rx="2" opacity="0.75" />
                     <rect x={x + bw * 2 + 6} y={BAR_H - hE - 10} width={bw} height={hE || 1} fill="#e05252" rx="2" opacity="0.75" />
                     <text x={x + barW / 2} y={BAR_H + 20} textAnchor="middle" fontSize="9" fill="#7a9ea2" fontFamily="sans-serif">
                       {MONTHS_AR[i].slice(0, 3)}
@@ -1462,8 +1462,8 @@ function PdfReportModal({ txs, members, onClose, year }) {
                     const bw = barW * 0.28;
                     return (
                       <g key={i}>
-                        <rect x={x + 2}           y={BAR_H - hC - 10} width={bw} height={hC || 1} fill=C.primaryLt rx="2" />
-                        <rect x={x + bw + 4}       y={BAR_H - hD - 10} width={bw} height={hD || 1} fill=C.secondary rx="2" />
+                        <rect x={x + 2}           y={BAR_H - hC - 10} width={bw} height={hC || 1} fill={C.primaryLt} rx="2" />
+                        <rect x={x + bw + 4}       y={BAR_H - hD - 10} width={bw} height={hD || 1} fill={C.secondary} rx="2" />
                         <rect x={x + bw * 2 + 6}   y={BAR_H - hE - 10} width={bw} height={hE || 1} fill="#e05252" rx="2" />
                         <text x={x + barW / 2} y={BAR_H + 22} textAnchor="middle" fontSize="8" fill="#7a9ea2" fontFamily="sans-serif">
                           {MONTHS_AR[i].slice(0, 3)}
