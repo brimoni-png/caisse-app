@@ -246,52 +246,143 @@ function useSupabaseData() {
   const [members, setMembers] = useState([]);
   const [txs, setTxs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [netError, setNetError] = useState(null); // message d'erreur réseau visible
+
+  // Affiche une erreur pendant 4 secondes puis la fait disparaître
+  const showError = (msg) => {
+    setNetError(msg);
+    setTimeout(() => setNetError(null), 4000);
+  };
+
+  const mapMember = (m) => ({ id: m.id, name: m.name, phone: m.phone || "" });
+  const mapTx = (t) => ({ id: t.id, type: t.type, memberId: t.member_id, memberName: t.member_name, amount: t.amount, date: t.date, note: t.note || "" });
 
   const fetchAll = async (silent = false) => {
     if (!silent) setLoading(true);
-    const [{ data: mData }, { data: tData }] = await Promise.all([
-      supabase.from("members").select("*").order("created_at", { ascending: true }),
-      supabase.from("transactions").select("*").order("created_at", { ascending: false }),
-    ]);
-    if (mData) setMembers(mData.map(m => ({ id: m.id, name: m.name, phone: m.phone || "" })));
-    if (tData) setTxs(tData.map(t => ({ id: t.id, type: t.type, memberId: t.member_id, memberName: t.member_name, amount: t.amount, date: t.date, note: t.note || "" })));
-    if (!silent) setLoading(false);
+    try {
+      const [{ data: mData, error: mErr }, { data: tData, error: tErr }] = await Promise.all([
+        supabase.from("members").select("*").order("created_at", { ascending: true }),
+        supabase.from("transactions").select("*").order("created_at", { ascending: false }),
+      ]);
+      if (mErr) throw new Error(mErr.message);
+      if (tErr) throw new Error(tErr.message);
+      if (mData) setMembers(mData.map(mapMember));
+      if (tData) setTxs(tData.map(mapTx));
+    } catch (err) {
+      showError("❌ Connexion échouée — vérifiez votre réseau.");
+      console.error("fetchAll error:", err);
+    } finally {
+      if (!silent) setLoading(false);
+    }
   };
 
   useEffect(() => { fetchAll(); }, []);
 
   const addTx = async (d) => {
-    const { data } = await supabase.from("transactions").insert([{ type: d.type, member_id: d.memberId || null, member_name: d.memberName, amount: d.amount, date: d.date, note: d.note }]).select().single();
-    if (data) setTxs(p => [{ id: data.id, type: data.type, memberId: data.member_id, memberName: data.member_name, amount: data.amount, date: data.date, note: data.note || "" }, ...p]);
+    // Optimistic update : on ajoute localement tout de suite
+    const tempId = "tmp_" + Date.now();
+    const optimistic = { id: tempId, type: d.type, memberId: d.memberId || null, memberName: d.memberName, amount: d.amount, date: d.date, note: d.note || "" };
+    setTxs(p => [optimistic, ...p]);
+    try {
+      const { data, error } = await supabase.from("transactions")
+        .insert([{ type: d.type, member_id: d.memberId || null, member_name: d.memberName, amount: d.amount, date: d.date, note: d.note }])
+        .select().single();
+      if (error) throw new Error(error.message);
+      // Remplace l'entrée temporaire par la vraie
+      setTxs(p => p.map(tx => tx.id === tempId ? mapTx(data) : tx));
+    } catch (err) {
+      // Annule l'optimistic update
+      setTxs(p => p.filter(tx => tx.id !== tempId));
+      showError("❌ Ajout échoué — réessayez.");
+      console.error("addTx error:", err);
+    }
   };
 
   const updateTx = async (d) => {
-    await supabase.from("transactions").update({ type: d.type, member_id: d.memberId || null, member_name: d.memberName, amount: d.amount, date: d.date, note: d.note }).eq("id", d.id);
+    // Sauvegarde l'ancienne valeur pour rollback
+    const prev = txs.find(tx => tx.id === d.id);
     setTxs(p => p.map(tx => tx.id === d.id ? d : tx));
+    try {
+      const { error } = await supabase.from("transactions")
+        .update({ type: d.type, member_id: d.memberId || null, member_name: d.memberName, amount: d.amount, date: d.date, note: d.note })
+        .eq("id", d.id);
+      if (error) throw new Error(error.message);
+    } catch (err) {
+      // Rollback
+      if (prev) setTxs(p => p.map(tx => tx.id === d.id ? prev : tx));
+      showError("❌ Modification échouée — réessayez.");
+      console.error("updateTx error:", err);
+    }
   };
 
   const deleteTx = async (id) => {
-    await supabase.from("transactions").delete().eq("id", id);
+    const prev = txs.find(tx => tx.id === id);
     setTxs(p => p.filter(tx => tx.id !== id));
+    try {
+      const { error } = await supabase.from("transactions").delete().eq("id", id);
+      if (error) throw new Error(error.message);
+    } catch (err) {
+      if (prev) setTxs(p => [prev, ...p]);
+      showError("❌ Suppression échouée — réessayez.");
+      console.error("deleteTx error:", err);
+    }
   };
 
   const addMember = async (d) => {
-    const { data } = await supabase.from("members").insert([{ name: d.name, phone: d.phone }]).select().single();
-    if (data) setMembers(p => [...p, { id: data.id, name: data.name, phone: data.phone || "" }]);
+    const tempId = "tmp_" + Date.now();
+    const optimistic = { id: tempId, name: d.name, phone: d.phone || "" };
+    setMembers(p => [...p, optimistic]);
+    try {
+      const { data, error } = await supabase.from("members")
+        .insert([{ name: d.name, phone: d.phone }])
+        .select().single();
+      if (error) throw new Error(error.message);
+      setMembers(p => p.map(m => m.id === tempId ? mapMember(data) : m));
+    } catch (err) {
+      setMembers(p => p.filter(m => m.id !== tempId));
+      showError("❌ Ajout du membre échoué — réessayez.");
+      console.error("addMember error:", err);
+    }
   };
 
   const deleteMember = async (id) => {
-    await supabase.from("members").delete().eq("id", id);
+    const prev = members.find(m => m.id === id);
     setMembers(p => p.filter(m => m.id !== id));
+    try {
+      const { error } = await supabase.from("members").delete().eq("id", id);
+      if (error) throw new Error(error.message);
+    } catch (err) {
+      if (prev) setMembers(p => [...p, prev]);
+      showError("❌ Suppression du membre échouée — réessayez.");
+      console.error("deleteMember error:", err);
+    }
   };
 
   const resetAll = async () => {
-    await supabase.from("transactions").delete().neq("id", 0);
-    await supabase.from("members").delete().neq("id", 0);
-    await fetchAll();
+    try {
+      const { error: tErr } = await supabase.from("transactions").delete().gte("id", 0);
+      if (tErr) {
+        // Fallback pour UUIDs
+        const { data: allTxs } = await supabase.from("transactions").select("id");
+        if (allTxs?.length) {
+          await supabase.from("transactions").delete().in("id", allTxs.map(t => t.id));
+        }
+      }
+      const { error: mErr } = await supabase.from("members").delete().gte("id", 0);
+      if (mErr) {
+        const { data: allMembers } = await supabase.from("members").select("id");
+        if (allMembers?.length) {
+          await supabase.from("members").delete().in("id", allMembers.map(m => m.id));
+        }
+      }
+      await fetchAll();
+    } catch (err) {
+      showError("❌ Réinitialisation échouée — réessayez.");
+      console.error("resetAll error:", err);
+    }
   };
 
-  return { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll };
+  return { members, txs, loading, netError, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll };
 }
 
 // ─── UI ATOMS ─────────────────────────────────────────────────────────────────
@@ -1853,7 +1944,6 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
     setImporting(true);
     setImportMsg(null);
     try {
-      // Read as Uint8Array — works reliably across browsers
       const arrayBuf = await file.arrayBuffer();
       const uint8 = new Uint8Array(arrayBuf);
       const wb = XLSX.read(uint8, { type: "array", cellDates: true, dateNF: "yyyy-mm-dd" });
@@ -1861,40 +1951,58 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
       const typeMap = {
         "Contribution": "contribution", "contribution": "contribution",
         "Contributions": "contribution", "contributions": "contribution",
+        "Cotisation": "contribution", "cotisation": "contribution",
         "Don": "don", "don": "don", "Dons": "don", "dons": "don",
+        "Donation": "don", "donation": "don",
         "Dépense": "depense", "Depense": "depense", "depense": "depense",
         "Dépenses": "depense", "Depenses": "depense", "depenses": "depense",
+        "Expense": "depense", "expense": "depense",
         "مساهمة": "contribution", "المساهمات": "contribution",
         "تبرع": "don", "التبرعات": "don",
         "مصروف": "depense", "المصروفات": "depense"
       };
 
-      // Helper: normalize sheet name lookup (ignore case/accents)
-      const findSheet = (names, target) => {
-        const t = target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return names.find(n => n.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === t);
+      // Normalise un texte : minuscules, sans accents, sans espaces
+      const norm = (s) => String(s || "").toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, "");
+
+      // Trouve une feuille parmi plusieurs noms possibles
+      const findSheet = (names, ...targets) => {
+        const normNames = names.map(n => ({ orig: n, norm: norm(n) }));
+        for (const target of targets) {
+          const found = normNames.find(n => n.norm === norm(target));
+          if (found) return found.orig;
+        }
+        return null;
       };
 
-      // Helper: parse date robustly
+      // Trouve la valeur d'une colonne en cherchant parmi plusieurs noms possibles
+      const getCol = (row, ...keys) => {
+        for (const k of keys) {
+          for (const rowKey of Object.keys(row)) {
+            if (norm(rowKey) === norm(k)) return row[rowKey];
+          }
+        }
+        return undefined;
+      };
+
+      // Parse la date robustement
       const parseDate = (raw) => {
         if (!raw) return new Date().toISOString().split("T")[0];
         if (raw instanceof Date && !isNaN(raw)) return raw.toISOString().split("T")[0];
         if (typeof raw === "number") {
-          // Excel serial date
           const d = new Date(Math.round((raw - 25569) * 86400 * 1000));
           return d.toISOString().split("T")[0];
         }
         const s = String(raw).trim();
-        // YYYY-MM-DD already
         if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-        // DD/MM/YYYY or DD\MM\YYYY or DD-MM-YYYY
         const m = s.match(/^(\d{1,2})[\-\/\\](\d{1,2})[\-\/\\](\d{2,4})$/);
         if (m) {
           const [, d, mo, y] = m;
           const yr = y.length === 2 ? "20" + y : y;
           return `${yr.padStart(4,"0")}-${mo.padStart(2,"0")}-${d.padStart(2,"0")}`;
         }
-        // Try native parse as last resort
         const dt = new Date(s);
         if (!isNaN(dt)) return dt.toISOString().split("T")[0];
         return new Date().toISOString().split("T")[0];
@@ -1902,25 +2010,27 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
 
       // ── Étape 1 : construire un index des membres existants (nom → objet) ──
       const memberIndex = {};
-      members.forEach(m => { memberIndex[m.name.trim().toLowerCase()] = m; });
+      members.forEach(m => { memberIndex[norm(m.name)] = m; });
+      const newMemberIndex = { ...memberIndex };
 
       // ── Étape 2 : importer les membres ──
       let membersImported = 0;
-      const newMemberIndex = { ...memberIndex };
-      const membresSheet = findSheet(wb.SheetNames, "Membres");
-      if (membresSheet) {
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[membresSheet]);
+      const membresSheetName = findSheet(wb.SheetNames,
+        "Membres", "membres", "Members", "member", "Adhérents", "adherents"
+      );
+      if (membresSheetName) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[membresSheetName]);
         for (const row of rows) {
           const name = String(
-            row["Membre"] || row["membre"] || row["Name"] || row["name"] ||
-            row["Nom"] || row["nom"] || ""
+            getCol(row, "Membre", "membre", "Name", "name", "Nom", "nom",
+                   "Nom complet", "NomComplet", "Prenom", "Prénom", "Libelle") || ""
           ).trim();
           const phone = String(
-            row["Téléphone"] || row["Telephone"] || row["telephone"] ||
-            row["Phone"] || row["phone"] || ""
+            getCol(row, "Téléphone", "Telephone", "telephone", "Phone", "phone",
+                   "Tel", "tel", "Mobile", "mobile", "GSM") || ""
           ).trim();
           if (!name) continue;
-          const key = name.toLowerCase();
+          const key = norm(name);
           if (!newMemberIndex[key]) {
             const { data: newM, error: mErr } = await supabase
               .from("members").insert([{ name, phone }]).select().single();
@@ -1934,23 +2044,38 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
 
       // ── Étape 3 : importer les transactions ──
       let txsImported = 0;
-      const txSheet = findSheet(wb.SheetNames, "Transactions");
-      if (txSheet) {
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[txSheet]);
+      const txSheetName = findSheet(wb.SheetNames,
+        "Transactions", "transactions", "Operations", "Opérations", "opérations",
+        "Ops", "ops", "Transaction", "Sheet1", "Feuil1", "Feuille1"
+      );
+      if (txSheetName) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[txSheetName]);
         for (const row of rows) {
-          const rawType = String(row["Type"] || row["type"] || "").trim();
+          const rawType = String(
+            getCol(row, "Type", "type", "Catégorie", "Categorie", "categorie") || ""
+          ).trim();
           const type = typeMap[rawType] || "contribution";
-          const amount = parseFloat(
-            String(row["Montant"] || row["montant"] || row["Amount"] || row["amount"] || "0")
-              .replace(/[^0-9.]/g, "")
-          );
+
+          const rawAmount = getCol(row, "Montant", "montant", "Amount", "amount",
+                                    "Somme", "somme", "Valeur", "valeur");
+          const amount = parseFloat(String(rawAmount || "0").replace(/[^0-9.]/g, ""));
           if (amount <= 0) continue;
 
-          const memberName = String(row["Membre"] || row["membre"] || row["Name"] || "—").trim();
-          const date = parseDate(row["Date"] || row["date"]);
-          const note = String(row["Note"] || row["note"] || row["Description"] || "").trim();
+          const memberName = String(
+            getCol(row, "Membre", "membre", "Name", "name", "Nom", "nom",
+                   "Donateur", "donateur", "Bénéficiaire", "beneficiaire") || "—"
+          ).trim();
 
-          const foundMember = newMemberIndex[memberName.toLowerCase()];
+          const date = parseDate(
+            getCol(row, "Date", "date", "Date opération", "DateOperation")
+          );
+
+          const note = String(
+            getCol(row, "Note", "note", "Description", "description",
+                   "Libellé", "libelle", "Objet", "objet", "Commentaire") || ""
+          ).trim();
+
+          const foundMember = newMemberIndex[norm(memberName)];
           const memberId = foundMember ? foundMember.id : null;
           const finalMemberName = type === "depense" ? "—" : (foundMember ? foundMember.name : memberName);
 
@@ -1968,7 +2093,14 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
 
       // ── Étape 4 : recharger les données ──
       await onRefresh();
-      setImportMsg(t.importSuccess(membersImported, txsImported));
+
+      if (membersImported === 0 && txsImported === 0) {
+        const sheetsFound = wb.SheetNames.join(", ");
+        setImportMsg(`⚠️ Aucune donnée importée. Feuilles détectées : ${sheetsFound}`);
+      } else {
+        setImportMsg(t.importSuccess(membersImported, txsImported));
+      }
+
     } catch(err) {
       console.error("Import error:", err);
       setImportMsg(t.importError + " (" + (err.message || "") + ")");
@@ -2595,7 +2727,7 @@ export default function App() {
   const [loggedIn, setLoggedIn] = useState(() => {
     try { return !!sessionStorage.getItem("cc_user"); } catch { return false; }
   });
-  const { members, txs, loading, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll } = useSupabaseData();
+  const { members, txs, loading, netError, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll } = useSupabaseData();
 
   const handleLogin = (name) => {
     try { sessionStorage.setItem("cc_user", name); } catch {}
@@ -2627,6 +2759,12 @@ export default function App() {
   return (
     <div style={{ background: C.bg, minHeight: "100vh", minHeight: "100dvh", width: "100%", maxWidth: 430, margin: "0 auto", fontFamily: "'Manrope','Segoe UI',sans-serif", color: C.text, position: "relative", paddingBottom: 90, overflowX: "hidden" }}>
       <style>{G}</style>
+      {netError && (
+        <div style={{ position: "fixed", top: 16, left: "50%", transform: "translateX(-50%)", zIndex: 9999, background: "#c0392b", color: "#fff", borderRadius: 14, padding: "12px 20px", fontSize: 13, fontWeight: 600, boxShadow: "0 6px 24px rgba(192,57,43,0.35)", maxWidth: 370, width: "calc(100% - 32px)", textAlign: "center", animation: "pop .2s ease both", display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {netError}
+        </div>
+      )}
       <div style={{ padding: "20px 16px" }}>
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
