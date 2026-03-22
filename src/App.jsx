@@ -1879,26 +1879,10 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
       const uint8 = new Uint8Array(arrayBuf);
       const wb = XLSX.read(uint8, { type: "array", cellDates: true, dateNF: "yyyy-mm-dd" });
 
-      const typeMap = {
-        "Contribution": "contribution", "contribution": "contribution",
-        "Contributions": "contribution", "contributions": "contribution",
-        "Cotisation": "contribution", "cotisation": "contribution",
-        "Don": "don", "don": "don", "Dons": "don", "dons": "don",
-        "Donation": "don", "donation": "don",
-        "Dépense": "depense", "Depense": "depense", "depense": "depense",
-        "Dépenses": "depense", "Depenses": "depense", "depenses": "depense",
-        "Expense": "depense", "expense": "depense",
-        "مساهمة": "contribution", "المساهمات": "contribution",
-        "تبرع": "don", "التبرعات": "don",
-        "مصروف": "depense", "المصروفات": "depense"
-      };
-
-      // Normalise un texte : minuscules, sans accents, sans espaces
+      // ── Helpers ──
       const norm = (s) => String(s || "").toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        .replace(/\s+/g, "");
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "");
 
-      // Trouve une feuille parmi plusieurs noms possibles
       const findSheet = (names, ...targets) => {
         const normNames = names.map(n => ({ orig: n, norm: norm(n) }));
         for (const target of targets) {
@@ -1908,7 +1892,6 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
         return null;
       };
 
-      // Trouve la valeur d'une colonne en cherchant parmi plusieurs noms possibles
       const getCol = (row, ...keys) => {
         for (const k of keys) {
           for (const rowKey of Object.keys(row)) {
@@ -1918,7 +1901,6 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
         return undefined;
       };
 
-      // Parse la date robustement
       const parseDate = (raw) => {
         if (!raw) return new Date().toISOString().split("T")[0];
         if (raw instanceof Date && !isNaN(raw)) return raw.toISOString().split("T")[0];
@@ -1939,95 +1921,169 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onImportMembers, o
         return new Date().toISOString().split("T")[0];
       };
 
-      // ── Étape 1 : construire un index des membres existants (nom → objet) ──
+      // Noms des mois → index (0-11)
+      const MONTH_COLS = {
+        "janvier":0,"fevrier":1,"mars":2,"avril":3,"mai":4,"juin":5,
+        "juillet":6,"aout":7,"septembre":8,"octobre":9,"novembre":10,"decembre":11
+      };
+
+      // ── Index membres existants ──
       const memberIndex = {};
       members.forEach(m => { memberIndex[norm(m.name)] = m; });
       const newMemberIndex = { ...memberIndex };
-
-      // ── Étape 2 : importer les membres ──
       let membersImported = 0;
-      const membresSheetName = findSheet(wb.SheetNames,
-        "Membres", "membres", "Members", "member", "Adhérents", "adherents"
-      );
-      if (membresSheetName) {
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[membresSheetName]);
-        for (const row of rows) {
-          const name = String(
-            getCol(row, "Membre", "membre", "Name", "name", "Nom", "nom",
-                   "Nom complet", "NomComplet", "Prenom", "Prénom", "Libelle") || ""
-          ).trim();
-          const phone = String(
-            getCol(row, "Téléphone", "Telephone", "telephone", "Phone", "phone",
-                   "Tel", "tel", "Mobile", "mobile", "GSM") || ""
-          ).trim();
-          if (!name) continue;
-          const key = norm(name);
-          if (!newMemberIndex[key]) {
-            const { data: newM, error: mErr } = await supabase
-              .from("members").insert([{ name, phone }]).select().single();
-            if (!mErr && newM) {
-              newMemberIndex[key] = { id: newM.id, name: newM.name, phone: newM.phone || "" };
-              membersImported++;
+      let txsImported = 0;
+
+      // ── Helper : créer ou récupérer un membre ──
+      const ensureMember = async (name) => {
+        const key = norm(name);
+        if (newMemberIndex[key]) return newMemberIndex[key];
+        const { data: newM, error: mErr } = await supabase
+          .from("members").insert([{ name, phone: "" }]).select().single();
+        if (!mErr && newM) {
+          const m = { id: newM.id, name: newM.name, phone: "" };
+          newMemberIndex[key] = m;
+          membersImported++;
+          return m;
+        }
+        return null;
+      };
+
+      // ── Helper : insérer une transaction ──
+      const insertTx = async (type, memberName, amount, date, note) => {
+        if (!amount || amount <= 0) return;
+        const foundMember = newMemberIndex[norm(memberName)];
+        const memberId = foundMember ? foundMember.id : null;
+        const finalName = type === "depense" ? "—" : (foundMember ? foundMember.name : memberName);
+        const { error } = await supabase.from("transactions").insert([{
+          type, member_id: memberId, member_name: finalName, amount, date, note: note || ""
+        }]);
+        if (!error) txsImported++;
+      };
+
+      // ════════════════════════════════════════════════════════════
+      // FORMAT A : Excel exporté par l'app (Contributions 2026, Dons 2026, Dépenses 2026)
+      // Détecté si une feuille contient "contribution" dans son nom
+      // ════════════════════════════════════════════════════════════
+      const isMatrixFormat = wb.SheetNames.some(n => norm(n).includes("contribution"));
+
+      if (isMatrixFormat) {
+        // ── Feuille Contributions (matrice Membre × Mois) ──
+        const contribSheetName = wb.SheetNames.find(n => norm(n).includes("contribution"));
+        if (contribSheetName) {
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[contribSheetName]);
+          for (const row of rows) {
+            const memberName = String(getCol(row, "Membre", "membre", "Name") || "").trim();
+            if (!memberName || norm(memberName) === "total") continue;
+            await ensureMember(memberName);
+            // Parcourir chaque colonne mois
+            for (const [colName, monthIdx] of Object.entries(MONTH_COLS)) {
+              // Cherche la colonne dans la row (flexible)
+              let amount = null;
+              for (const rowKey of Object.keys(row)) {
+                if (norm(rowKey) === colName) { amount = parseFloat(row[rowKey]); break; }
+              }
+              if (!amount || isNaN(amount) || amount <= 0) continue;
+              // Extraire l'année depuis le nom de la feuille (ex: "Contributions 2026")
+              const yearMatch = contribSheetName.match(/\d{4}/);
+              const year = yearMatch ? parseInt(yearMatch[0]) : new Date().getFullYear();
+              const date = `${year}-${String(monthIdx + 1).padStart(2,"0")}-01`;
+              await insertTx("contribution", memberName, amount, date, "");
             }
+          }
+        }
+
+        // ── Feuille Dons (matrice Donateur × Mois) ──
+        const donsSheetName = wb.SheetNames.find(n => norm(n).includes("don"));
+        if (donsSheetName) {
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[donsSheetName]);
+          for (const row of rows) {
+            const donateur = String(getCol(row, "Donateur", "donateur", "Membre", "Name") || "").trim();
+            if (!donateur || norm(donateur) === "total" || donateur === "NaN") continue;
+            for (const [colName, monthIdx] of Object.entries(MONTH_COLS)) {
+              let amount = null;
+              for (const rowKey of Object.keys(row)) {
+                if (norm(rowKey) === colName) { amount = parseFloat(row[rowKey]); break; }
+              }
+              if (!amount || isNaN(amount) || amount <= 0) continue;
+              const yearMatch = donsSheetName.match(/\d{4}/);
+              const year = yearMatch ? parseInt(yearMatch[0]) : new Date().getFullYear();
+              const date = `${year}-${String(monthIdx + 1).padStart(2,"0")}-01`;
+              await insertTx("don", donateur, amount, date, "");
+            }
+          }
+        }
+
+        // ── Feuille Dépenses (liste détaillée) ──
+        const depSheetName = wb.SheetNames.find(n => norm(n).includes("depense") || norm(n).includes("depenses"));
+        if (depSheetName) {
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[depSheetName]);
+          for (const row of rows) {
+            const desc = String(getCol(row, "Description / Objet", "Description", "description", "Objet", "objet") || "").trim();
+            if (!desc || norm(desc).includes("total")) continue;
+            const amount = parseFloat(String(getCol(row, "Montant", "montant") || "0").replace(/[^0-9.]/g, ""));
+            const date = parseDate(getCol(row, "Date", "date"));
+            const note = String(getCol(row, "Note", "note") || desc).trim();
+            await insertTx("depense", "—", amount, date, note);
+          }
+        }
+
+      } else {
+        // ════════════════════════════════════════════════════════════
+        // FORMAT B : Format classique avec feuilles Membres + Transactions
+        // ════════════════════════════════════════════════════════════
+
+        // Import membres
+        const membresSheetName = findSheet(wb.SheetNames,
+          "Membres", "membres", "Members", "member", "Adhérents", "adherents"
+        );
+        if (membresSheetName) {
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[membresSheetName]);
+          for (const row of rows) {
+            const name = String(getCol(row, "Membre", "membre", "Name", "name", "Nom", "nom") || "").trim();
+            if (!name) continue;
+            const phone = String(getCol(row, "Téléphone", "Telephone", "Phone", "phone", "Tel", "Mobile") || "").trim();
+            const key = norm(name);
+            if (!newMemberIndex[key]) {
+              const { data: newM, error: mErr } = await supabase
+                .from("members").insert([{ name, phone }]).select().single();
+              if (!mErr && newM) {
+                newMemberIndex[key] = { id: newM.id, name: newM.name, phone: newM.phone || "" };
+                membersImported++;
+              }
+            }
+          }
+        }
+
+        // Import transactions
+        const typeMap = {
+          "Contribution":"contribution","contribution":"contribution","Contributions":"contribution",
+          "Cotisation":"contribution","Don":"don","don":"don","Dons":"don","Donation":"don",
+          "Dépense":"depense","Depense":"depense","depense":"depense","Dépenses":"depense","Expense":"depense",
+          "مساهمة":"contribution","تبرع":"don","مصروف":"depense"
+        };
+        const txSheetName = findSheet(wb.SheetNames,
+          "Transactions","transactions","Operations","Opérations","Sheet1","Feuil1","Feuille1"
+        );
+        if (txSheetName) {
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[txSheetName]);
+          for (const row of rows) {
+            const type = typeMap[String(getCol(row,"Type","type","Catégorie") || "").trim()] || "contribution";
+            const amount = parseFloat(String(getCol(row,"Montant","montant","Amount","amount") || "0").replace(/[^0-9.]/g,""));
+            if (amount <= 0) continue;
+            const memberName = String(getCol(row,"Membre","membre","Name","Donateur") || "—").trim();
+            const date = parseDate(getCol(row,"Date","date"));
+            const note = String(getCol(row,"Note","note","Description","Libellé") || "").trim();
+            await insertTx(type, memberName, amount, date, note);
           }
         }
       }
 
-      // ── Étape 3 : importer les transactions ──
-      let txsImported = 0;
-      const txSheetName = findSheet(wb.SheetNames,
-        "Transactions", "transactions", "Operations", "Opérations", "opérations",
-        "Ops", "ops", "Transaction", "Sheet1", "Feuil1", "Feuille1"
-      );
-      if (txSheetName) {
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[txSheetName]);
-        for (const row of rows) {
-          const rawType = String(
-            getCol(row, "Type", "type", "Catégorie", "Categorie", "categorie") || ""
-          ).trim();
-          const type = typeMap[rawType] || "contribution";
-
-          const rawAmount = getCol(row, "Montant", "montant", "Amount", "amount",
-                                    "Somme", "somme", "Valeur", "valeur");
-          const amount = parseFloat(String(rawAmount || "0").replace(/[^0-9.]/g, ""));
-          if (amount <= 0) continue;
-
-          const memberName = String(
-            getCol(row, "Membre", "membre", "Name", "name", "Nom", "nom",
-                   "Donateur", "donateur", "Bénéficiaire", "beneficiaire") || "—"
-          ).trim();
-
-          const date = parseDate(
-            getCol(row, "Date", "date", "Date opération", "DateOperation")
-          );
-
-          const note = String(
-            getCol(row, "Note", "note", "Description", "description",
-                   "Libellé", "libelle", "Objet", "objet", "Commentaire") || ""
-          ).trim();
-
-          const foundMember = newMemberIndex[norm(memberName)];
-          const memberId = foundMember ? foundMember.id : null;
-          const finalMemberName = type === "depense" ? "—" : (foundMember ? foundMember.name : memberName);
-
-          const { data: newTx, error: txErr } = await supabase.from("transactions").insert([{
-            type,
-            member_id: memberId,
-            member_name: finalMemberName,
-            amount,
-            date,
-            note
-          }]).select().single();
-          if (!txErr && newTx) txsImported++;
-        }
-      }
-
-      // ── Étape 4 : recharger les données ──
+      // ── Recharger ──
       await onRefresh();
 
       if (membersImported === 0 && txsImported === 0) {
-        const sheetsFound = wb.SheetNames.join(", ");
-        setImportMsg(`⚠️ Aucune donnée importée. Feuilles détectées : ${sheetsFound}`);
+        setImportMsg(`⚠️ Aucune donnée importée. Feuilles détectées : ${wb.SheetNames.join(", ")}`);
       } else {
         setImportMsg(t.importSuccess(membersImported, txsImported));
       }
