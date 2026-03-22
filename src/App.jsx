@@ -1795,59 +1795,84 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
       const ab = await file.arrayBuffer();
       const wb = XLSX.read(ab, { type: "array", cellDates: true });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
-      if (!rows.length) { setImportMsg({ ok: false, text: t.importError }); setImporting(false); return; }
 
-      // Detect columns flexibly (case-insensitive, FR/AR)
-      const firstRow = rows[0];
-      const keys = Object.keys(firstRow);
-      const find = (candidates) => keys.find(k => candidates.some(c => k.toLowerCase().includes(c.toLowerCase())));
+      // Convert to array-of-arrays to handle banner rows from our own export format
+      const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
 
-      const colType   = find(["type","typ","نوع"]);
-      const colAmt    = find(["montant","amount","مبلغ","amt"]);
-      const colDate   = find(["date","تاريخ","dat"]);
-      const colMember = find(["membre","member","عضو","nom","name","اسم","payeur"]);
-      const colNote   = find(["note","desc","remarque","ملاحظة","وصف"]);
+      // Find the header row: the first row that contains "type" or "montant" (case-insensitive)
+      const isHeaderRow = (row) => row.some(cell => {
+        const s = String(cell).toLowerCase().trim();
+        return s === "type" || s === "typ" || s.includes("montant") || s.includes("amount") || s === "نوع";
+      });
+      const headerIdx = aoa.findIndex(isHeaderRow);
+      if (headerIdx === -1) { setImportMsg({ ok: false, text: t.importColsError }); setImporting(false); return; }
 
-      if (!colType || !colAmt || !colDate) {
+      const headers = aoa[headerIdx].map(h => String(h).trim());
+      const dataRows = aoa.slice(headerIdx + 1).filter(r => r.some(c => String(c).trim() !== ""));
+
+      if (!dataRows.length) { setImportMsg({ ok: false, text: t.importError }); setImporting(false); return; }
+
+      // Flexible column index finder (case-insensitive substring match)
+      const findCol = (candidates) => {
+        const idx = headers.findIndex(h => candidates.some(c => h.toLowerCase().includes(c.toLowerCase())));
+        return idx === -1 ? null : idx;
+      };
+
+      // "Montant (MRU)", "Membre / Payeur" — our own export headers included
+      const iType   = findCol(["type","typ","نوع"]);
+      const iAmt    = findCol(["montant","amount","مبلغ","amt"]);
+      const iDate   = findCol(["date","تاريخ","dat"]);
+      const iMember = findCol(["membre","member","عضو","payeur","nom","name","اسم"]);
+      const iNote   = findCol(["note","desc","remarque","ملاحظة","وصف"]);
+
+      if (iType === null || iAmt === null || iDate === null) {
         setImportMsg({ ok: false, text: t.importColsError });
         setImporting(false);
         return;
       }
 
-      // Normalize type values
+      // Normalize type values (also handle our own export labels "Contribution", "Don", "Dépense")
       const typeMap = {
         "contribution": "contribution", "contrib": "contribution", "مساهمة": "contribution",
         "don": "don", "donation": "don", "تبرع": "don",
         "depense": "depense", "dépense": "depense", "expense": "depense", "مصروف": "depense",
+        // exported labels (capitalised)
+        "Contribution": "contribution", "Don": "don", "Dépense": "depense", "Depense": "depense",
+      };
+
+      // Parse date helper
+      const parseDate = (rawDate) => {
+        if (rawDate instanceof Date && !isNaN(rawDate)) {
+          return `${rawDate.getFullYear()}-${String(rawDate.getMonth()+1).padStart(2,"0")}-${String(rawDate.getDate()).padStart(2,"0")}`;
+        }
+        const s = String(rawDate).trim();
+        // DD/MM/YYYY
+        const m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (m1) return `${m1[3]}-${m1[2].padStart(2,"0")}-${m1[1].padStart(2,"0")}`;
+        // YYYY-MM-DD already
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+        // Excel serial number
+        if (/^\d+$/.test(s)) {
+          const d = XLSX.SSF.parse_date_code(parseInt(s));
+          if (d) return `${d.y}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`;
+        }
+        return null;
       };
 
       let count = 0;
-      for (const row of rows) {
-        const rawType = String(row[colType] || "").trim().toLowerCase();
-        const type = typeMap[rawType];
+      for (const row of dataRows) {
+        const rawType = String(row[iType] || "").trim();
+        const type = typeMap[rawType] || typeMap[rawType.toLowerCase()];
         if (!type) continue;
 
-        const rawAmt = parseFloat(String(row[colAmt]).replace(/[^0-9.,-]/g, "").replace(",", "."));
+        const rawAmt = parseFloat(String(row[iAmt]).replace(/[^0-9.,-]/g, "").replace(",", "."));
         if (!rawAmt || isNaN(rawAmt) || rawAmt <= 0) continue;
 
-        // Date handling: accept string "DD/MM/YYYY", "YYYY-MM-DD" or JS Date from xlsx
-        let dateStr = "";
-        const rawDate = row[colDate];
-        if (rawDate instanceof Date) {
-          const d = rawDate;
-          dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-        } else {
-          const s = String(rawDate).trim();
-          // Try DD/MM/YYYY
-          const m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-          if (m1) dateStr = `${m1[3]}-${m1[2].padStart(2,"0")}-${m1[1].padStart(2,"0")}`;
-          else dateStr = s; // assume YYYY-MM-DD or similar
-        }
-        if (!dateStr || dateStr === "Invalid Date") continue;
+        const dateStr = parseDate(row[iDate]);
+        if (!dateStr) continue;
 
-        const memberName = colMember ? String(row[colMember] || "").trim() || "—" : "—";
-        const note = colNote ? String(row[colNote] || "").trim() : "";
+        const memberName = iMember !== null ? (String(row[iMember] || "").trim() || "—") : "—";
+        const note = iNote !== null ? String(row[iNote] || "").trim() : "";
 
         await onAddTx({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note });
         count++;
