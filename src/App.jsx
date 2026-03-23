@@ -222,302 +222,6 @@ const AVC = [
   ["rgba(113,46,221,0.08)","#9b5de5"],["rgba(84,0,29,0.10)","#54001d"],
 ];
 
-// ─── EXCEL SYNC ───────────────────────────────────────────────────────────────
-// Synchronise automatiquement toutes les données dans un fichier Excel persisté
-// en IndexedDB. Chaque addTx/updateTx/deleteTx/addMember/deleteMember déclenche
-// une mise à jour complète du workbook stocké en mémoire IndexedDB.
-
-const IDB_DB    = "caisse_excel_db";
-const IDB_STORE = "workbooks";
-const IDB_KEY   = "CaisseCooperative_2026";
-
-function openIDB() {
-  return new Promise((res, rej) => {
-    const req = indexedDB.open(IDB_DB, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
-    req.onsuccess = () => res(req.result);
-    req.onerror   = () => rej(req.error);
-  });
-}
-async function idbGet(db, key) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(IDB_STORE, "readonly");
-    const req = tx.objectStore(IDB_STORE).get(key);
-    req.onsuccess = () => res(req.result || null);
-    req.onerror   = () => rej(req.error);
-  });
-}
-async function idbSet(db, key, value) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(IDB_STORE, "readwrite");
-    const req = tx.objectStore(IDB_STORE).put(value, key);
-    req.onsuccess = () => res();
-    req.onerror   = () => rej(req.error);
-  });
-}
-
-// Génère le workbook complet à partir des données en mémoire
-function buildWorkbook(txs, members) {
-  const XLSX = window.XLSX;
-  if (!XLSX) return null;
-
-  const today       = new Date().toLocaleDateString("fr-FR");
-  const YEAR        = new Date().getFullYear();
-  const typeLabels  = { contribution: "Contribution", don: "Don", depense: "Dépense" };
-  const MONTHS_FR   = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-
-  // ── Couleurs ARGB ──────────────────────────────────────────────────────────
-  const CLR = {
-    greenDark:"FF012D1D", greenMid:"FF1B4332", greenLight:"FF2D6A4F",
-    greenPale:"FFD8F3DC", greenXl:"FFEEF7EF",
-    purple:"FF712EDD",    purplePale:"FFEDE8F9",
-    red:"FFC0392B",       redPale:"FFFDECEA",
-    white:"FFFFFFFF",     grayLight:"FFF3F4F0",
-    grayMid:"FFCBD5E0",   grayDark:"FF4A5568",
-    black:"FF1A1C1A",
-  };
-  const solidFill = (argb) => ({ patternFill: { patternType:"solid", fgColor:{ rgb:argb } } });
-  const fnt  = (bold, sz, argb) => ({ name:"Arial", sz:sz||10, bold:!!bold, color:{ rgb:argb||CLR.black } });
-  const aln  = (h, v) => ({ horizontal:h||"left", vertical:v||"center" });
-  const bdr  = () => { const s={style:"thin",color:{rgb:CLR.grayMid}}; return {top:s,bottom:s,left:s,right:s}; };
-  const fmtM = '#,##0.00\\ "MRU"';
-  function sty(cell, { fill, f, a, b, numFmt }) {
-    if (!cell) return;
-    cell.s = {};
-    if (fill)   cell.s.fill      = fill;
-    if (f)      cell.s.font      = f;
-    if (a)      cell.s.alignment = a;
-    if (b)      cell.s.border    = b;
-    if (numFmt) { cell.s.numFmt  = numFmt; cell.z = numFmt; }
-  }
-
-  const wb = XLSX.utils.book_new();
-  const txsSorted = [...txs].sort((a,b) => new Date(a.date)-new Date(b.date));
-
-  // ══════════════════════════════════════════════════════════════
-  // FEUILLE 1 : Transactions
-  // ══════════════════════════════════════════════════════════════
-  const TX_HDR_ROW = 3; // 0-based index → row Excel 4
-  const TX_DATA_START = 4;
-  const txAoa = [
-    ["🌿  CAISSE COOPÉRATIVE — REGISTRE DES TRANSACTIONS","","","","","","","","",""],
-    [`Synchronisé le ${today}  ·  ${txsSorted.length} transaction(s)  ·  ${members.length} membre(s)`,"","","","","","","","",""],
-    ["#","Date","Type","Membre / Payeur","Montant (MRU)","Description / Note","Mois","Année","Statut","Réf."],
-    ...txsSorted.map((tx, i) => {
-      const d = new Date(tx.date);
-      return [
-        i+1,
-        tx.date,
-        typeLabels[tx.type] || tx.type,
-        tx.memberName || "—",
-        tx.amount,
-        tx.note || "",
-        isNaN(d) ? "" : d.getMonth()+1,
-        isNaN(d) ? "" : d.getFullYear(),
-        "Confirmé",
-        `TXN-${String(i+1).padStart(3,"0")}`,
-      ];
-    }),
-  ];
-
-  // Totaux
-  const tC = txsSorted.filter(t=>t.type==="contribution").reduce((a,t)=>a+t.amount,0);
-  const tD = txsSorted.filter(t=>t.type==="don").reduce((a,t)=>a+t.amount,0);
-  const tE = txsSorted.filter(t=>t.type==="depense").reduce((a,t)=>a+t.amount,0);
-  const totStart = txAoa.length + 2;
-  while (txAoa.length < totStart - 1) txAoa.push(["","","","","","","","","",""]);
-  txAoa.push(["","","","Total Contributions :","", tC,"","","",""]);
-  txAoa.push(["","","","Total Dons :","",          tD,"","","",""]);
-  txAoa.push(["","","","Total Dépenses :","",       tE,"","","",""]);
-  txAoa.push(["","","","","","","","","",""]);
-  txAoa.push(["","","","SOLDE NET :","",            tC+tD-tE,"","","",""]);
-
-  const wsT = XLSX.utils.aoa_to_sheet(txAoa);
-  wsT["!cols"] = [{wch:5},{wch:14},{wch:16},{wch:22},{wch:18},{wch:32},{wch:10},{wch:9},{wch:13},{wch:14}];
-  wsT["!merges"] = [
-    {s:{r:0,c:0},e:{r:0,c:9}},
-    {s:{r:1,c:0},e:{r:1,c:9}},
-    {s:{r:totStart-1,c:3},e:{r:totStart-1,c:4}},
-    {s:{r:totStart  ,c:3},e:{r:totStart  ,c:4}},
-    {s:{r:totStart+1,c:3},e:{r:totStart+1,c:4}},
-    {s:{r:totStart+3,c:3},e:{r:totStart+3,c:4}},
-  ];
-
-  const cols = ["A","B","C","D","E","F","G","H","I","J"];
-  // Banner
-  const a1=wsT["A1"]; if(a1) sty(a1,{fill:solidFill(CLR.greenDark),f:fnt(true,13,CLR.white),a:aln("center","center"),b:bdr()});
-  const a2=wsT["A2"]; if(a2) sty(a2,{fill:solidFill(CLR.greenMid),f:fnt(false,9,"FFAAAAAA"),a:aln("center","center")});
-  // Header row 3
-  cols.forEach(c=>{ const cell=wsT[`${c}3`]; if(cell) sty(cell,{fill:solidFill(CLR.greenMid),f:fnt(true,10,CLR.white),a:aln("center","center"),b:bdr()}); });
-  // Data rows
-  txsSorted.forEach((tx,i)=>{
-    const r = TX_DATA_START+i;
-    const isEven=i%2===1;
-    const baseFill = isEven?solidFill(CLR.greenXl):solidFill(CLR.white);
-    let tFill=baseFill; let tFnt=fnt(false,10,CLR.black);
-    if(tx.type==="contribution"){tFill=solidFill(CLR.greenPale);tFnt=fnt(false,10,CLR.greenLight);}
-    if(tx.type==="don")         {tFill=solidFill(CLR.purplePale);tFnt=fnt(false,10,CLR.purple);}
-    if(tx.type==="depense")     {tFill=solidFill(CLR.redPale);tFnt=fnt(false,10,CLR.red);}
-    cols.forEach((col,ci)=>{
-      const cell=wsT[`${col}${r}`]; if(!cell) return;
-      const isAmt=col==="E"; const isDt=col==="B";
-      sty(cell,{fill:tFill,f:[6,7].includes(ci)?fnt(false,9,CLR.greenLight):tFnt,a:aln(isAmt?"right":[0,1,6,7,8,9].includes(ci)?"center":"left","center"),b:bdr(),numFmt:isAmt?fmtM:isDt?"DD/MM/YYYY":undefined});
-    });
-  });
-  // Totals style
-  [[0,CLR.greenLight],[1,CLR.purple],[2,CLR.red],[4,CLR.greenDark]].forEach(([off,clr])=>{
-    const r=totStart+off;
-    ["D","E","F"].forEach(c=>{ const cell=wsT[`${c}${r}`]; if(!cell) return; sty(cell,{fill:solidFill(clr),f:fnt(true,off===4?13:10,CLR.white),a:aln("right","center"),b:bdr(),numFmt:c==="F"?fmtM:undefined}); });
-  });
-
-  XLSX.utils.book_append_sheet(wb, wsT, "Transactions");
-
-  // ══════════════════════════════════════════════════════════════
-  // FEUILLE 2 : REGISTRE DES MEMBRES
-  // ══════════════════════════════════════════════════════════════
-  const mbAoa = [
-    ["👥  REGISTRE DES MEMBRES — CAISSE COOPÉRATIVE","","","","","",""],
-    ["","","","","","",""],
-    ["#","Nom complet","Téléphone","Email","Date d'adhésion","Total Contributions (MRU)","Statut"],
-    ...members.map((m,i)=>{
-      const mTotal = txs.filter(tx=>tx.type==="contribution"&&(tx.memberName===m.name||tx.memberId===m.id)).reduce((a,tx)=>a+tx.amount,0);
-      return [i+1, m.name, m.phone||"", "", "", mTotal, "Actif"];
-    }),
-  ];
-  const wsM = XLSX.utils.aoa_to_sheet(mbAoa);
-  wsM["!cols"]   = [{wch:5},{wch:28},{wch:16},{wch:26},{wch:16},{wch:26},{wch:12}];
-  wsM["!merges"] = [{s:{r:0,c:0},e:{r:0,c:6}}];
-  const mA1=wsM["A1"]; if(mA1) sty(mA1,{fill:solidFill(CLR.greenDark),f:fnt(true,13,CLR.white),a:aln("center","center")});
-  ["A","B","C","D","E","F","G"].forEach(c=>{ const cell=wsM[`${c}3`]; if(cell) sty(cell,{fill:solidFill(CLR.greenMid),f:fnt(true,10,CLR.white),a:aln("center","center"),b:bdr()}); });
-  members.forEach((_,i)=>{
-    const r=4+i; const isEven=i%2===1;
-    ["A","B","C","D","E","F","G"].forEach((col,ci)=>{
-      const cell=wsM[`${col}${r}`]; if(!cell) return;
-      sty(cell,{fill:isEven?solidFill(CLR.greenXl):solidFill(CLR.white),f:fnt(false,10,ci===5?CLR.greenMid:CLR.black),a:aln(ci===5?"right":ci===0||ci>=4?"center":"left","center"),b:bdr(),numFmt:ci===5?fmtM:undefined});
-    });
-  });
-  XLSX.utils.book_append_sheet(wb, wsM, "REGISTRE DES MEMBRES");
-
-  // ══════════════════════════════════════════════════════════════
-  // FEUILLE 3 : Récap. Mensuel
-  // ══════════════════════════════════════════════════════════════
-  const txsYear = txs.filter(tx=>new Date(tx.date).getFullYear()===YEAR);
-  const allC=txsYear.filter(t=>t.type==="contribution").reduce((a,t)=>a+t.amount,0);
-  const allD=txsYear.filter(t=>t.type==="don").reduce((a,t)=>a+t.amount,0);
-  const allE=txsYear.filter(t=>t.type==="depense").reduce((a,t)=>a+t.amount,0);
-
-  const rcpAoa = [
-    [`🌿  RÉCAPITULATIF MENSUEL — CAISSE COOPÉRATIVE ${YEAR}`,"","","","",""],
-    [`Synchronisé le ${today}  ·  ${members.length} membres  ·  ${txsYear.length} opérations`,"","","","",""],
-    ["","","","","",""],
-    ["Mois","Contributions (MRU)","Dons (MRU)","Dépenses (MRU)","Solde du mois (MRU)","Δ vs mois préc."],
-  ];
-  let prevS=null;
-  MONTHS_FR.forEach((mname,mi)=>{
-    const mIdx=mi+1;
-    const mC=txsYear.filter(tx=>tx.type==="contribution"&&new Date(tx.date).getMonth()+1===mIdx).reduce((a,tx)=>a+tx.amount,0);
-    const mD=txsYear.filter(tx=>tx.type==="don"&&new Date(tx.date).getMonth()+1===mIdx).reduce((a,tx)=>a+tx.amount,0);
-    const mE=txsYear.filter(tx=>tx.type==="depense"&&new Date(tx.date).getMonth()+1===mIdx).reduce((a,tx)=>a+tx.amount,0);
-    const mS=mC+mD-mE;
-    const evo=prevS!==null&&prevS!==0?(mS-prevS)/Math.abs(prevS):"";
-    prevS=mS;
-    rcpAoa.push([mname,mC,mD,mE,mS,evo]);
-  });
-  rcpAoa.push(["TOTAL ANNUEL",allC,allD,allE,allC+allD-allE,""]);
-  rcpAoa.push(["","","","","",""]);
-  rcpAoa.push(["Solde cumulé fin d'année :",allC+allD-allE,"","","",""]);
-
-  const wsS=XLSX.utils.aoa_to_sheet(rcpAoa);
-  wsS["!cols"]   = [{wch:26},{wch:20},{wch:14},{wch:14},{wch:20},{wch:14}];
-  wsS["!merges"] = [{s:{r:0,c:0},e:{r:0,c:5}},{s:{r:1,c:0},e:{r:1,c:5}}];
-  const sA1=wsS["A1"]; if(sA1) sty(sA1,{fill:solidFill(CLR.greenDark),f:fnt(true,13,CLR.white),a:aln("center","center")});
-  const sA2=wsS["A2"]; if(sA2) sty(sA2,{fill:solidFill(CLR.greenMid),f:fnt(false,9,"FFAAAAAA"),a:aln("center","center")});
-  ["A","B","C","D","E","F"].forEach(c=>{ const cell=wsS[`${c}4`]; if(cell) sty(cell,{fill:solidFill(CLR.greenMid),f:fnt(true,10,CLR.white),a:aln("center","center"),b:bdr()}); });
-  MONTHS_FR.forEach((_,mi)=>{
-    const r=5+mi; const isEven=mi%2===1;
-    ["A","B","C","D","E","F"].forEach((col,ci)=>{
-      const cell=wsS[`${col}${r}`]; if(!cell) return;
-      let rf=isEven?solidFill(CLR.greenXl):solidFill(CLR.white);
-      let cf=CLR.black; let nf;
-      if(ci===0){cf=CLR.greenMid;}
-      else if(ci===1){rf=solidFill(CLR.greenPale);nf=fmtM;}
-      else if(ci===2){rf=solidFill(CLR.purplePale);nf=fmtM;}
-      else if(ci===3){rf=solidFill(CLR.redPale);nf=fmtM;}
-      else if(ci===4){cf=CLR.greenDark;nf=fmtM;}
-      else if(ci===5&&cell.t==="n"){nf="0.0%";}
-      sty(cell,{fill:rf,f:fnt(ci===0,10,cf),a:aln(ci>=1&&ci<=4?"right":"center","center"),b:bdr(),numFmt:nf});
-    });
-  });
-  ["A","B","C","D","E","F"].forEach((col,ci)=>{ const cell=wsS[`${col}17`]; if(!cell) return; sty(cell,{fill:solidFill(CLR.greenDark),f:fnt(true,10,CLR.white),a:aln(ci>=1?"right":"center","center"),b:bdr(),numFmt:ci>=1&&ci<=4?fmtM:undefined}); });
-  const sCum=wsS["A19"]; if(sCum) sty(sCum,{f:fnt(true,10,CLR.greenDark),a:aln("right","center")});
-  const sCumV=wsS["B19"]; if(sCumV) sty(sCumV,{fill:solidFill(CLR.greenPale),f:fnt(true,11,CLR.greenDark),a:aln("right","center"),b:bdr(),numFmt:fmtM});
-  XLSX.utils.book_append_sheet(wb, wsS, "Récap. Mensuel");
-
-  return wb;
-}
-
-// Sérialise le workbook en binaire ArrayBuffer
-function wbToBuffer(wb) {
-  const XLSX = window.XLSX;
-  if (!XLSX || !wb) return null;
-  const out = XLSX.write(wb, { bookType:"xlsx", type:"binary", cellStyles:true });
-  const buf = new ArrayBuffer(out.length);
-  const view = new Uint8Array(buf);
-  for (let i=0; i<out.length; i++) view[i] = out.charCodeAt(i) & 0xFF;
-  return buf;
-}
-
-// Télécharge le fichier Excel synchronisé
-function downloadBuffer(buf, filename) {
-  if (!buf) return;
-  const blob = new Blob([buf], { type:"application/octet-stream" });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement("a");
-  a.href = url; a.download = filename; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-// Hook principal : expose syncExcel(txs, members) et downloadExcel()
-function useExcelSync(xlsxReady) {
-  const dbRef = useRef(null);
-  const [syncStatus, setSyncStatus] = useState("idle"); // "idle" | "syncing" | "ok" | "error"
-  const lastSyncRef = useRef(null);
-
-  // Ouvre IndexedDB une seule fois
-  useEffect(() => {
-    openIDB().then(db => { dbRef.current = db; }).catch(() => {});
-  }, []);
-
-  const syncExcel = async (txs, members) => {
-    if (!xlsxReady || !dbRef.current) return;
-    setSyncStatus("syncing");
-    try {
-      const wb  = buildWorkbook(txs, members);
-      if (!wb) { setSyncStatus("error"); return; }
-      const buf = wbToBuffer(wb);
-      if (!buf) { setSyncStatus("error"); return; }
-      await idbSet(dbRef.current, IDB_KEY, buf);
-      lastSyncRef.current = new Date();
-      setSyncStatus("ok");
-      setTimeout(() => setSyncStatus("idle"), 2500);
-    } catch (err) {
-      console.error("Excel sync error:", err);
-      setSyncStatus("error");
-      setTimeout(() => setSyncStatus("idle"), 3000);
-    }
-  };
-
-  const downloadExcel = async (txs, members) => {
-    if (!xlsxReady) return alert("SheetJS pas encore chargé…");
-    const wb  = buildWorkbook(txs, members);
-    const buf = wbToBuffer(wb);
-    const date = new Date().toISOString().split("T")[0];
-    downloadBuffer(buf, `CaisseCooperative_${date}.xlsx`);
-  };
-
-  return { syncExcel, downloadExcel, syncStatus, lastSync: lastSyncRef.current };
-}
-
 // ─── PERSISTED STATE ──────────────────────────────────────────────────────────
 function usePersisted(k, d) {
   const [s, set] = useState(() => {
@@ -540,16 +244,11 @@ function usePersisted(k, d) {
 }
 
 // ─── SUPABASE HOOKS ───────────────────────────────────────────────────────────
-function useSupabaseData(onSync) {
+function useSupabaseData() {
   const [members, setMembers] = useState([]);
   const [txs, setTxs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [netError, setNetError] = useState(null);
-  // Refs pour accéder aux dernières valeurs dans les callbacks async
-  const txsRef = useRef([]);
-  const membersRef = useRef([]);
-  useEffect(() => { txsRef.current = txs; }, [txs]);
-  useEffect(() => { membersRef.current = members; }, [members]); // message d'erreur réseau visible
+  const [netError, setNetError] = useState(null); // message d'erreur réseau visible
 
   // Affiche une erreur pendant 4 secondes puis la fait disparaître
   const showError = (msg) => {
@@ -581,42 +280,38 @@ function useSupabaseData(onSync) {
 
   useEffect(() => { fetchAll(); }, []);
 
-  // Déclenche la sync Excel 300ms après une mutation (laisse React finir son render)
-  const triggerSync = (updatedTxs, updatedMembers) => {
-    setTimeout(() => {
-      if (onSync) onSync(updatedTxs ?? txsRef.current, updatedMembers ?? membersRef.current);
-    }, 300);
-  };
-
   const addTx = async (d) => {
+    // Optimistic update : on ajoute localement tout de suite
     const tempId = "tmp_" + Date.now();
     const optimistic = { id: tempId, type: d.type, memberId: d.memberId || null, memberName: d.memberName, amount: d.amount, date: d.date, note: d.note || "" };
-    setTxs(p => { const next = [optimistic, ...p]; txsRef.current = next; return next; });
+    setTxs(p => [optimistic, ...p]);
     try {
       const { data, error } = await supabase.from("transactions")
         .insert([{ type: d.type, member_id: d.memberId || null, member_name: d.memberName, amount: d.amount, date: d.date, note: d.note }])
         .select().single();
       if (error) throw new Error(error.message);
-      setTxs(p => { const next = p.map(tx => tx.id === tempId ? mapTx(data) : tx); txsRef.current = next; return next; });
-      triggerSync(txsRef.current, null);
+      // Remplace l'entrée temporaire par la vraie
+      setTxs(p => p.map(tx => tx.id === tempId ? mapTx(data) : tx));
     } catch (err) {
-      setTxs(p => { const next = p.filter(tx => tx.id !== tempId); txsRef.current = next; return next; });
+      // Annule l'optimistic update
+      setTxs(p => p.filter(tx => tx.id !== tempId));
       showError("❌ Ajout échoué — réessayez.");
       console.error("addTx error:", err);
     }
   };
 
   const updateTx = async (d) => {
+    // Sauvegarde l'ancienne valeur pour rollback
     const prev = txs.find(tx => tx.id === d.id);
-    setTxs(p => { const next = p.map(tx => tx.id === d.id ? d : tx); txsRef.current = next; return next; });
+    setTxs(p => p.map(tx => tx.id === d.id ? d : tx));
     try {
       const { error } = await supabase.from("transactions")
         .update({ type: d.type, member_id: d.memberId || null, member_name: d.memberName, amount: d.amount, date: d.date, note: d.note })
         .eq("id", d.id);
       if (error) throw new Error(error.message);
-      triggerSync(txsRef.current, null);
     } catch (err) {
-      if (prev) setTxs(p => { const next = p.map(tx => tx.id === d.id ? prev : tx); txsRef.current = next; return next; });
+      // Rollback
+      if (prev) setTxs(p => p.map(tx => tx.id === d.id ? prev : tx));
       showError("❌ Modification échouée — réessayez.");
       console.error("updateTx error:", err);
     }
@@ -624,13 +319,12 @@ function useSupabaseData(onSync) {
 
   const deleteTx = async (id) => {
     const prev = txs.find(tx => tx.id === id);
-    setTxs(p => { const next = p.filter(tx => tx.id !== id); txsRef.current = next; return next; });
+    setTxs(p => p.filter(tx => tx.id !== id));
     try {
       const { error } = await supabase.from("transactions").delete().eq("id", id);
       if (error) throw new Error(error.message);
-      triggerSync(txsRef.current, null);
     } catch (err) {
-      if (prev) setTxs(p => { const next = [prev, ...p]; txsRef.current = next; return next; });
+      if (prev) setTxs(p => [prev, ...p]);
       showError("❌ Suppression échouée — réessayez.");
       console.error("deleteTx error:", err);
     }
@@ -639,16 +333,15 @@ function useSupabaseData(onSync) {
   const addMember = async (d) => {
     const tempId = "tmp_" + Date.now();
     const optimistic = { id: tempId, name: d.name, phone: d.phone || "" };
-    setMembers(p => { const next = [...p, optimistic]; membersRef.current = next; return next; });
+    setMembers(p => [...p, optimistic]);
     try {
       const { data, error } = await supabase.from("members")
         .insert([{ name: d.name, phone: d.phone }])
         .select().single();
       if (error) throw new Error(error.message);
-      setMembers(p => { const next = p.map(m => m.id === tempId ? mapMember(data) : m); membersRef.current = next; return next; });
-      triggerSync(null, membersRef.current);
+      setMembers(p => p.map(m => m.id === tempId ? mapMember(data) : m));
     } catch (err) {
-      setMembers(p => { const next = p.filter(m => m.id !== tempId); membersRef.current = next; return next; });
+      setMembers(p => p.filter(m => m.id !== tempId));
       showError("❌ Ajout du membre échoué — réessayez.");
       console.error("addMember error:", err);
     }
@@ -656,13 +349,12 @@ function useSupabaseData(onSync) {
 
   const deleteMember = async (id) => {
     const prev = members.find(m => m.id === id);
-    setMembers(p => { const next = p.filter(m => m.id !== id); membersRef.current = next; return next; });
+    setMembers(p => p.filter(m => m.id !== id));
     try {
       const { error } = await supabase.from("members").delete().eq("id", id);
       if (error) throw new Error(error.message);
-      triggerSync(null, membersRef.current);
     } catch (err) {
-      if (prev) setMembers(p => { const next = [...p, prev]; membersRef.current = next; return next; });
+      if (prev) setMembers(p => [...p, prev]);
       showError("❌ Suppression du membre échouée — réessayez.");
       console.error("deleteMember error:", err);
     }
@@ -672,16 +364,20 @@ function useSupabaseData(onSync) {
     try {
       const { error: tErr } = await supabase.from("transactions").delete().gte("id", 0);
       if (tErr) {
+        // Fallback pour UUIDs
         const { data: allTxs } = await supabase.from("transactions").select("id");
-        if (allTxs?.length) await supabase.from("transactions").delete().in("id", allTxs.map(t => t.id));
+        if (allTxs?.length) {
+          await supabase.from("transactions").delete().in("id", allTxs.map(t => t.id));
+        }
       }
       const { error: mErr } = await supabase.from("members").delete().gte("id", 0);
       if (mErr) {
         const { data: allMembers } = await supabase.from("members").select("id");
-        if (allMembers?.length) await supabase.from("members").delete().in("id", allMembers.map(m => m.id));
+        if (allMembers?.length) {
+          await supabase.from("members").delete().in("id", allMembers.map(m => m.id));
+        }
       }
       await fetchAll();
-      triggerSync([], []);
     } catch (err) {
       showError("❌ Réinitialisation échouée — réessayez.");
       console.error("resetAll error:", err);
@@ -2080,11 +1776,118 @@ function PdfReportModal({ txs, members, onClose, year }) {
 }
 
 // ─── REPORTS ──────────────────────────────────────────────────────────────────
-function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset }) {
+function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx }) {
   const t = T[lang];
   const years = getYrs(txs);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState(null);
+  const importRef = useRef(null);
+
+  useEffect(() => { setImportMsg(null); }, []);
+
+  async function doImport(file) {
+    if (!file) return;
+    const XLSX = window.XLSX;
+    if (!XLSX) return setImportMsg({ ok: false, text: t.xlsxWait });
+    setImporting(true);
+    setImportMsg(null);
+    try {
+      const ab = await file.arrayBuffer();
+      const wb = XLSX.read(ab, { type: "array", cellDates: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+
+      // Convert to array-of-arrays to handle banner rows from our own export format
+      const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+
+      // Find the header row: the first row that contains "type" or "montant" (case-insensitive)
+      const isHeaderRow = (row) => row.some(cell => {
+        const s = String(cell).toLowerCase().trim();
+        return s === "type" || s === "typ" || s.includes("montant") || s.includes("amount") || s === "نوع";
+      });
+      const headerIdx = aoa.findIndex(isHeaderRow);
+      if (headerIdx === -1) { setImportMsg({ ok: false, text: t.importColsError }); setImporting(false); return; }
+
+      const headers = aoa[headerIdx].map(h => String(h).trim());
+      const dataRows = aoa.slice(headerIdx + 1).filter(r => r.some(c => String(c).trim() !== ""));
+
+      if (!dataRows.length) { setImportMsg({ ok: false, text: t.importError }); setImporting(false); return; }
+
+      // Flexible column index finder (case-insensitive substring match)
+      const findCol = (candidates) => {
+        const idx = headers.findIndex(h => candidates.some(c => h.toLowerCase().includes(c.toLowerCase())));
+        return idx === -1 ? null : idx;
+      };
+
+      // "Montant (MRU)", "Membre / Payeur" — our own export headers included
+      const iType   = findCol(["type","typ","نوع"]);
+      const iAmt    = findCol(["montant","amount","مبلغ","amt"]);
+      const iDate   = findCol(["date","تاريخ","dat"]);
+      const iMember = findCol(["membre","member","عضو","payeur","nom","name","اسم"]);
+      const iNote   = findCol(["note","desc","remarque","ملاحظة","وصف"]);
+
+      if (iType === null || iAmt === null || iDate === null) {
+        setImportMsg({ ok: false, text: t.importColsError });
+        setImporting(false);
+        return;
+      }
+
+      // Normalize type values (also handle our own export labels "Contribution", "Don", "Dépense")
+      const typeMap = {
+        "contribution": "contribution", "contrib": "contribution", "مساهمة": "contribution",
+        "don": "don", "donation": "don", "تبرع": "don",
+        "depense": "depense", "dépense": "depense", "expense": "depense", "مصروف": "depense",
+        // exported labels (capitalised)
+        "Contribution": "contribution", "Don": "don", "Dépense": "depense", "Depense": "depense",
+      };
+
+      // Parse date helper
+      const parseDate = (rawDate) => {
+        if (rawDate instanceof Date && !isNaN(rawDate)) {
+          return `${rawDate.getFullYear()}-${String(rawDate.getMonth()+1).padStart(2,"0")}-${String(rawDate.getDate()).padStart(2,"0")}`;
+        }
+        const s = String(rawDate).trim();
+        // DD/MM/YYYY
+        const m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (m1) return `${m1[3]}-${m1[2].padStart(2,"0")}-${m1[1].padStart(2,"0")}`;
+        // YYYY-MM-DD already
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+        // Excel serial number
+        if (/^\d+$/.test(s)) {
+          const d = XLSX.SSF.parse_date_code(parseInt(s));
+          if (d) return `${d.y}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`;
+        }
+        return null;
+      };
+
+      let count = 0;
+      for (const row of dataRows) {
+        const rawType = String(row[iType] || "").trim();
+        const type = typeMap[rawType] || typeMap[rawType.toLowerCase()];
+        if (!type) continue;
+
+        const rawAmt = parseFloat(String(row[iAmt]).replace(/[^0-9.,-]/g, "").replace(",", "."));
+        if (!rawAmt || isNaN(rawAmt) || rawAmt <= 0) continue;
+
+        const dateStr = parseDate(row[iDate]);
+        if (!dateStr) continue;
+
+        const memberName = iMember !== null ? (String(row[iMember] || "").trim() || "—") : "—";
+        const note = iNote !== null ? String(row[iNote] || "").trim() : "";
+
+        await onAddTx({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note });
+        count++;
+      }
+      setImportMsg({ ok: true, text: t.importSuccess(count) });
+    } catch (e) {
+      console.error("Import error:", e);
+      setImportMsg({ ok: false, text: t.importError });
+    }
+    setImporting(false);
+    if (importRef.current) importRef.current.value = "";
+  }
+
   const all = txs.filter((tx) => { const d = new Date(tx.date); return d.getMonth() + 1 === month && d.getFullYear() === year; });
 
   const YEAR_STATS = year;  // Suit l'année sélectionnée
@@ -2664,6 +2467,64 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
           </button>
         ))}
       </div>
+      {/* IMPORT */}
+      <div style={{ marginTop: 6, borderTop: `1px solid ${C.outline}`, paddingTop: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 13, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: C.secondaryCnt, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.secondaryLt} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{t.importBtn}</span>
+          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.bgLow, border: `1px solid ${C.outline}`, borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
+        </div>
+
+        {/* feedback message */}
+        {importMsg && (
+          <div style={{ marginBottom: 12, padding: "10px 14px", borderRadius: 12, background: importMsg.ok ? C.goldLt : C.redLt, border: `1px solid ${importMsg.ok ? C.primaryLt : C.red}20`, fontSize: 12, fontWeight: 600, color: importMsg.ok ? C.primaryLt : C.red, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+            <span>{importMsg.text}</span>
+            <button onClick={() => setImportMsg(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", opacity: 0.6, fontSize: 16, lineHeight: 1, padding: "0 2px", flexShrink: 0 }}>✕</button>
+          </div>
+        )}
+
+        {/* hidden file input */}
+        <input
+          ref={importRef}
+          type="file"
+          accept=".xlsx,.xls"
+          style={{ display: "none" }}
+          onChange={e => { const f = e.target.files?.[0]; if (f) doImport(f); }}
+        />
+
+        <button
+          className="tbtn eco-btn"
+          onClick={() => { if (xlsxReady && !importing) importRef.current?.click(); }}
+          disabled={!xlsxReady || importing}
+          style={{ width: "100%", background: xlsxReady ? C.secondaryCnt : C.bgLow, border: `1.5px solid ${xlsxReady ? "rgba(113,46,221,0.25)" : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: xlsxReady && !importing ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "inherit", opacity: xlsxReady ? 1 : 0.5, boxShadow: xlsxReady ? C.shadow : "none" }}>
+          <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
+            <div style={{ color: xlsxReady ? C.secondaryLt : C.muted, fontWeight: 600, fontSize: 13 }}>
+              {importing ? t.importProcessing : t.importDesc}
+            </div>
+            <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>
+              {lang === "ar" ? "صيغة .xlsx · الأعمدة: Type, Montant, Date, Membre" : "Format .xlsx · Colonnes : Type, Montant, Date, Membre"}
+            </div>
+          </div>
+          {importing
+            ? <div style={{ width: 22, height: 22, border: `2.5px solid ${C.secondaryLt}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite", flexShrink: 0 }} />
+            : <span style={{ fontSize: 22, flexShrink: 0 }}>📂</span>
+          }
+        </button>
+
+        {/* format helper */}
+        <div style={{ marginTop: 10, padding: "10px 14px", borderRadius: 12, background: C.bgLow, border: `1px solid ${C.outline}`, fontSize: 11, color: C.muted, lineHeight: 1.6, direction: "ltr" }}>
+          <div style={{ fontWeight: 700, color: C.sub, marginBottom: 4 }}>📋 {lang === "ar" ? "مثال على بنية الملف:" : "Exemple de structure du fichier :"}</div>
+          <div style={{ fontFamily: "monospace", fontSize: 10, color: C.primaryLt }}>
+            Type &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Montant | Date &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Membre<br/>
+            contribution | 500 &nbsp;&nbsp;&nbsp;&nbsp;| 2026-01-15 | Ahmed<br/>
+            don &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| 200 &nbsp;&nbsp;&nbsp;&nbsp;| 15/01/2026 | —<br/>
+            depense &nbsp;&nbsp;| 150 &nbsp;&nbsp;&nbsp;&nbsp;| 2026-01-20 | —
+          </div>
+        </div>
+      </div>
+
       {showPdf && <PdfReportModal txs={txs} members={members} onClose={() => setShowPdf(false)} year={YEAR_STATS} />}
     </div>
   );
@@ -2671,13 +2532,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
 // ─── SETTINGS ─────────────────────────────────────────────────────────────────
 const PROFILE_IMG = "data:image/png;base64,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";
 
-function Settings({ lang, setLang, t, onLogout, onDownloadExcel, syncStatus, txs, members }) {
-  const syncBadge = {
-    idle:    { bg: "rgba(45,106,79,0.10)", color: "#2d6a4f", text: lang === "ar" ? "جاهز" : "Prêt" },
-    syncing: { bg: "rgba(113,46,221,0.12)", color: "#712edd", text: lang === "ar" ? "جارٍ التزامن…" : "Synchronisation…" },
-    ok:      { bg: "rgba(45,106,79,0.15)", color: "#1b4332", text: lang === "ar" ? "✅ تم التزامن" : "✅ Excel synchronisé" },
-    error:   { bg: "rgba(192,57,43,0.10)", color: "#c0392b", text: lang === "ar" ? "❌ خطأ في التزامن" : "❌ Erreur de sync" },
-  }[syncStatus] || { bg: "rgba(45,106,79,0.10)", color: "#2d6a4f", text: "Prêt" };
+function Settings({ lang, setLang, t, onLogout }) {
   const groups = [
     { title: t.settingsTitle, items: [
       { icon: Ic.globe(C.primaryLt), label: t.langLbl, value: lang === "fr" ? "Français" : "عربي", action: () => setLang(lang === "fr" ? "ar" : "fr") },
@@ -2719,39 +2574,6 @@ function Settings({ lang, setLang, t, onLogout, onDownloadExcel, syncStatus, txs
           </Card>
         </div>
       ))}
-
-      {/* ── Excel Sync Card ── */}
-      <div className="a4" style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 8, paddingLeft: 3 }}>
-          {lang === "ar" ? "ملف Excel" : "Fichier Excel"}
-        </div>
-        <Card sx={{ padding: "16px 16px 14px", display: "flex", flexDirection: "column", gap: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: C.muted }}>{lang === "ar" ? "الحالة" : "Statut de synchronisation"}</span>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 20, background: syncBadge.bg, color: syncBadge.color, display: "flex", alignItems: "center", gap: 5 }}>
-              {syncStatus === "syncing" && (<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" style={{ animation: "spin 1s linear infinite" }}><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".2"/><path d="M12 3a9 9 0 019 9"/></svg>)}
-              {syncBadge.text}
-            </span>
-          </div>
-          <div style={{ display: "flex", gap: 8, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-            {[{ label: lang === "ar" ? "معاملة" : "transactions", val: txs.length, color: C.primaryLt }, { label: lang === "ar" ? "عضو" : "membres", val: members.length, color: C.secondary }].map((s, i) => (
-              <div key={i} style={{ flex: 1, background: C.bgLow, borderRadius: 12, padding: "10px 12px", textAlign: "center" }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: s.color }}>{s.val}</div>
-                <div style={{ fontSize: 10, color: C.muted, fontWeight: 600, marginTop: 2 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-          <button className="tbtn eco-btn" onClick={() => onDownloadExcel && onDownloadExcel()}
-            style={{ width: "100%", background: C.heroGrad, border: "none", borderRadius: 18, padding: "13px 16px", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 9, boxShadow: "0 4px 16px rgba(1,45,29,0.20)" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            {lang === "ar" ? "تحميل ملف Excel المحدّث" : "Télécharger Excel synchronisé"}
-          </button>
-          <div style={{ fontSize: 10, color: C.sub, textAlign: "center", lineHeight: 1.5 }}>
-            {lang === "ar" ? "يتم التزامن تلقائياً عند كل إضافة أو تعديل أو حذف" : "Sync automatique à chaque ajout, modification ou suppression"}
-          </div>
-        </Card>
-      </div>
-
       <div className="a5">
         <button className="tbtn" onClick={onLogout} style={{ width: "100%", background: C.redLt, border: "none", borderRadius: 24, padding: "15px", color: C.red, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 4px 16px rgba(192,57,43,0.10)" }}>{t.logout}</button>
       </div>
@@ -3217,10 +3039,7 @@ export default function App() {
   const [loggedIn, setLoggedIn] = useState(() => {
     try { return !!sessionStorage.getItem("cc_user"); } catch { return false; }
   });
-  const { syncExcel, downloadExcel, syncStatus } = useExcelSync(xlsxReady);
-  const { members, txs, loading, netError, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll } = useSupabaseData(
-    (newTxs, newMembers) => syncExcel(newTxs, newMembers)
-  );
+  const { members, txs, loading, netError, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll } = useSupabaseData();
 
   const handleLogin = (name) => {
     try { sessionStorage.setItem("cc_user", name); } catch {}
@@ -3258,21 +3077,12 @@ export default function App() {
           {netError}
         </div>
       )}
-      {/* ── Excel sync toast ── */}
-      {(syncStatus === "syncing" || syncStatus === "ok" || syncStatus === "error") && (
-        <div style={{ position: "fixed", top: netError ? 64 : 16, right: 16, zIndex: 9998, background: syncStatus === "ok" ? "#1b4332" : syncStatus === "error" ? "#c0392b" : "#712edd", color: "#fff", borderRadius: 22, padding: "8px 14px 8px 10px", fontSize: 11, fontWeight: 700, boxShadow: "0 4px 18px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", gap: 7, animation: "pop .2s ease both", maxWidth: 200 }}>
-          {syncStatus === "syncing" && (<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" style={{ animation: "spin 1s linear infinite" }}><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".2"/><path d="M12 3a9 9 0 019 9"/></svg>)}
-          {syncStatus === "ok"      && <span>✅</span>}
-          {syncStatus === "error"   && <span>❌</span>}
-          <span>{syncStatus === "syncing" ? (lang === "ar" ? "جارٍ التزامن…" : "Sync Excel…") : syncStatus === "ok" ? (lang === "ar" ? "تم حفظ Excel" : "Excel sauvegardé") : (lang === "ar" ? "خطأ" : "Erreur sync")}</span>
-        </div>
-      )}
       <div style={{ padding: "20px 16px" }}>
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
-        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} />}
-        {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} txs={txs} members={members} syncStatus={syncStatus} onDownloadExcel={() => downloadExcel(txs, members)} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
+        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} />}
+        {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "rgba(1,45,29,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 40px rgba(1,45,29,0.25)" }}>
         {TABS.map((tb) => <NavItem key={tb.id} label={tb.label} icon={tb.icon} activeIcon={tb.aicon} active={tab === tb.id} onClick={() => setTab(tb.id)} />)}
