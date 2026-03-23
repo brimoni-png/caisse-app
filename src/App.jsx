@@ -157,7 +157,6 @@ const T = {
     newMember: "Nouveau membre", fullName: "Nom complet", fullNamePh: "Ex : Fatima Mint Ahmed",
     phone: "Téléphone", phonePh: "Ex : 22234567890", addMemberBtn: "Ajouter",
     exportBtn: "Exporter Excel", exportAll: "Toutes les transactions", exportMonth: "Ce mois", xlsxWait: "Chargement…", resetBtn: "Réinitialiser les données", resetConfirmTitle: "Tout supprimer ?", resetConfirmMsg: "Cette action supprimera TOUS les membres et TOUTES les transactions. Impossible d'annuler.", resetSuccess: "✅ Toutes les données ont été supprimées.",
-    importBtn: "Importer Excel", importDesc: "Charger des transactions depuis un fichier .xlsx", importSuccess: (n, m) => `✅ ${n} transaction(s)${m > 0 ? ` + ${m} membre(s)` : ""} importé(s) avec succès.`, importError: "❌ Erreur lors de la lecture du fichier. Vérifiez le format.", importColsError: "❌ Colonnes introuvables. Le fichier doit contenir : Type, Montant, Date, Membre.", importProcessing: "Importation en cours…",
     settingsTitle: "Paramètres", langLbl: "Langue", themeLbl: "Apparence", secLbl: "Sécurité",
     aboutLbl: "À propos", version: "Version 1.0.0", darkMode: "Mode sombre", changeLang: "Changer la langue",
     changePin: "Changer le PIN", aboutApp: "Caisse Coopérative · Gestion communautaire", logout: "Se déconnecter",
@@ -189,7 +188,6 @@ const T = {
     newMember: "عضو جديد", fullName: "الاسم الكامل", fullNamePh: "مثال: فاطمة بنت أحمد",
     phone: "الهاتف", phonePh: "مثال: 22234567890", addMemberBtn: "إضافة",
     exportBtn: "تصدير Excel", exportAll: "كل العمليات", exportMonth: "هذا الشهر", xlsxWait: "جارٍ التحميل…", resetBtn: "مسح جميع البيانات", resetConfirmTitle: "حذف الكل؟", resetConfirmMsg: "سيتم حذف جميع الأعضاء والمعاملات. لا يمكن التراجع.", resetSuccess: "✅ تم مسح جميع البيانات.",
-    importBtn: "استيراد Excel", importDesc: "تحميل المعاملات من ملف .xlsx", importSuccess: (n, m) => `✅ تم استيراد ${n} عملية${m > 0 ? ` و ${m} عضو` : ""} بنجاح.`, importError: "❌ خطأ في قراءة الملف. تحقق من الصيغة.", importColsError: "❌ الأعمدة غير موجودة. يجب أن يحتوي الملف على: Type, Montant, Date, Membre.", importProcessing: "جارٍ الاستيراد…",
     settingsTitle: "الإعدادات", langLbl: "اللغة", themeLbl: "المظهر", secLbl: "الأمان",
     aboutLbl: "حول التطبيق", version: "الإصدار 1.0.0", darkMode: "الوضع الداكن", changeLang: "تغيير اللغة",
     changePin: "تغيير رمز PIN", aboutApp: "الصندوق التعاوني · إدارة مجتمعية", logout: "تسجيل الخروج",
@@ -1776,150 +1774,11 @@ function PdfReportModal({ txs, members, onClose, year }) {
 }
 
 // ─── REPORTS ──────────────────────────────────────────────────────────────────
-function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx, onAddMember }) {
+function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset }) {
   const t = T[lang];
   const years = getYrs(txs);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
-  const [importing, setImporting] = useState(false);
-  const [importMsg, setImportMsg] = useState(null);
-  const importRef = useRef(null);
-
-  useEffect(() => { setImportMsg(null); }, []);
-
-  async function doImport(file) {
-    if (!file) return;
-    const XLSX = window.XLSX;
-    if (!XLSX) return setImportMsg({ ok: false, text: t.xlsxWait });
-    setImporting(true);
-    setImportMsg(null);
-    try {
-      const ab = await file.arrayBuffer();
-      const wb = XLSX.read(ab, { type: "array", cellDates: true });
-
-      // ── Helper: find header row in a sheet (returns { headers, dataRows } or null) ──
-      const parseSheet = (ws, isHeaderRow) => {
-        const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-        const headerIdx = aoa.findIndex(isHeaderRow);
-        if (headerIdx === -1) return null;
-        const headers = aoa[headerIdx].map(h => String(h).trim());
-        const dataRows = aoa.slice(headerIdx + 1).filter(r => r.some(c => String(c).trim() !== ""));
-        return { headers, dataRows };
-      };
-
-      const findCol = (headers, candidates) => {
-        const idx = headers.findIndex(h => candidates.some(c => h.toLowerCase().includes(c.toLowerCase())));
-        return idx === -1 ? null : idx;
-      };
-
-      // Parse date helper
-      const parseDate = (rawDate) => {
-        if (rawDate instanceof Date && !isNaN(rawDate)) {
-          return `${rawDate.getFullYear()}-${String(rawDate.getMonth()+1).padStart(2,"0")}-${String(rawDate.getDate()).padStart(2,"0")}`;
-        }
-        const s = String(rawDate).trim();
-        const m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-        if (m1) return `${m1[3]}-${m1[2].padStart(2,"0")}-${m1[1].padStart(2,"0")}`;
-        if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
-        if (/^\d+$/.test(s)) {
-          try { const d = XLSX.SSF.parse_date_code(parseInt(s)); if (d) return `${d.y}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`; } catch {}
-        }
-        return null;
-      };
-
-      let txCount = 0;
-      let mbrCount = 0;
-
-      // ════════════════════════════════════════════════════════════════
-      // 1. IMPORTER LES MEMBRES (feuille "Membres" si elle existe)
-      // ════════════════════════════════════════════════════════════════
-      if (onAddMember) {
-        // Look for sheet named "Membres" or any sheet with a "Nom complet" / "Nom" header
-        const mbrSheetName = wb.SheetNames.find(n =>
-          n.toLowerCase().includes("membre") || n.toLowerCase().includes("member") || n.toLowerCase().includes("عضو")
-        );
-        const mbrWs = mbrSheetName ? wb.Sheets[mbrSheetName] : null;
-        if (mbrWs) {
-          const parsed = parseSheet(mbrWs, row => row.some(c => {
-            const s = String(c).toLowerCase().trim();
-            return s.includes("nom") || s.includes("name") || s.includes("اسم") || s.includes("membre") || s.includes("عضو");
-          }));
-          if (parsed) {
-            const { headers, dataRows } = parsed;
-            const iName  = findCol(headers, ["nom complet","fullname","nom","name","اسم","عضو","membre"]);
-            const iPhone = findCol(headers, ["téléphone","telephone","phone","tél","هاتف","tel"]);
-            if (iName !== null) {
-              // Build set of already-existing member names (lowercase) to avoid duplicates
-              const existingNames = new Set(members.map(m => m.name.toLowerCase().trim()));
-              for (const row of dataRows) {
-                const name = String(row[iName] || "").trim();
-                if (!name || name === "—" || name === "-") continue;
-                // Skip total/summary rows
-                if (name.toLowerCase().startsWith("total") || name.toLowerCase().startsWith("إجمالي")) continue;
-                if (existingNames.has(name.toLowerCase())) continue; // already exists
-                const phone = iPhone !== null ? String(row[iPhone] || "").trim() : "";
-                await onAddMember({ name, phone });
-                existingNames.add(name.toLowerCase());
-                mbrCount++;
-              }
-            }
-          }
-        }
-      }
-
-      // ════════════════════════════════════════════════════════════════
-      // 2. IMPORTER LES TRANSACTIONS (première feuille avec Type/Montant)
-      // ════════════════════════════════════════════════════════════════
-      // Try "Transactions" sheet first, then fall back to first sheet
-      const txSheetName = wb.SheetNames.find(n =>
-        n.toLowerCase().includes("transaction") || n.toLowerCase().includes("معاملة") || n.toLowerCase().includes("opération")
-      ) || wb.SheetNames[0];
-      const txWs = wb.Sheets[txSheetName];
-
-      const txParsed = parseSheet(txWs, row => row.some(cell => {
-        const s = String(cell).toLowerCase().trim();
-        return s === "type" || s === "typ" || s.includes("montant") || s.includes("amount") || s === "نوع";
-      }));
-
-      if (txParsed) {
-        const { headers, dataRows } = txParsed;
-        const iType   = findCol(headers, ["type","typ","نوع"]);
-        const iAmt    = findCol(headers, ["montant","amount","مبلغ","amt"]);
-        const iDate   = findCol(headers, ["date","تاريخ","dat"]);
-        const iMember = findCol(headers, ["membre","member","عضو","payeur","nom","name","اسم"]);
-        const iNote   = findCol(headers, ["note","desc","remarque","ملاحظة","وصف"]);
-
-        if (iType !== null && iAmt !== null && iDate !== null) {
-          const typeMap = {
-            "contribution": "contribution", "contrib": "contribution", "مساهمة": "contribution",
-            "don": "don", "donation": "don", "تبرع": "don",
-            "depense": "depense", "dépense": "depense", "expense": "depense", "مصروف": "depense",
-            "Contribution": "contribution", "Don": "don", "Dépense": "depense", "Depense": "depense",
-          };
-          for (const row of dataRows) {
-            const rawType = String(row[iType] || "").trim();
-            const type = typeMap[rawType] || typeMap[rawType.toLowerCase()];
-            if (!type) continue;
-            const rawAmt = parseFloat(String(row[iAmt]).replace(/[^0-9.,-]/g, "").replace(",", "."));
-            if (!rawAmt || isNaN(rawAmt) || rawAmt <= 0) continue;
-            const dateStr = parseDate(row[iDate]);
-            if (!dateStr) continue;
-            const memberName = iMember !== null ? (String(row[iMember] || "").trim() || "—") : "—";
-            const note = iNote !== null ? String(row[iNote] || "").trim() : "";
-            await onAddTx({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note });
-            txCount++;
-          }
-        }
-      }
-
-      setImportMsg({ ok: true, text: t.importSuccess(txCount, mbrCount) });
-    } catch (e) {
-      console.error("Import error:", e);
-      setImportMsg({ ok: false, text: t.importError });
-    }
-    setImporting(false);
-    if (importRef.current) importRef.current.value = "";
-  }
 
   const all = txs.filter((tx) => { const d = new Date(tx.date); return d.getMonth() + 1 === month && d.getFullYear() === year; });
 
@@ -2500,64 +2359,6 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
           </button>
         ))}
       </div>
-      {/* IMPORT */}
-      <div style={{ marginTop: 6, borderTop: `1px solid ${C.outline}`, paddingTop: 20 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 13, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: C.secondaryCnt, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.secondaryLt} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          </div>
-          <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{t.importBtn}</span>
-          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.bgLow, border: `1px solid ${C.outline}`, borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
-        </div>
-
-        {/* feedback message */}
-        {importMsg && (
-          <div style={{ marginBottom: 12, padding: "10px 14px", borderRadius: 12, background: importMsg.ok ? C.goldLt : C.redLt, border: `1px solid ${importMsg.ok ? C.primaryLt : C.red}20`, fontSize: 12, fontWeight: 600, color: importMsg.ok ? C.primaryLt : C.red, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-            <span>{importMsg.text}</span>
-            <button onClick={() => setImportMsg(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", opacity: 0.6, fontSize: 16, lineHeight: 1, padding: "0 2px", flexShrink: 0 }}>✕</button>
-          </div>
-        )}
-
-        {/* hidden file input */}
-        <input
-          ref={importRef}
-          type="file"
-          accept=".xlsx,.xls"
-          style={{ display: "none" }}
-          onChange={e => { const f = e.target.files?.[0]; if (f) doImport(f); }}
-        />
-
-        <button
-          className="tbtn eco-btn"
-          onClick={() => { if (xlsxReady && !importing) importRef.current?.click(); }}
-          disabled={!xlsxReady || importing}
-          style={{ width: "100%", background: xlsxReady ? C.secondaryCnt : C.bgLow, border: `1.5px solid ${xlsxReady ? "rgba(113,46,221,0.25)" : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: xlsxReady && !importing ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "inherit", opacity: xlsxReady ? 1 : 0.5, boxShadow: xlsxReady ? C.shadow : "none" }}>
-          <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
-            <div style={{ color: xlsxReady ? C.secondaryLt : C.muted, fontWeight: 600, fontSize: 13 }}>
-              {importing ? t.importProcessing : t.importDesc}
-            </div>
-            <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>
-              {lang === "ar" ? "صيغة .xlsx · الأعمدة: Type, Montant, Date, Membre" : "Format .xlsx · Colonnes : Type, Montant, Date, Membre"}
-            </div>
-          </div>
-          {importing
-            ? <div style={{ width: 22, height: 22, border: `2.5px solid ${C.secondaryLt}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite", flexShrink: 0 }} />
-            : <span style={{ fontSize: 22, flexShrink: 0 }}>📂</span>
-          }
-        </button>
-
-        {/* format helper */}
-        <div style={{ marginTop: 10, padding: "10px 14px", borderRadius: 12, background: C.bgLow, border: `1px solid ${C.outline}`, fontSize: 11, color: C.muted, lineHeight: 1.6, direction: "ltr" }}>
-          <div style={{ fontWeight: 700, color: C.sub, marginBottom: 4 }}>📋 {lang === "ar" ? "مثال على بنية الملف:" : "Exemple de structure du fichier :"}</div>
-          <div style={{ fontFamily: "monospace", fontSize: 10, color: C.primaryLt }}>
-            Type &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Montant | Date &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Membre<br/>
-            contribution | 500 &nbsp;&nbsp;&nbsp;&nbsp;| 2026-01-15 | Ahmed<br/>
-            don &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| 200 &nbsp;&nbsp;&nbsp;&nbsp;| 15/01/2026 | —<br/>
-            depense &nbsp;&nbsp;| 150 &nbsp;&nbsp;&nbsp;&nbsp;| 2026-01-20 | —
-          </div>
-        </div>
-      </div>
-
       {showPdf && <PdfReportModal txs={txs} members={members} onClose={() => setShowPdf(false)} year={YEAR_STATS} />}
     </div>
   );
@@ -3114,7 +2915,7 @@ export default function App() {
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
-        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} onAddMember={addMember} />}
+        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "rgba(1,45,29,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 40px rgba(1,45,29,0.25)" }}>
