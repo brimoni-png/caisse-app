@@ -1898,7 +1898,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 }
 
 // ─── REPORTS ──────────────────────────────────────────────────────────────────
-function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx }) {
+function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx, onUpdateTx, onDeleteTx, onAddMember }) {
   const t = T[lang];
   const years = getYrs(txs);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -1927,93 +1927,181 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     if (!XLSX) return setImportMsg({ ok: false, text: t.xlsxWait });
     setImporting(true);
     setImportMsg(null);
+
+    // ── helpers ────────────────────────────────────────────────────────────────
+    const typeMap = {
+      "contribution":"contribution","contrib":"contribution","مساهمة":"contribution","Contribution":"contribution",
+      "don":"don","donation":"don","تبرع":"don","Don":"don",
+      "depense":"depense","dépense":"depense","expense":"depense","مصروف":"depense","Dépense":"depense","Depense":"depense",
+    };
+    const normalizeType = (v) => typeMap[String(v).trim()] || typeMap[String(v).trim().toLowerCase()] || null;
+
+    const parseDate = (rawDate) => {
+      if (rawDate instanceof Date && !isNaN(rawDate))
+        return `${rawDate.getFullYear()}-${String(rawDate.getMonth()+1).padStart(2,"0")}-${String(rawDate.getDate()).padStart(2,"0")}`;
+      const s = String(rawDate).trim();
+      const m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (m1) return `${m1[3]}-${m1[2].padStart(2,"0")}-${m1[1].padStart(2,"0")}`;
+      if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+      if (/^\d+$/.test(s)) {
+        const d = XLSX.SSF.parse_date_code(parseInt(s));
+        if (d) return `${d.y}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`;
+      }
+      return null;
+    };
+
+    const readSheet = (wb, sheetName) => {
+      const ws = wb.Sheets[sheetName];
+      if (!ws) return null;
+      return XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+    };
+
+    const findHeaderRow = (aoa, candidates) => {
+      const idx = aoa.findIndex(row => row.some(cell => candidates.some(c => String(cell).toLowerCase().includes(c))));
+      return idx === -1 ? null : idx;
+    };
+
+    const findCol = (headers, candidates) => {
+      const idx = headers.findIndex(h => candidates.some(c => String(h).toLowerCase().includes(c)));
+      return idx === -1 ? null : idx;
+    };
+
     try {
       const ab = await file.arrayBuffer();
       const wb = XLSX.read(ab, { type: "array", cellDates: true });
-      const ws = wb.Sheets[wb.SheetNames[0]];
 
-      // Convert to array-of-arrays to handle banner rows from our own export format
-      const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+      let added = 0, updated = 0, deleted = 0, membersAdded = 0;
 
-      // Find the header row: the first row that contains "type" or "montant" (case-insensitive)
-      const isHeaderRow = (row) => row.some(cell => {
-        const s = String(cell).toLowerCase().trim();
-        return s === "type" || s === "typ" || s.includes("montant") || s.includes("amount") || s === "نوع";
-      });
-      const headerIdx = aoa.findIndex(isHeaderRow);
-      if (headerIdx === -1) { setImportMsg({ ok: false, text: t.importColsError }); setImporting(false); return; }
+      // ════════════════════════════════════════════════════════════════════
+      // FEUILLE 1 — TRANSACTIONS (sync bidirectionnelle)
+      // ════════════════════════════════════════════════════════════════════
+      const txSheet = wb.Sheets[wb.SheetNames[0]];
+      if (txSheet) {
+        const aoa = XLSX.utils.sheet_to_json(txSheet, { header: 1, defval: "" });
 
-      const headers = aoa[headerIdx].map(h => String(h).trim());
-      const dataRows = aoa.slice(headerIdx + 1).filter(r => r.some(c => String(c).trim() !== ""));
+        const hIdx = findHeaderRow(aoa, ["type","typ","montant","amount","date","نوع"]);
+        if (hIdx !== null) {
+          const headers = aoa[hIdx].map(h => String(h).trim());
+          const dataRows = aoa.slice(hIdx + 1).filter(r => r.some(c => String(c).trim() !== ""));
 
-      if (!dataRows.length) { setImportMsg({ ok: false, text: t.importError }); setImporting(false); return; }
+          const iType   = findCol(headers, ["type","typ","نوع"]);
+          const iAmt    = findCol(headers, ["montant","amount","مبلغ","amt"]);
+          const iDate   = findCol(headers, ["date","تاريخ","dat"]);
+          const iMember = findCol(headers, ["membre","member","عضو","payeur","nom","name","اسم"]);
+          const iNote   = findCol(headers, ["note","desc","remarque","ملاحظة","وصف"]);
+          const iId     = findCol(headers, ["id","réf","ref","رقم"]);
 
-      // Flexible column index finder (case-insensitive substring match)
-      const findCol = (candidates) => {
-        const idx = headers.findIndex(h => candidates.some(c => h.toLowerCase().includes(c.toLowerCase())));
-        return idx === -1 ? null : idx;
-      };
+          if (iType !== null && iAmt !== null && iDate !== null) {
+            // Build a map of existing txs by ID (for rows exported by this app)
+            const existingById = {};
+            txs.forEach(tx => { existingById[String(tx.id)] = tx; });
 
-      // "Montant (MRU)", "Membre / Payeur" — our own export headers included
-      const iType   = findCol(["type","typ","نوع"]);
-      const iAmt    = findCol(["montant","amount","مبلغ","amt"]);
-      const iDate   = findCol(["date","تاريخ","dat"]);
-      const iMember = findCol(["membre","member","عضو","payeur","nom","name","اسم"]);
-      const iNote   = findCol(["note","desc","remarque","ملاحظة","وصف"]);
+            // Collect IDs seen in the Excel file (only real IDs, not TXN-xxx ref codes)
+            const seenIds = new Set();
 
-      if (iType === null || iAmt === null || iDate === null) {
-        setImportMsg({ ok: false, text: t.importColsError });
-        setImporting(false);
-        return;
+            for (const row of dataRows) {
+              const rawType = String(row[iType] || "").trim();
+              const type = normalizeType(rawType);
+              if (!type) continue;
+
+              const rawAmt = parseFloat(String(row[iAmt]).replace(/[^0-9.,-]/g, "").replace(",", "."));
+              if (!rawAmt || isNaN(rawAmt) || rawAmt <= 0) continue;
+
+              const dateStr = parseDate(row[iDate]);
+              if (!dateStr) continue;
+
+              const memberName = iMember !== null ? (String(row[iMember] || "").trim() || "—") : "—";
+              const note = iNote !== null ? String(row[iNote] || "").trim() : "";
+
+              // Check if row has a real DB ID (UUID or numeric, not TXN-xxx)
+              const rawId = iId !== null ? String(row[iId] || "").trim() : "";
+              const isRealId = rawId && !/^TXN-/i.test(rawId) && !/^tmp_/.test(rawId);
+
+              if (isRealId && existingById[rawId]) {
+                // Row exists in DB — check if data changed → UPDATE
+                seenIds.add(rawId);
+                const existing = existingById[rawId];
+                const changed =
+                  existing.type !== type ||
+                  existing.amount !== rawAmt ||
+                  existing.date !== dateStr ||
+                  (existing.memberName || "—") !== memberName ||
+                  (existing.note || "") !== note;
+                if (changed) {
+                  await onUpdateTx({ ...existing, type, amount: rawAmt, date: dateStr, memberName, note });
+                  updated++;
+                }
+              } else {
+                // No matching ID → new row → ADD (dedup by type+amount+date+member)
+                const duplicate = txs.some(tx =>
+                  tx.type === type &&
+                  tx.amount === rawAmt &&
+                  tx.date === dateStr &&
+                  (tx.memberName || "—") === memberName
+                );
+                if (!duplicate) {
+                  await onAddTx({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note });
+                  added++;
+                }
+              }
+            }
+
+            // Detect DELETED rows: existing tx IDs that had real IDs in this file but are now absent
+            // Only delete if the file contained at least one real ID (meaning it's our own export)
+            if (seenIds.size > 0) {
+              for (const tx of txs) {
+                const id = String(tx.id);
+                if (!id.startsWith("tmp_") && existingById[id] && !seenIds.has(id)) {
+                  // This tx was in the DB but not in the Excel file → deleted by user in Excel
+                  await onDeleteTx(tx.id);
+                  deleted++;
+                }
+              }
+            }
+          }
+        }
       }
 
-      // Normalize type values (also handle our own export labels "Contribution", "Don", "Dépense")
-      const typeMap = {
-        "contribution": "contribution", "contrib": "contribution", "مساهمة": "contribution",
-        "don": "don", "donation": "don", "تبرع": "don",
-        "depense": "depense", "dépense": "depense", "expense": "depense", "مصروف": "depense",
-        // exported labels (capitalised)
-        "Contribution": "contribution", "Don": "don", "Dépense": "depense", "Depense": "depense",
-      };
+      // ════════════════════════════════════════════════════════════════════
+      // FEUILLE 2 — MEMBRES (ajout des nouveaux membres uniquement)
+      // ════════════════════════════════════════════════════════════════════
+      const memberSheetName = wb.SheetNames.find(n => n.toLowerCase().includes("membre") || n.toLowerCase().includes("member"));
+      if (memberSheetName) {
+        const aoa = readSheet(wb, memberSheetName);
+        if (aoa) {
+          const hIdx = findHeaderRow(aoa, ["nom","name","اسم","membre","member"]);
+          if (hIdx !== null) {
+            const headers = aoa[hIdx].map(h => String(h).trim());
+            const dataRows = aoa.slice(hIdx + 1).filter(r => r.some(c => String(c).trim() !== ""));
+            const iName  = findCol(headers, ["nom complet","full name","الاسم","nom","name"]);
+            const iPhone = findCol(headers, ["téléphone","telephone","phone","هاتف","tel"]);
 
-      // Parse date helper
-      const parseDate = (rawDate) => {
-        if (rawDate instanceof Date && !isNaN(rawDate)) {
-          return `${rawDate.getFullYear()}-${String(rawDate.getMonth()+1).padStart(2,"0")}-${String(rawDate.getDate()).padStart(2,"0")}`;
+            if (iName !== null) {
+              const existingNames = new Set(members.map(m => m.name.toLowerCase().trim()));
+              for (const row of dataRows) {
+                const name = String(row[iName] || "").trim();
+                if (!name || name === "—" || name === "-") continue;
+                if (!existingNames.has(name.toLowerCase())) {
+                  const phone = iPhone !== null ? String(row[iPhone] || "").trim() : "";
+                  await onAddMember({ name, phone });
+                  existingNames.add(name.toLowerCase());
+                  membersAdded++;
+                }
+              }
+            }
+          }
         }
-        const s = String(rawDate).trim();
-        // DD/MM/YYYY
-        const m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-        if (m1) return `${m1[3]}-${m1[2].padStart(2,"0")}-${m1[1].padStart(2,"0")}`;
-        // YYYY-MM-DD already
-        if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
-        // Excel serial number
-        if (/^\d+$/.test(s)) {
-          const d = XLSX.SSF.parse_date_code(parseInt(s));
-          if (d) return `${d.y}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`;
-        }
-        return null;
-      };
-
-      let count = 0;
-      for (const row of dataRows) {
-        const rawType = String(row[iType] || "").trim();
-        const type = typeMap[rawType] || typeMap[rawType.toLowerCase()];
-        if (!type) continue;
-
-        const rawAmt = parseFloat(String(row[iAmt]).replace(/[^0-9.,-]/g, "").replace(",", "."));
-        if (!rawAmt || isNaN(rawAmt) || rawAmt <= 0) continue;
-
-        const dateStr = parseDate(row[iDate]);
-        if (!dateStr) continue;
-
-        const memberName = iMember !== null ? (String(row[iMember] || "").trim() || "—") : "—";
-        const note = iNote !== null ? String(row[iNote] || "").trim() : "";
-
-        await onAddTx({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note });
-        count++;
       }
-      setImportMsg({ ok: true, text: t.importSuccess(count) });
+
+      // ── Résumé ─────────────────────────────────────────────────────────────
+      const parts = [];
+      if (added)        parts.push(`${added} ajoutée(s)`);
+      if (updated)      parts.push(`${updated} modifiée(s)`);
+      if (deleted)      parts.push(`${deleted} supprimée(s)`);
+      if (membersAdded) parts.push(`${membersAdded} membre(s) ajouté(s)`);
+      const summary = parts.length ? parts.join(" · ") : "Aucune modification détectée";
+      setImportMsg({ ok: true, text: `✅ Synchronisation complète — ${summary}` });
+
     } catch (e) {
       console.error("Import error:", e);
       setImportMsg({ ok: false, text: t.importError });
@@ -2640,14 +2728,23 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
           </button>
         ))}
       </div>
-      {/* IMPORT */}
+      {/* IMPORT / SYNC BIDIRECTIONNEL */}
       <div style={{ marginTop: 6, borderTop: `1px solid ${C.outline}`, paddingTop: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 13, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: C.secondaryCnt, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.secondaryLt} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           </div>
-          <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{t.importBtn}</span>
+          <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{lang === "ar" ? "استيراد ومزامنة Excel" : "Importer & Synchroniser Excel"}</span>
           {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.bgLow, border: `1px solid ${C.outline}`, borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
+        </div>
+
+        {/* Explication bidirectionnelle */}
+        <div style={{ marginBottom: 12, padding: "11px 14px", borderRadius: 12, background: "rgba(113,46,221,0.06)", border: `1px solid rgba(113,46,221,0.18)`, fontSize: 11, color: C.muted, lineHeight: 1.7 }}>
+          <div style={{ fontWeight: 700, color: C.secondaryLt, marginBottom: 5, fontSize: 12 }}>🔁 {lang === "ar" ? "مزامنة ثنائية الاتجاه" : "Synchronisation bidirectionnelle"}</div>
+          <div>✅ {lang === "ar" ? "صفوف جديدة في Excel → مضافة إلى التطبيق" : "Lignes nouvelles dans Excel → ajoutées dans l'app"}</div>
+          <div>✏️ {lang === "ar" ? "بيانات معدّلة (بالمعرّف) → محدّثة في التطبيق" : "Données modifiées (avec ID) → mises à jour dans l'app"}</div>
+          <div>🗑️ {lang === "ar" ? "صفوف محذوفة (بالمعرّف) → محذوفة من التطبيق" : "Lignes supprimées (avec ID) → supprimées de l'app"}</div>
+          <div>👤 {lang === "ar" ? "أعضاء جدد في الفعهة 2 → مضافون" : "Nouveaux membres (feuille 2) → ajoutés"}</div>
         </div>
 
         {/* feedback message */}
@@ -2674,10 +2771,10 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
           style={{ width: "100%", background: xlsxReady ? C.secondaryCnt : C.bgLow, border: `1.5px solid ${xlsxReady ? "rgba(113,46,221,0.25)" : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: xlsxReady && !importing ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "inherit", opacity: xlsxReady ? 1 : 0.5, boxShadow: xlsxReady ? C.shadow : "none" }}>
           <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
             <div style={{ color: xlsxReady ? C.secondaryLt : C.muted, fontWeight: 600, fontSize: 13 }}>
-              {importing ? t.importProcessing : t.importDesc}
+              {importing ? (lang === "ar" ? "جارٍ المزامنة…" : "Synchronisation en cours…") : (lang === "ar" ? "تحميل ملف Excel للمزامنة" : "Charger un fichier Excel à synchroniser")}
             </div>
             <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>
-              {lang === "ar" ? "صيغة .xlsx · الأعمدة: Type, Montant, Date, Membre" : "Format .xlsx · Colonnes : Type, Montant, Date, Membre"}
+              {lang === "ar" ? "فعهة 1: المعاملات · فعهة 2: الأعضاء" : "Feuille 1 : Transactions · Feuille 2 : Membres"}
             </div>
           </div>
           {importing
@@ -2688,8 +2785,9 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
 
         {/* format helper */}
         <div style={{ marginTop: 10, padding: "10px 14px", borderRadius: 12, background: C.bgLow, border: `1px solid ${C.outline}`, fontSize: 11, color: C.muted, lineHeight: 1.6, direction: "ltr" }}>
-          <div style={{ fontWeight: 700, color: C.sub, marginBottom: 4 }}>📋 {lang === "ar" ? "مثال على بنية الملف:" : "Exemple de structure du fichier :"}</div>
+          <div style={{ fontWeight: 700, color: C.sub, marginBottom: 4 }}>💡 {lang === "ar" ? "نصيحة: لتفعيل الكشف بالمعرّف، استخدم ملف تم تصديره من التطبيق." : "Conseil : Pour la détection par ID, utilisez un fichier exporté depuis l'app."}</div>
           <div style={{ fontFamily: "monospace", fontSize: 10, color: C.primaryLt }}>
+
             Type &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Montant | Date &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Membre<br/>
             contribution | 500 &nbsp;&nbsp;&nbsp;&nbsp;| 2026-01-15 | Ahmed<br/>
             don &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| 200 &nbsp;&nbsp;&nbsp;&nbsp;| 15/01/2026 | —<br/>
@@ -3254,7 +3352,7 @@ export default function App() {
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
-        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} />}
+        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} onUpdateTx={updateTx} onDeleteTx={deleteTx} onAddMember={addMember} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "rgba(1,45,29,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 40px rgba(1,45,29,0.25)" }}>
