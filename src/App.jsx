@@ -202,6 +202,35 @@ const T = {
 const DEF_MEMBERS = [];
 const DEF_TX = [];
 
+// ─── DONNÉES INITIALES (importées depuis Classeur1.xlsx) ──────────────────────
+const SEED_MEMBERS = [
+  { name: "MARIEM MED YACOUB NDARI",   phone: "789686" },
+  { name: "ABDEL JELIL RAMDANE",        phone: "64367547" },
+  { name: "RACHIDSALECKSALEM",           phone: "737777737" },
+  { name: "KASSOUM AMADOU BA",          phone: "73737" },
+  { name: "BEWBE MOHAMED ESSID",        phone: "37778" },
+  { name: "LALLA BLAL BLAL",            phone: "375758" },
+  { name: "FATIMETOU HAIBALLA",         phone: "37737" },
+  { name: "AISSATA DEMBA N DIAYE",      phone: "375747" },
+  { name: "BANO MAMADOU NIANG",         phone: "37577" },
+  { name: "MOHAMED EL MOUSTAPHA",       phone: "375757" },
+];
+
+const SEED_TRANSACTIONS = [
+  { type: "contribution", memberName: "MARIEM MED YACOUB NDARI",   amount: 2000,  date: "2026-01-01", note: "" },
+  { type: "contribution", memberName: "ABDEL JELIL RAMDANE",        amount: 3000,  date: "2026-01-02", note: "" },
+  { type: "contribution", memberName: "RACHIDSALECKSALEM",           amount: 4500,  date: "2026-01-03", note: "" },
+  { type: "contribution", memberName: "KASSOUM AMADOU BA",          amount: 6700,  date: "2026-01-04", note: "" },
+  { type: "contribution", memberName: "BEWBE MOHAMED ESSID",        amount: 3400,  date: "2026-01-05", note: "" },
+  { type: "contribution", memberName: "LALLA BLAL BLAL",            amount: 12500, date: "2026-01-06", note: "" },
+  { type: "contribution", memberName: "FATIMETOU HAIBALLA",         amount: 3450,  date: "2026-01-07", note: "" },
+  { type: "contribution", memberName: "AISSATA DEMBA N DIAYE",      amount: 4000,  date: "2026-01-08", note: "" },
+  { type: "contribution", memberName: "BANO MAMADOU NIANG",         amount: 9000,  date: "2026-01-09", note: "" },
+  { type: "contribution", memberName: "MOHAMED EL MOUSTAPHA",       amount: 3000,  date: "2026-01-10", note: "" },
+  { type: "contribution", memberName: "MARIEM MED YACOUB NDARI",   amount: 400,   date: "2026-01-11", note: "" },
+  { type: "contribution", memberName: "ABDEL JELIL RAMDANE",        amount: 200,   date: "2026-01-12", note: "" },
+];
+
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 const fmt = (n) => new Intl.NumberFormat("fr-FR").format(n);
 const fmtN = (n) => new Intl.NumberFormat("fr-FR").format(n);
@@ -1776,7 +1805,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 }
 
 // ─── REPORTS ──────────────────────────────────────────────────────────────────
-function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx, onUpdateTx }) {
+function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx, onUpdateTx, onAddMember }) {
   const t = T[lang];
   const years = getYrs(txs);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -2363,6 +2392,44 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
   const [showPdf, setShowPdf] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [seedMsg, setSeedMsg] = useState(null);
+
+  async function doSeedImport() {
+    if (seeding) return;
+    setSeeding(true);
+    setSeedMsg(null);
+    try {
+      // 1. Ajouter les membres manquants
+      let addedM = 0;
+      for (const m of SEED_MEMBERS) {
+        const alreadyExists = members.some(ex => ex.name.trim().toLowerCase() === m.name.trim().toLowerCase());
+        if (!alreadyExists && onAddMember) {
+          await onAddMember({ name: m.name, phone: m.phone });
+          addedM++;
+        }
+      }
+      // 2. Ajouter les transactions (en évitant les doublons)
+      let addedT = 0;
+      for (const tx of SEED_TRANSACTIONS) {
+        const duplicate = txs.some(
+          ex => ex.date === tx.date && ex.amount === tx.amount && ex.memberName === tx.memberName
+        );
+        if (!duplicate) {
+          await onAddTx({ type: tx.type, memberName: tx.memberName, memberId: null, amount: tx.amount, date: tx.date, note: tx.note });
+          addedT++;
+        }
+      }
+      setSeedMsg({ ok: true, text: lang === "ar"
+        ? `✅ تم استيراد ${addedM} عضو و${addedT} معاملة بنجاح.`
+        : `✅ ${addedM} membre(s) et ${addedT} transaction(s) importés avec succès.` });
+      if (onRefresh) onRefresh(true);
+    } catch (e) {
+      console.error("Seed import error:", e);
+      setSeedMsg({ ok: false, text: lang === "ar" ? "❌ فشل الاستيراد." : "❌ Erreur lors de l'importation." });
+    }
+    setSeeding(false);
+  }
 
   const doReset = async () => {
     setResetting(true);
@@ -2408,6 +2475,40 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
       <DonutChart contrib={yC} dons={yD} dep={yE} lang={lang} chartReady={chartReady} />
       <TopMembers members={members} txs={txs2026} lang={lang} />
       <FinChart txs={txs2026} lang={lang} chartReady={chartReady} />
+
+      {/* IMPORT DONNÉES INITIALES (Classeur1.xlsx) */}
+      <div style={{ marginTop: 20, borderTop: `1px solid ${C.outline}`, paddingTop: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(45,106,79,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17 }}>📋</div>
+          <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{lang === "ar" ? "استيراد البيانات الأولية" : "Importer les données initiales"}</span>
+        </div>
+        <div style={{ marginBottom: 10, padding: "10px 14px", borderRadius: 12, background: C.bgLow, border: `1px solid ${C.outline}`, fontSize: 11, color: C.muted, lineHeight: 1.6 }}>
+          {lang === "ar"
+            ? "يتيح هذا الخيار تحميل البيانات من السجل الأولي: ١٠ أعضاء و١٢ معاملة مساهمة (يناير ٢٠٢٦). لن يتم تكرار المعاملات الموجودة."
+            : "Charge les données du registre initial : 10 membres et 12 contributions (janvier 2026). Les doublons sont ignorés automatiquement."}
+        </div>
+        {seedMsg && (
+          <div style={{ marginBottom: 10, padding: "10px 14px", borderRadius: 12, background: seedMsg.ok ? C.goldLt : C.redLt, border: `1px solid ${seedMsg.ok ? C.primaryLt : C.red}20`, fontSize: 12, fontWeight: 600, color: seedMsg.ok ? C.primaryLt : C.red, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+            <span>{seedMsg.text}</span>
+            <button onClick={() => setSeedMsg(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", opacity: 0.6, fontSize: 16, lineHeight: 1, padding: "0 2px" }}>✕</button>
+          </div>
+        )}
+        <button className="tbtn eco-btn" onClick={doSeedImport} disabled={seeding}
+          style={{ width: "100%", background: seeding ? C.bgLow : "rgba(45,106,79,0.10)", border: `1.5px solid rgba(45,106,79,0.25)`, borderRadius: 14, padding: "14px 16px", cursor: seeding ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "inherit", opacity: seeding ? 0.7 : 1 }}>
+          <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
+            <div style={{ color: C.primaryLt, fontWeight: 600, fontSize: 13 }}>
+              {seeding ? (lang === "ar" ? "جارٍ الاستيراد…" : "Importation en cours…") : (lang === "ar" ? "تحميل البيانات الأولية" : "Charger le registre initial")}
+            </div>
+            <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>
+              {lang === "ar" ? "١٠ أعضاء · ١٢ معاملة · يناير ٢٠٢٦" : "10 membres · 12 transactions · Janvier 2026"}
+            </div>
+          </div>
+          {seeding
+            ? <div style={{ width: 22, height: 22, border: `2.5px solid ${C.primaryLt}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite", flexShrink: 0 }} />
+            : <span style={{ fontSize: 22, flexShrink: 0 }}>📥</span>
+          }
+        </button>
+      </div>
 
       {/* RESET */}
       <div style={{ marginTop: 20, borderTop: `1px solid ${C.outline}`, paddingTop: 20 }}>
@@ -3054,7 +3155,7 @@ export default function App() {
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
-        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} onUpdateTx={updateTx} />}
+        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} onUpdateTx={updateTx} onAddMember={addMember} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "rgba(1,45,29,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 40px rgba(1,45,29,0.25)" }}>
