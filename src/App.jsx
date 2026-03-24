@@ -1825,38 +1825,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     try {
       const ab = await file.arrayBuffer();
       const wb = XLSX.read(ab, { type: "array", cellDates: true });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-      const isHeaderRow = (row) => row.some(cell => {
-        const s = String(cell).toLowerCase().trim();
-        return s === "type" || s === "typ" || s.includes("montant") || s.includes("amount") || s === "نوع";
-      });
-      const headerIdx = aoa.findIndex(isHeaderRow);
-      if (headerIdx === -1) { setImportMsg({ ok: false, text: t.importColsError }); setImporting(false); return; }
-      const headers = aoa[headerIdx].map(h => String(h).trim());
-      const dataRows = aoa.slice(headerIdx + 1).filter(r => r.some(c => String(c).trim() !== ""));
-      if (!dataRows.length) { setImportMsg({ ok: false, text: t.importError }); setImporting(false); return; }
-      const findCol = (candidates) => {
-        const idx = headers.findIndex(h => candidates.some(c => h.toLowerCase().includes(c.toLowerCase())));
-        return idx === -1 ? null : idx;
-      };
-      const iType   = findCol(["type","typ","نوع"]);
-      const iAmt    = findCol(["montant","amount","مبلغ","amt"]);
-      const iDate   = findCol(["date","تاريخ","dat"]);
-      const iMember = findCol(["membre","member","عضو","payeur","nom","name","اسم"]);
-      const iNote   = findCol(["note","desc","remarque","ملاحظة","وصف"]);
-      const iId     = findCol(["id_system","id system","id"]);
-      if (iType === null || iAmt === null || iDate === null) {
-        setImportMsg({ ok: false, text: t.importColsError });
-        setImporting(false);
-        return;
-      }
-      const typeMap = {
-        "contribution": "contribution", "contrib": "contribution", "مساهمة": "contribution",
-        "don": "don", "donation": "don", "تبرع": "don",
-        "depense": "depense", "dépense": "depense", "expense": "depense", "مصروف": "depense",
-        "Contribution": "contribution", "Don": "don", "Dépense": "depense", "Depense": "depense",
-      };
+
       const parseDate = (rawDate) => {
         if (rawDate instanceof Date && !isNaN(rawDate)) {
           return `${rawDate.getFullYear()}-${String(rawDate.getMonth()+1).padStart(2,"0")}-${String(rawDate.getDate()).padStart(2,"0")}`;
@@ -1866,35 +1835,128 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
         if (m1) return `${m1[3]}-${m1[2].padStart(2,"0")}-${m1[1].padStart(2,"0")}`;
         if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
         if (/^\d+$/.test(s)) {
-          const d = XLSX.SSF.parse_date_code(parseInt(s));
-          if (d) return `${d.y}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`;
+          try { const d = XLSX.SSF.parse_date_code(parseInt(s)); if (d) return `${d.y}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`; } catch {}
         }
         return null;
       };
-      let countAdded = 0, countUpdated = 0;
-      for (const row of dataRows) {
-        const rawType = String(row[iType] || "").trim();
-        const type = typeMap[rawType] || typeMap[rawType.toLowerCase()];
-        if (!type) continue;
-        const rawAmt = parseFloat(String(row[iAmt]).replace(/[^0-9.,-]/g, "").replace(",", "."));
-        if (!rawAmt || isNaN(rawAmt) || rawAmt <= 0) continue;
-        const dateStr = parseDate(row[iDate]);
-        if (!dateStr) continue;
-        const memberName = iMember !== null ? (String(row[iMember] || "").trim() || "—") : "—";
-        const note = iNote !== null ? String(row[iNote] || "").trim() : "";
-        // Si l'ID existe dans l'app → mise à jour, sinon → ajout
-        const existingId = iId !== null ? String(row[iId] || "").trim() : "";
-        const existingTx = existingId ? txs.find(tx => String(tx.id) === existingId) : null;
-        if (existingTx) {
-          await onUpdateTx({ ...existingTx, type, memberName, amount: rawAmt, date: dateStr, note });
-          countUpdated++;
-        } else {
-          await onAddTx({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note });
-          countAdded++;
+
+      const typeMap = {
+        "contribution": "contribution", "contributions": "contribution", "contrib": "contribution", "مساهمة": "contribution",
+        "don": "don", "dons": "don", "donation": "don", "تبرع": "don",
+        "depense": "depense", "depenses": "depense", "dépense": "depense", "dépenses": "depense", "expense": "depense", "مصروف": "depense",
+      };
+
+      let countAdded = 0, countUpdated = 0, membersAdded = 0;
+
+      // ── Détection du format Classeur1 : feuille "REGISTRE DES TRANSACTIONS" ──
+      const txSheetName = wb.SheetNames.find(n => n.toUpperCase().includes("TRANSACTION"));
+      const mbrSheetName = wb.SheetNames.find(n => n.toUpperCase().includes("MEMBRE"));
+
+      if (txSheetName) {
+        // FORMAT CLASSEUR1 : en-têtes ligne 2, données ligne 3+
+        // Importer les membres d'abord si la feuille existe
+        if (mbrSheetName && onAddMember) {
+          const wsMbr = wb.Sheets[mbrSheetName];
+          const aoaMbr = XLSX.utils.sheet_to_json(wsMbr, { header: 1, defval: "" });
+          // Trouver la ligne d'en-tête (contient "Nom complet" ou "Nom")
+          const mbrHdrIdx = aoaMbr.findIndex(row => row.some(c => {
+            const s = String(c).toLowerCase();
+            return s.includes("nom") || s.includes("name");
+          }));
+          if (mbrHdrIdx !== -1) {
+            const mbrHeaders = aoaMbr[mbrHdrIdx].map(h => String(h).trim().toLowerCase());
+            const iNom = mbrHeaders.findIndex(h => h.includes("nom") || h.includes("name"));
+            const iTel = mbrHeaders.findIndex(h => h.includes("tel") || h.includes("phone") || h.includes("portable"));
+            const mbrRows = aoaMbr.slice(mbrHdrIdx + 1).filter(r => String(r[iNom] || "").trim() !== "");
+            for (const row of mbrRows) {
+              const name = String(row[iNom] || "").trim();
+              if (!name) continue;
+              const phone = iTel !== -1 ? String(row[iTel] || "").trim() : "";
+              const alreadyExists = members.some(ex => ex.name.trim().toLowerCase() === name.toLowerCase());
+              if (!alreadyExists) { await onAddMember({ name, phone }); membersAdded++; }
+            }
+          }
+        }
+
+        // Importer les transactions
+        const wsTx = wb.Sheets[txSheetName];
+        const aoaTx = XLSX.utils.sheet_to_json(wsTx, { header: 1, defval: "" });
+        // Trouver la ligne d'en-tête (contient "Date" et "Type" ou "Montant")
+        const txHdrIdx = aoaTx.findIndex(row => row.some(c => {
+          const s = String(c).toLowerCase().trim();
+          return s === "date" || s.includes("montant") || s.includes("type");
+        }));
+        if (txHdrIdx === -1) { setImportMsg({ ok: false, text: t.importColsError }); setImporting(false); return; }
+        const txHeaders = aoaTx[txHdrIdx].map(h => String(h).trim().toLowerCase());
+        const findCol = (cands) => { const i = txHeaders.findIndex(h => cands.some(c => h.includes(c))); return i === -1 ? null : i; };
+        const iDate   = findCol(["date"]);
+        const iType   = findCol(["type"]);
+        const iAmt    = findCol(["montant","amount"]);
+        const iMember = findCol(["membre","member","nom","payeur"]);
+        const iNote   = findCol(["note","desc","remarque"]);
+        const iId     = findCol(["id_system","id system"]);
+        if (iAmt === null || iDate === null) { setImportMsg({ ok: false, text: t.importColsError }); setImporting(false); return; }
+        const txDataRows = aoaTx.slice(txHdrIdx + 1).filter(r => r.some(c => String(c).trim() !== ""));
+        for (const row of txDataRows) {
+          const rawType = iType !== null ? String(row[iType] || "").trim().toLowerCase() : "contribution";
+          const type = typeMap[rawType] || "contribution";
+          const rawAmt = parseFloat(String(row[iAmt] || "").replace(/[^0-9.,-]/g, "").replace(",", "."));
+          if (!rawAmt || isNaN(rawAmt) || rawAmt <= 0) continue;
+          const dateStr = parseDate(row[iDate]);
+          if (!dateStr) continue;
+          const memberName = iMember !== null ? (String(row[iMember] || "").trim() || "—") : "—";
+          const note = iNote !== null ? String(row[iNote] || "").trim() : "";
+          const existingId = iId !== null ? String(row[iId] || "").trim() : "";
+          const existingTx = existingId ? txs.find(tx => String(tx.id) === existingId) : null;
+          const duplicate = !existingTx && txs.some(ex => ex.date === dateStr && ex.amount === rawAmt && ex.memberName === memberName);
+          if (existingTx) { await onUpdateTx({ ...existingTx, type, memberName, amount: rawAmt, date: dateStr, note }); countUpdated++; }
+          else if (!duplicate) { await onAddTx({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note }); countAdded++; }
+        }
+
+      } else {
+        // FORMAT STANDARD : première feuille, détection automatique de l'en-tête
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+        const isHeaderRow = (row) => row.some(cell => {
+          const s = String(cell).toLowerCase().trim();
+          return s === "type" || s === "typ" || s.includes("montant") || s.includes("amount") || s === "نوع";
+        });
+        const headerIdx = aoa.findIndex(isHeaderRow);
+        if (headerIdx === -1) { setImportMsg({ ok: false, text: t.importColsError }); setImporting(false); return; }
+        const headers = aoa[headerIdx].map(h => String(h).trim().toLowerCase());
+        const dataRows = aoa.slice(headerIdx + 1).filter(r => r.some(c => String(c).trim() !== ""));
+        if (!dataRows.length) { setImportMsg({ ok: false, text: t.importError }); setImporting(false); return; }
+        const findCol = (cands) => { const i = headers.findIndex(h => cands.some(c => h.includes(c.toLowerCase()))); return i === -1 ? null : i; };
+        const iType   = findCol(["type","typ","نوع"]);
+        const iAmt    = findCol(["montant","amount","مبلغ","amt"]);
+        const iDate   = findCol(["date","تاريخ","dat"]);
+        const iMember = findCol(["membre","member","عضو","payeur","nom","name","اسم"]);
+        const iNote   = findCol(["note","desc","remarque","ملاحظة","وصف"]);
+        const iId     = findCol(["id_system","id system"]);
+        if (iType === null || iAmt === null || iDate === null) { setImportMsg({ ok: false, text: t.importColsError }); setImporting(false); return; }
+        for (const row of dataRows) {
+          const rawType = String(row[iType] || "").trim().toLowerCase();
+          const type = typeMap[rawType];
+          if (!type) continue;
+          const rawAmt = parseFloat(String(row[iAmt]).replace(/[^0-9.,-]/g, "").replace(",", "."));
+          if (!rawAmt || isNaN(rawAmt) || rawAmt <= 0) continue;
+          const dateStr = parseDate(row[iDate]);
+          if (!dateStr) continue;
+          const memberName = iMember !== null ? (String(row[iMember] || "").trim() || "—") : "—";
+          const note = iNote !== null ? String(row[iNote] || "").trim() : "";
+          const existingId = iId !== null ? String(row[iId] || "").trim() : "";
+          const existingTx = existingId ? txs.find(tx => String(tx.id) === existingId) : null;
+          if (existingTx) { await onUpdateTx({ ...existingTx, type, memberName, amount: rawAmt, date: dateStr, note }); countUpdated++; }
+          else { await onAddTx({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note }); countAdded++; }
         }
       }
-      setImportMsg({ ok: true, text: t.importSuccess(countAdded, countUpdated) });
-      // Refresh data from server to ensure sync
+
+      const successText = membersAdded > 0
+        ? (lang === "ar"
+          ? `✅ تمت إضافة ${membersAdded} عضو و${countAdded} معاملة${countUpdated > 0 ? ` وتعديل ${countUpdated}` : ""}.`
+          : `✅ ${membersAdded} membre(s), ${countAdded} transaction(s) importés${countUpdated > 0 ? `, ${countUpdated} modifiée(s)` : ""}.`)
+        : t.importSuccess(countAdded, countUpdated);
+      setImportMsg({ ok: true, text: successText });
       if (onRefresh) onRefresh(true);
     } catch (e) {
       console.error("Import error:", e);
@@ -2581,7 +2643,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
           style={{ width: "100%", background: xlsxReady ? C.secondaryCnt : C.bgLow, border: `1.5px solid ${xlsxReady ? "rgba(113,46,221,0.25)" : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: xlsxReady && !importing ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "inherit", opacity: xlsxReady ? 1 : 0.5, boxShadow: xlsxReady ? C.shadow : "none" }}>
           <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
             <div style={{ color: xlsxReady ? C.secondaryLt : C.muted, fontWeight: 600, fontSize: 13 }}>{importing ? t.importProcessing : t.importDesc}</div>
-            <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{lang === "ar" ? "صيغة .xlsx · الأعمدة: Type, Montant, Date, Membre" : "Format .xlsx · Colonnes : Type, Montant, Date, Membre"}</div>
+            <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{lang === "ar" ? "يدعم Classeur1.xlsx وأي ملف .xlsx بأعمدة: Type, Montant, Date, Membre" : "Compatible Classeur1.xlsx · Format .xlsx · Colonnes : Type, Montant, Date, Membre"}</div>
           </div>
           {importing
             ? <div style={{ width: 22, height: 22, border: `2.5px solid ${C.secondaryLt}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite", flexShrink: 0 }} />
@@ -2589,12 +2651,11 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
           }
         </button>
         <div style={{ marginTop: 10, padding: "10px 14px", borderRadius: 12, background: C.bgLow, border: `1px solid ${C.outline}`, fontSize: 11, color: C.muted, lineHeight: 1.6, direction: "ltr" }}>
-          <div style={{ fontWeight: 700, color: C.sub, marginBottom: 4 }}>📋 {lang === "ar" ? "مثال على بنية الملف:" : "Exemple de structure du fichier :"}</div>
+          <div style={{ fontWeight: 700, color: C.sub, marginBottom: 4 }}>📋 {lang === "ar" ? "الصيغ المدعومة :" : "Formats acceptés :"}</div>
           <div style={{ fontFamily: "monospace", fontSize: 10, color: C.primaryLt }}>
-            Type &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Montant | Date &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Membre<br/>
-            contribution | 500 &nbsp;&nbsp;&nbsp;&nbsp;| 2026-01-15 | Ahmed<br/>
-            don &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| 200 &nbsp;&nbsp;&nbsp;&nbsp;| 15/01/2026 | —<br/>
-            depense &nbsp;&nbsp;| 150 &nbsp;&nbsp;&nbsp;&nbsp;| 2026-01-20 | —
+            ✅ Classeur1.xlsx — feuilles "REGISTRE DES TRANSACTIONS" + "REGISTRE DES MEMBRES"<br/>
+            ✅ Export standard — colonnes : Type | Montant | Date | Membre<br/>
+            ✅ Dates : 2026-01-15 ou 15/01/2026
           </div>
         </div>
       </div>
