@@ -2462,29 +2462,39 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     setSeeding(true);
     setSeedMsg(null);
     try {
-      // 1. Ajouter les membres manquants
-      let addedM = 0;
+      // 1. Ajouter les membres manquants, mettre à jour le téléphone si changé
+      let addedM = 0, updatedM = 0;
       for (const m of SEED_MEMBERS) {
-        const alreadyExists = members.some(ex => ex.name.trim().toLowerCase() === m.name.trim().toLowerCase());
-        if (!alreadyExists && onAddMember) {
-          await onAddMember({ name: m.name, phone: m.phone });
-          addedM++;
+        const existing = members.find(ex => ex.name.trim().toLowerCase() === m.name.trim().toLowerCase());
+        if (!existing) {
+          if (onAddMember) { await onAddMember({ name: m.name, phone: m.phone }); addedM++; }
+        } else if (existing.phone !== m.phone && onUpdateMember) {
+          await onUpdateMember({ ...existing, phone: m.phone }); updatedM++;
         }
       }
-      // 2. Ajouter les transactions (en évitant les doublons)
-      let addedT = 0;
+      // 2. Ajouter ou mettre à jour les transactions
+      // Clé d'identification : date + memberName (permet de détecter un changement de montant)
+      let addedT = 0, updatedT = 0;
       for (const tx of SEED_TRANSACTIONS) {
-        const duplicate = txs.some(
-          ex => ex.date === tx.date && ex.amount === tx.amount && ex.memberName === tx.memberName
+        const existing = txs.find(
+          ex => ex.date === tx.date && ex.memberName.trim().toLowerCase() === tx.memberName.trim().toLowerCase()
         );
-        if (!duplicate) {
+        if (!existing) {
           await onAddTx({ type: tx.type, memberName: tx.memberName, memberId: null, amount: tx.amount, date: tx.date, note: tx.note });
           addedT++;
+        } else if (existing.amount !== tx.amount || existing.type !== tx.type || existing.note !== tx.note) {
+          // Le montant ou le type a changé → on met à jour
+          await onUpdateTx({ ...existing, type: tx.type, amount: tx.amount, note: tx.note });
+          updatedT++;
         }
       }
-      setSeedMsg({ ok: true, text: lang === "ar"
-        ? `✅ تم استيراد ${addedM} عضو و${addedT} معاملة بنجاح.`
-        : `✅ ${addedM} membre(s) et ${addedT} transaction(s) importés avec succès.` });
+      const parts = [];
+      if (addedM > 0) parts.push(lang === "ar" ? `${addedM} عضو جديد` : `${addedM} membre(s) ajouté(s)`);
+      if (updatedM > 0) parts.push(lang === "ar" ? `${updatedM} عضو محدَّث` : `${updatedM} membre(s) mis à jour`);
+      if (addedT > 0) parts.push(lang === "ar" ? `${addedT} معاملة جديدة` : `${addedT} transaction(s) ajoutée(s)`);
+      if (updatedT > 0) parts.push(lang === "ar" ? `${updatedT} معاملة محدَّثة` : `${updatedT} transaction(s) mise(s) à jour`);
+      const msg = parts.length > 0 ? `✅ ${parts.join(", ")}.` : (lang === "ar" ? "✅ لا توجد تغييرات جديدة." : "✅ Aucune modification détectée.");
+      setSeedMsg({ ok: true, text: msg });
       if (onRefresh) onRefresh(true);
     } catch (e) {
       console.error("Seed import error:", e);
