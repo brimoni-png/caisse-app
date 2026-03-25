@@ -157,7 +157,7 @@ const T = {
     newMember: "Nouveau membre", fullName: "Nom complet", fullNamePh: "Ex : Fatima Mint Ahmed",
     phone: "Téléphone", phonePh: "Ex : 22234567890", addMemberBtn: "Ajouter",
     exportBtn: "Exporter Excel", exportAll: "Toutes les transactions", exportMonth: "Ce mois", xlsxWait: "Chargement…", resetBtn: "Réinitialiser les données", resetConfirmTitle: "Tout supprimer ?", resetConfirmMsg: "Cette action supprimera TOUS les membres et TOUTES les transactions. Impossible d'annuler.", resetSuccess: "✅ Toutes les données ont été supprimées.",
-    importBtn: "Importer Excel", importDesc: "Charger des transactions depuis un fichier .xlsx", importSuccess: (added, updated) => updated > 0 ? `✅ ${added} ajoutée(s), ${updated} modifiée(s) avec succès.` : `✅ ${added} transaction(s) importée(s) avec succès.`, importError: "❌ Erreur lors de la lecture du fichier. Vérifiez le format.", importColsError: "❌ Colonnes introuvables. Le fichier doit contenir : Type, Montant, Date, Membre.", importProcessing: "Importation en cours…",
+    importBtn: "Importer Excel", importDesc: "Charger des transactions depuis un fichier .xlsx", importSuccess: (n) => `✅ ${n} transaction(s) importée(s) avec succès.`, importError: "❌ Erreur lors de la lecture du fichier. Vérifiez le format.", importColsError: "❌ Colonnes introuvables. Le fichier doit contenir : Type, Montant, Date, Membre.", importProcessing: "Importation en cours…",
     settingsTitle: "Paramètres", langLbl: "Langue", themeLbl: "Apparence", secLbl: "Sécurité",
     aboutLbl: "À propos", version: "Version 1.0.0", darkMode: "Mode sombre", changeLang: "Changer la langue",
     changePin: "Changer le PIN", aboutApp: "Caisse Coopérative · Gestion communautaire", logout: "Se déconnecter",
@@ -189,7 +189,7 @@ const T = {
     newMember: "عضو جديد", fullName: "الاسم الكامل", fullNamePh: "مثال: فاطمة بنت أحمد",
     phone: "الهاتف", phonePh: "مثال: 22234567890", addMemberBtn: "إضافة",
     exportBtn: "تصدير Excel", exportAll: "كل العمليات", exportMonth: "هذا الشهر", xlsxWait: "جارٍ التحميل…", resetBtn: "مسح جميع البيانات", resetConfirmTitle: "حذف الكل؟", resetConfirmMsg: "سيتم حذف جميع الأعضاء والمعاملات. لا يمكن التراجع.", resetSuccess: "✅ تم مسح جميع البيانات.",
-    importBtn: "استيراد Excel", importDesc: "تحميل المعاملات من ملف .xlsx", importSuccess: (added, updated) => updated > 0 ? `✅ تمت إضافة ${added}، وتعديل ${updated} بنجاح.` : `✅ تم استيراد ${added} عملية بنجاح.`, importError: "❌ خطأ في قراءة الملف. تحقق من الصيغة.", importColsError: "❌ الأعمدة غير موجودة. يجب أن يحتوي الملف على: Type, Montant, Date, Membre.", importProcessing: "جارٍ الاستيراد…",
+    importBtn: "استيراد Excel", importDesc: "تحميل المعاملات من ملف .xlsx", importSuccess: (n) => `✅ تم استيراد ${n} عملية بنجاح.`, importError: "❌ خطأ في قراءة الملف. تحقق من الصيغة.", importColsError: "❌ الأعمدة غير موجودة. يجب أن يحتوي الملف على: Type, Montant, Date, Membre.", importProcessing: "جارٍ الاستيراد…",
     settingsTitle: "الإعدادات", langLbl: "اللغة", themeLbl: "المظهر", secLbl: "الأمان",
     aboutLbl: "حول التطبيق", version: "الإصدار 1.0.0", darkMode: "الوضع الداكن", changeLang: "تغيير اللغة",
     changePin: "تغيير رمز PIN", aboutApp: "الصندوق التعاوني · إدارة مجتمعية", logout: "تسجيل الخروج",
@@ -201,35 +201,6 @@ const T = {
 // ─── DATA VIDE ────────────────────────────────────────────────────────────────
 const DEF_MEMBERS = [];
 const DEF_TX = [];
-
-// ─── DONNÉES INITIALES (importées depuis Classeur1.xlsx) ──────────────────────
-const SEED_MEMBERS = [
-  { name: "MARIEM MED YACOUB NDARI",   phone: "789686" },
-  { name: "ABDEL JELIL RAMDANE",        phone: "64367547" },
-  { name: "RACHIDSALECKSALEM",           phone: "737777737" },
-  { name: "KASSOUM AMADOU BA",          phone: "73737" },
-  { name: "BEWBE MOHAMED ESSID",        phone: "37778" },
-  { name: "LALLA BLAL BLAL",            phone: "375758" },
-  { name: "FATIMETOU HAIBALLA",         phone: "37737" },
-  { name: "AISSATA DEMBA N DIAYE",      phone: "375747" },
-  { name: "BANO MAMADOU NIANG",         phone: "37577" },
-  { name: "MOHAMED EL MOUSTAPHA",       phone: "375757" },
-];
-
-const SEED_TRANSACTIONS = [
-  { type: "contribution", memberName: "MARIEM MED YACOUB NDARI",   amount: 2000,  date: "2026-01-01", note: "" },
-  { type: "contribution", memberName: "ABDEL JELIL RAMDANE",        amount: 3000,  date: "2026-01-02", note: "" },
-  { type: "contribution", memberName: "RACHIDSALECKSALEM",           amount: 4500,  date: "2026-01-03", note: "" },
-  { type: "contribution", memberName: "KASSOUM AMADOU BA",          amount: 6700,  date: "2026-01-04", note: "" },
-  { type: "contribution", memberName: "BEWBE MOHAMED ESSID",        amount: 3400,  date: "2026-01-05", note: "" },
-  { type: "contribution", memberName: "LALLA BLAL BLAL",            amount: 12500, date: "2026-01-06", note: "" },
-  { type: "contribution", memberName: "FATIMETOU HAIBALLA",         amount: 3450,  date: "2026-01-07", note: "" },
-  { type: "contribution", memberName: "AISSATA DEMBA N DIAYE",      amount: 4000,  date: "2026-01-08", note: "" },
-  { type: "contribution", memberName: "BANO MAMADOU NIANG",         amount: 9000,  date: "2026-01-09", note: "" },
-  { type: "contribution", memberName: "MOHAMED EL MOUSTAPHA",       amount: 3000,  date: "2026-01-10", note: "" },
-  { type: "contribution", memberName: "MARIEM MED YACOUB NDARI",   amount: 400,   date: "2026-01-11", note: "" },
-  { type: "contribution", memberName: "ABDEL JELIL RAMDANE",        amount: 200,   date: "2026-01-12", note: "" },
-];
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 const fmt = (n) => new Intl.NumberFormat("fr-FR").format(n);
@@ -1805,338 +1776,759 @@ function PdfReportModal({ txs, members, onClose, year }) {
 }
 
 // ─── REPORTS ──────────────────────────────────────────────────────────────────
-function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx, onUpdateTx, onAddMember }) {
+function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx }) {
   const t = T[lang];
+  const years = getYrs(txs);
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
-  const [importMsg, setImportMsg] = useState(null);
   const [importing, setImporting] = useState(false);
-  const importRef = useRef();
+  const [importMsg, setImportMsg] = useState(null);
+  const importRef = useRef(null);
 
-  const YEAR_STATS = year;
-  const txsYear = txs.filter(tx => new Date(tx.date).getFullYear() === YEAR_STATS);
-  const yC = txsYear.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
-  const yD = txsYear.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
-  const yE = txsYear.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
+  useEffect(() => { setImportMsg(null); }, []);
 
-  // ── EXPORT EXCEL ──────────────────────────────────────────────────────────
-  const doExport = () => {
-    if (!xlsxReady || !window.XLSX) return;
+  async function doImport(file) {
+    if (!file) return;
     const XLSX = window.XLSX;
-    const hStyle = { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "1B4332" } } };
-    // Feuille Transactions
-    const txHeaders = ["ID", "Type", "Montant", "Date", "Membre", "Description"];
-    const typeLabels = { contribution: "Contribution", don: "Don", depense: "Dépense" };
-    const txRows = [...txs].sort((a, b) => new Date(b.date) - new Date(a.date))
-      .map(tx => [tx.id, typeLabels[tx.type] || tx.type, tx.amount, tx.date, tx.memberName || "", tx.note || ""]);
-    const wsTx = XLSX.utils.aoa_to_sheet([txHeaders, ...txRows]);
-    wsTx["!cols"] = [{ wch: 36 }, { wch: 14 }, { wch: 12 }, { wch: 12 }, { wch: 30 }, { wch: 30 }];
-    txHeaders.forEach((_, ci) => {
-      const cell = XLSX.utils.encode_cell({ r: 0, c: ci });
-      if (wsTx[cell]) wsTx[cell].s = hStyle;
-    });
-    // Feuille Membres
-    const memHeaders = ["ID", "Nom", "Téléphone", "Total Contributions"];
-    const memRows = members.map(m => {
-      const tot = txs.filter(tx => tx.memberId === m.id && tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
-      return [m.id, m.name, m.phone || "", tot];
-    });
-    const wsMem = XLSX.utils.aoa_to_sheet([memHeaders, ...memRows]);
-    wsMem["!cols"] = [{ wch: 36 }, { wch: 30 }, { wch: 16 }, { wch: 22 }];
-    memHeaders.forEach((_, ci) => {
-      const cell = XLSX.utils.encode_cell({ r: 0, c: ci });
-      if (wsMem[cell]) wsMem[cell].s = hStyle;
-    });
-    // Feuille Résumé
-    const totalC = txs.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
-    const totalD = txs.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
-    const totalE = txs.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
-    const wsSummary = XLSX.utils.aoa_to_sheet([
-      ["Caisse Communautaire"],
-      ["Exporté le", new Date().toLocaleDateString("fr-FR")],
-      [],
-      ["Indicateur", "Montant (MRU)"],
-      ["Contributions", totalC],
-      ["Dons", totalD],
-      ["Dépenses", totalE],
-      ["Solde Net", totalC + totalD - totalE],
-      [],
-      ["Membres", members.length],
-      ["Transactions", txs.length],
-    ]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, wsTx, "Transactions");
-    XLSX.utils.book_append_sheet(wb, wsMem, "Membres");
-    XLSX.utils.book_append_sheet(wb, wsSummary, "Résumé");
-    XLSX.writeFile(wb, "Caisse_" + new Date().toISOString().slice(0, 10) + ".xlsx");
-  };
-
-  // ── IMPORT EXCEL ──────────────────────────────────────────────────────────
-  const doImport = async (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file || !xlsxReady || !window.XLSX) return;
-    e.target.value = "";
+    if (!XLSX) return setImportMsg({ ok: false, text: t.xlsxWait });
     setImporting(true);
     setImportMsg(null);
     try {
-      const XLSX = window.XLSX;
-      const buf = await file.arrayBuffer();
-      const wb = XLSX.read(buf, { type: "array", cellDates: true });
-      const names = wb.SheetNames;
+      const ab = await file.arrayBuffer();
+      const wb = XLSX.read(ab, { type: "array", cellDates: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
 
-      // Normalisation de chaîne pour comparaison souple
-      const norm = s => String(s || "").toLowerCase().trim()
-        .replace(/\s+/g, " ")
-        .replace(/[éèêë]/g, "e").replace(/[àâä]/g, "a")
-        .replace(/[ûü]/g, "u").replace(/[îï]/g, "i")
-        .replace(/[ôö]/g, "o").replace(/[ç]/g, "c");
+      // Convert to array-of-arrays to handle banner rows from our own export format
+      const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
 
-      // Trouver la feuille transactions (nom flexible)
-      const txSheetName = names.find(n => norm(n).includes("transaction")) || names[0];
-      const ws = wb.Sheets[txSheetName];
-      if (!ws) { setImportMsg(t.importColsError); setImporting(false); return; }
+      // Find the header row: the first row that contains "type" or "montant" (case-insensitive)
+      const isHeaderRow = (row) => row.some(cell => {
+        const s = String(cell).toLowerCase().trim();
+        return s === "type" || s === "typ" || s.includes("montant") || s.includes("amount") || s === "نوع";
+      });
+      const headerIdx = aoa.findIndex(isHeaderRow);
+      if (headerIdx === -1) { setImportMsg({ ok: false, text: t.importColsError }); setImporting(false); return; }
 
-      // Lire TOUTES les lignes brutes pour gérer les en-têtes décalés
-      const rawRows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
-      if (!rawRows.length) { setImportMsg(t.importColsError); setImporting(false); return; }
+      const headers = aoa[headerIdx].map(h => String(h).trim());
+      const dataRows = aoa.slice(headerIdx + 1).filter(r => r.some(c => String(c).trim() !== ""));
 
-      // Trouver la ligne d'en-tête (qui contient "Date" ou "Type" ou "Montant")
-      let headerRowIdx = -1;
-      for (let i = 0; i < Math.min(rawRows.length, 6); i++) {
-        const row = rawRows[i].map(c => norm(String(c)));
-        if (row.some(c => c === "date") && row.some(c => c.includes("type") || c.includes("montant"))) {
-          headerRowIdx = i;
-          break;
-        }
-      }
-      if (headerRowIdx === -1) { setImportMsg(t.importColsError); setImporting(false); return; }
+      if (!dataRows.length) { setImportMsg({ ok: false, text: t.importError }); setImporting(false); return; }
 
-      const headers = rawRows[headerRowIdx].map(c => String(c || ""));
-      const dataRows = rawRows.slice(headerRowIdx + 1);
-
-      // Index de chaque colonne
-      const colIdx = (cands) => {
-        const idx = headers.findIndex(h => cands.some(c => norm(h) === norm(c)));
-        if (idx !== -1) return idx;
-        return headers.findIndex(h => cands.some(c => norm(h).includes(norm(c)) && norm(c).length > 2));
+      // Flexible column index finder (case-insensitive substring match)
+      const findCol = (candidates) => {
+        const idx = headers.findIndex(h => candidates.some(c => h.toLowerCase().includes(c.toLowerCase())));
+        return idx === -1 ? null : idx;
       };
 
-      const iDate    = colIdx(["Date", "date", "تاريخ"]);
-      const iType    = colIdx(["Type", "type", "نوع"]);
-      const iMontant = colIdx(["Montant", "Montant (MRU)", "montant", "Amount", "مبلغ"]);
-      const iMembre  = colIdx(["Membre", "membre", "Nom", "nom", "Member", "عضو", "Nom complet"]);
-      const iDesc    = colIdx(["Description", "description", "Note", "وصف", "Détail"]);
-      const iId      = colIdx(["ID", "id"]);
+      // "Montant (MRU)", "Membre / Payeur" — our own export headers included
+      const iType   = findCol(["type","typ","نوع"]);
+      const iAmt    = findCol(["montant","amount","مبلغ","amt"]);
+      const iDate   = findCol(["date","تاريخ","dat"]);
+      const iMember = findCol(["membre","member","عضو","payeur","nom","name","اسم"]);
+      const iNote   = findCol(["note","desc","remarque","ملاحظة","وصف"]);
 
-      if (iDate === -1 || iType === -1 || iMontant === -1) {
-        setImportMsg(t.importColsError); setImporting(false); return;
+      if (iType === null || iAmt === null || iDate === null) {
+        setImportMsg({ ok: false, text: t.importColsError });
+        setImporting(false);
+        return;
       }
 
-      // Mapping des types (pluriels, majuscules, accents)
-      const typeMap = {};
-      ["Contribution","contribution","Contributions","contributions"].forEach(k => typeMap[k] = "contribution");
-      ["Don","don","Dons","dons"].forEach(k => typeMap[k] = "don");
-      ["Dépense","depense","Dépenses","depenses","Depense","Depenses"].forEach(k => typeMap[k] = "depense");
+      // Normalize type values (also handle our own export labels "Contribution", "Don", "Dépense")
+      const typeMap = {
+        "contribution": "contribution", "contrib": "contribution", "مساهمة": "contribution",
+        "don": "don", "donation": "don", "تبرع": "don",
+        "depense": "depense", "dépense": "depense", "expense": "depense", "مصروف": "depense",
+        // exported labels (capitalised)
+        "Contribution": "contribution", "Don": "don", "Dépense": "depense", "Depense": "depense",
+      };
 
-      // Convertir date (Date object, string ISO, sériel Excel)
-      const toDate = (v) => {
-        if (!v && v !== 0) return null;
-        if (v instanceof Date && !isNaN(v.getTime())) {
-          const y = v.getFullYear();
-          const mo = String(v.getMonth() + 1).padStart(2, "0");
-          const d = String(v.getDate()).padStart(2, "0");
-          return y + "-" + mo + "-" + d;
+      // Parse date helper
+      const parseDate = (rawDate) => {
+        if (rawDate instanceof Date && !isNaN(rawDate)) {
+          return `${rawDate.getFullYear()}-${String(rawDate.getMonth()+1).padStart(2,"0")}-${String(rawDate.getDate()).padStart(2,"0")}`;
         }
-        const s = String(v).trim();
+        const s = String(rawDate).trim();
+        // DD/MM/YYYY
+        const m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (m1) return `${m1[3]}-${m1[2].padStart(2,"0")}-${m1[1].padStart(2,"0")}`;
+        // YYYY-MM-DD already
         if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
-        if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
-          const p = s.split("/");
-          return p[2] + "-" + p[1].padStart(2,"0") + "-" + p[0].padStart(2,"0");
-        }
-        const n = parseFloat(s);
-        if (!isNaN(n) && n > 1000) {
-          const d2 = new Date(Math.round((n - 25569) * 86400000));
-          return d2.getUTCFullYear() + "-" + String(d2.getUTCMonth()+1).padStart(2,"0") + "-" + String(d2.getUTCDate()).padStart(2,"0");
+        // Excel serial number
+        if (/^\d+$/.test(s)) {
+          const d = XLSX.SSF.parse_date_code(parseInt(s));
+          if (d) return `${d.y}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`;
         }
         return null;
       };
 
-      const byId = {};
-      txs.forEach(tx => { byId[String(tx.id)] = tx; });
-      let added = 0, updated = 0;
-
+      let count = 0;
       for (const row of dataRows) {
         const rawType = String(row[iType] || "").trim();
-        const type = typeMap[rawType] || typeMap[norm(rawType)];
+        const type = typeMap[rawType] || typeMap[rawType.toLowerCase()];
         if (!type) continue;
 
-        const amount = parseFloat(String(row[iMontant] || "").replace(/\s/g, "").replace(",", "."));
-        if (!amount || isNaN(amount) || amount <= 0) continue;
+        const rawAmt = parseFloat(String(row[iAmt]).replace(/[^0-9.,-]/g, "").replace(",", "."));
+        if (!rawAmt || isNaN(rawAmt) || rawAmt <= 0) continue;
 
-        const date = toDate(row[iDate]);
-        if (!date) continue;
+        const dateStr = parseDate(row[iDate]);
+        if (!dateStr) continue;
 
-        const memberName = iMembre !== -1 ? String(row[iMembre] || "").trim() : "";
-        const note = iDesc !== -1 ? String(row[iDesc] || "").trim() : "";
-        const rowId = iId !== -1 ? String(row[iId] || "").trim() : "";
+        const memberName = iMember !== null ? (String(row[iMember] || "").trim() || "—") : "—";
+        const note = iNote !== null ? String(row[iNote] || "").trim() : "";
 
-        const match = memberName ? members.find(m => m.name.toLowerCase() === memberName.toLowerCase()) : null;
-        const memberId = match ? match.id : null;
-        const txData = { type, memberName, memberId, amount, date, note };
-
-        if (rowId && byId[rowId]) {
-          const ex = byId[rowId];
-          if (ex.amount !== amount || ex.date !== date || ex.note !== note || ex.memberName !== memberName) {
-            await onUpdateTx({ ...txData, id: ex.id });
-            updated++;
-          }
-        } else {
-          await onAddTx(txData);
-          added++;
-        }
+        await onAddTx({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note });
+        count++;
       }
-
-      // Feuille Membres
-      const memSheetName = names.find(n => norm(n).includes("membre") || norm(n).includes("member"));
-      if (memSheetName && wb.Sheets[memSheetName]) {
-        const mRaw = XLSX.utils.sheet_to_json(wb.Sheets[memSheetName], { header: 1, defval: "", raw: false });
-        let mHeaderIdx = -1;
-        for (let i = 0; i < Math.min(mRaw.length, 5); i++) {
-          if (mRaw[i].some(c => norm(String(c)).includes("nom"))) { mHeaderIdx = i; break; }
-        }
-        if (mHeaderIdx !== -1) {
-          const mHeaders = mRaw[mHeaderIdx].map(c => String(c || ""));
-          const mRows = mRaw.slice(mHeaderIdx + 1);
-          const mColIdx = (cands) => mHeaders.findIndex(h => cands.some(c => norm(h).includes(norm(c)) && norm(c).length > 1));
-          const cNom = mColIdx(["Nom", "nom", "name", "اسم"]);
-          const cPhone = mColIdx(["Téléphone", "telephone", "Phone", "هاتف"]);
-          if (cNom !== -1) {
-            const existing = new Set(members.map(m => m.name.toLowerCase()));
-            for (const row of mRows) {
-              const name = String(row[cNom] || "").trim();
-              const phone = cPhone !== -1 ? String(row[cPhone] || "").trim() : "";
-              if (name && !existing.has(name.toLowerCase())) {
-                await onAddMember({ name, phone });
-                existing.add(name.toLowerCase());
-              }
-            }
-          }
-        }
-      }
-
-      await onRefresh();
-      setImportMsg(t.importSuccess(added, updated));
-    } catch (err) {
-      console.error("Import error:", err);
-      setImportMsg(t.importError);
-    } finally {
-      setImporting(false);
+      setImportMsg({ ok: true, text: t.importSuccess(count) });
+    } catch (e) {
+      console.error("Import error:", e);
+      setImportMsg({ ok: false, text: t.importError });
     }
+    setImporting(false);
+    if (importRef.current) importRef.current.value = "";
+  }
+
+  const all = txs.filter((tx) => { const d = new Date(tx.date); return d.getMonth() + 1 === month && d.getFullYear() === year; });
+
+  const YEAR_STATS = year;  // Suit l'année sélectionnée
+  const txs2026 = txs.filter(tx => new Date(tx.date).getFullYear() === YEAR_STATS);
+  const yC = txs2026.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
+  const yD = txs2026.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
+  const yE = txs2026.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
+  const yB = yC + yD - yE;
+
+  function doExport(mode) {
+    const XLSX = window.XLSX;
+    if (!XLSX) return alert(t.xlsxWait);
+
+    const EXPORT_YEAR = year;
+    const today = new Date().toLocaleDateString("fr-FR");
+    const typeLabels = { contribution: "Contribution", don: "Don", depense: "Dépense" };
+    const MONTHS_FR = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+
+    // ── Palette couleurs (ARGB sans #) ──
+    const CLR = {
+      greenDark:  "FF012D1D", greenMid:   "FF1B4332", greenLight: "FF2D6A4F",
+      greenPale:  "FFD8F3DC", greenXl:    "FFEEF7EF",
+      purple:     "FF712EDD", purplePale: "FFEDE8F9",
+      red:        "FFC0392B", redPale:    "FFFDECEA",
+      white:      "FFFFFFFF", grayLight:  "FFF3F4F0",
+      grayMid:    "FFCBD5E0", grayDark:   "FF4A5568",
+      black:      "FF1A1C1A", blue:       "FF0000FF",
+    };
+
+    // ── Helpers styles ──
+    const solidFill  = (argb)     => ({ patternFill: { patternType: "solid", fgColor: { rgb: argb } } });
+    const font       = (bold, sz, argb, name = "Arial") => ({ name, sz: sz || 11, bold: !!bold, color: { rgb: argb || CLR.black } });
+    const align      = (h, v, wrap) => ({ horizontal: h || "left", vertical: v || "center", wrapText: !!wrap });
+    const thinBorder = () => {
+      const s = { style: "thin", color: { rgb: CLR.grayMid } };
+      return { top: s, bottom: s, left: s, right: s };
+    };
+    const fmtMoney = '#,##0.00\\ "MRU"';
+    const fmtDate  = "DD/MM/YYYY";
+    const fmtPct   = "0.0%";
+
+    // Apply style helper (sets fill, font, alignment, border, numFmt on a cell object)
+    function styled(cell, { fill, fnt, aln, border, numFmt }) {
+      if (!cell) return;
+      cell.s = {};
+      if (fill)   cell.s.fill   = fill;
+      if (fnt)    cell.s.font   = fnt;
+      if (aln)    cell.s.alignment = aln;
+      if (border) cell.s.border = border;
+      if (numFmt) { cell.s.numFmt = numFmt; cell.z = numFmt; }
+    }
+
+    const wb = XLSX.utils.book_new();
+
+    // ════════════════════════════════════════════════════════════════
+    // FEUILLE 1 — TRANSACTIONS
+    // ════════════════════════════════════════════════════════════════
+    const txsToExport = (mode === "month"
+      ? txs.filter(tx => { const d = new Date(tx.date); return d.getFullYear() === year && d.getMonth() + 1 === month; })
+      : txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR)
+    ).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const TX_START = 5; // data rows start at row index 4 (0-based) → Excel row 5
+    const txAoa = [
+      // Row 1 – Banner
+      [`🌿  CAISSE COOPÉRATIVE — REGISTRE DES TRANSACTIONS`,"","","","","","","","",""],
+      // Row 2 – subtitle
+      [`Modèle de saisie — Exporté le ${today}`,"","","","","","","","",""],
+      // Row 3 – legend
+      ["  ■ Contribution (vert)    ■ Don (violet)    ■ Dépense (rouge)","","","","","","","","",""],
+      // Row 4 – headers
+      ["#","Date","Type","Membre / Payeur","Montant (MRU)","Description / Note","Mois","Année","Statut","Réf."],
+      // Data rows
+      ...txsToExport.map((tx, i) => {
+        const d = new Date(tx.date);
+        const mon = isNaN(d) ? "" : d.getMonth() + 1;
+        const yr  = isNaN(d) ? "" : d.getFullYear();
+        const ref = `TXN-${String(i + 1).padStart(3, "0")}`;
+        return [
+          i + 1,
+          tx.date,
+          typeLabels[tx.type] || tx.type,
+          tx.memberName || "—",
+          tx.amount,
+          tx.note || "",
+          mon,
+          yr,
+          "Confirmé",
+          ref,
+        ];
+      }),
+    ];
+
+    // Add totals block (3 rows gap + 4 rows)
+    const dataEndRow = TX_START + txsToExport.length; // 1-based last data row
+    const totRow = dataEndRow + 2;
+    // Pad aoa to reach totRow
+    while (txAoa.length < totRow - 1) txAoa.push(["","","","","","","","","",""]);
+    const totalC_tx = txsToExport.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
+    const totalD_tx = txsToExport.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
+    const totalE_tx = txsToExport.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
+    txAoa.push(["","","","Total Contributions :","", totalC_tx,"","","",""]);
+    txAoa.push(["","","","Total Dons :","",          totalD_tx,"","","",""]);
+    txAoa.push(["","","","Total Dépenses :","",       totalE_tx,"","","",""]);
+    txAoa.push(["","","","","","","","","",""]);
+    txAoa.push(["","","","SOLDE NET :","",            totalC_tx + totalD_tx - totalE_tx,"","","",""]);
+
+    const wsT = XLSX.utils.aoa_to_sheet(txAoa);
+    wsT["!cols"] = [{wch:5},{wch:14},{wch:16},{wch:22},{wch:18},{wch:32},{wch:10},{wch:9},{wch:13},{wch:14}];
+
+    // Merges: banner rows span A:J (cols 0-9)
+    wsT["!merges"] = [
+      {s:{r:0,c:0},e:{r:0,c:9}},
+      {s:{r:1,c:0},e:{r:1,c:9}},
+      {s:{r:2,c:0},e:{r:2,c:9}},
+      {s:{r:totRow-1,c:3},e:{r:totRow-1,c:4}},
+      {s:{r:totRow  ,c:3},e:{r:totRow  ,c:4}},
+      {s:{r:totRow+1,c:3},e:{r:totRow+1,c:4}},
+      {s:{r:totRow+3,c:3},e:{r:totRow+3,c:4}},
+    ];
+
+    // Style banner row 1
+    const cellA1 = wsT["A1"] || (wsT["A1"] = {t:"s", v:txAoa[0][0]});
+    styled(cellA1, { fill: solidFill(CLR.greenDark), fnt: font(true, 14, CLR.white), aln: align("center","center"), border: thinBorder() });
+
+    // Style banner row 2
+    const cellA2 = wsT["A2"] || (wsT["A2"] = {t:"s", v:txAoa[1][0]});
+    styled(cellA2, { fill: solidFill(CLR.greenMid), fnt: font(false, 9, "FFAAAAAA"), aln: align("center","center") });
+
+    // Style legend row 3
+    const cellA3 = wsT["A3"] || (wsT["A3"] = {t:"s", v:txAoa[2][0]});
+    styled(cellA3, { fill: solidFill(CLR.grayLight), fnt: font(false, 9, CLR.grayDark), aln: align("left","center") });
+
+    // Style header row 4
+    const txHdrs = ["A","B","C","D","E","F","G","H","I","J"];
+    txHdrs.forEach(col => {
+      const c = wsT[`${col}4`];
+      if (c) styled(c, { fill: solidFill(CLR.greenMid), fnt: font(true, 10, CLR.white), aln: align("center","center"), border: thinBorder() });
+    });
+
+    // Style data rows
+    txsToExport.forEach((tx, i) => {
+      const r = TX_START + i; // 1-based Excel row
+      const isEven = i % 2 === 1;
+      const rowFill = isEven ? solidFill(CLR.greenXl) : solidFill(CLR.white);
+      let typeFill = rowFill;
+      let typeFnt  = font(false, 10, CLR.black);
+      if (tx.type === "contribution") { typeFill = solidFill(CLR.greenPale);  typeFnt = font(false, 10, CLR.greenLight); }
+      if (tx.type === "don")          { typeFill = solidFill(CLR.purplePale); typeFnt = font(false, 10, CLR.purple); }
+      if (tx.type === "depense")      { typeFill = solidFill(CLR.redPale);    typeFnt = font(false, 10, CLR.red); }
+
+      txHdrs.forEach((col, ci) => {
+        const addr = `${col}${r}`;
+        const cell = wsT[addr];
+        if (!cell) return;
+        const isAmount = col === "E";
+        const isDate   = col === "B";
+        styled(cell, {
+          fill:   typeFill,
+          fnt:    ci === 6 || ci === 7 ? font(false, 9, CLR.greenLight) : typeFnt,
+          aln:    align(isAmount ? "right" : col === "A" || isDate || col === "G" || col === "H" || col === "I" || col === "J" ? "center" : "left", "center"),
+          border: thinBorder(),
+          numFmt: isAmount ? fmtMoney : isDate ? fmtDate : undefined,
+        });
+      });
+    });
+
+    // Style totals
+    const totColors = [CLR.greenLight, CLR.purple, CLR.red, undefined, CLR.greenDark];
+    [0,1,2,4].forEach((offset, idx) => {
+      const r = totRow + offset;
+      const clr = totColors[idx] || CLR.greenDark;
+      ["D","E","F"].forEach(col => {
+        const cell = wsT[`${col}${r}`];
+        if (!cell) return;
+        styled(cell, {
+          fill: solidFill(clr),
+          fnt:  font(true, offset === 4 ? 13 : 10, CLR.white),
+          aln:  align("right","center"),
+          border: thinBorder(),
+          numFmt: col === "F" ? fmtMoney : undefined,
+        });
+      });
+    });
+
+    XLSX.utils.book_append_sheet(wb, wsT, "Transactions");
+
+    // ════════════════════════════════════════════════════════════════
+    // FEUILLE 2 — RÉCAPITULATIF MENSUEL (enrichi)
+    // ════════════════════════════════════════════════════════════════
+    const txsYear = txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR);
+    const allC = txsYear.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
+    const allD = txsYear.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
+    const allE = txsYear.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
+
+    // ── Section 1 : tableau mensuel (lignes 1-19) ──
+    const sumAoa = [
+      [`🌿  RÉCAPITULATIF MENSUEL — CAISSE COOPÉRATIVE ${EXPORT_YEAR}`,"","","","",""],
+      ["Exporté le " + today + "  ·  " + members.length + " membres  ·  " + txsYear.length + " opérations","","","","",""],
+      ["","","","","",""],
+      ["Mois","Contributions (MRU)","Dons (MRU)","Dépenses (MRU)","Solde du mois (MRU)","Δ vs mois préc."],
+    ];
+    let cumul = 0;
+    let prevMonthSolde = null;
+    const monthlyData = MONTHS_FR.map((mname, mi) => {
+      const mIdx = mi + 1;
+      const mC = txsYear.filter(tx => tx.type === "contribution" && new Date(tx.date).getMonth()+1 === mIdx).reduce((a,tx)=>a+tx.amount,0);
+      const mD = txsYear.filter(tx => tx.type === "don"          && new Date(tx.date).getMonth()+1 === mIdx).reduce((a,tx)=>a+tx.amount,0);
+      const mE = txsYear.filter(tx => tx.type === "depense"      && new Date(tx.date).getMonth()+1 === mIdx).reduce((a,tx)=>a+tx.amount,0);
+      const mS = mC + mD - mE;
+      cumul += mS;
+      const evo = prevMonthSolde !== null && prevMonthSolde !== 0 ? (mS - prevMonthSolde) / Math.abs(prevMonthSolde) : "";
+      prevMonthSolde = mS;
+      return { mname, mC, mD, mE, mS, evo };
+    });
+    monthlyData.forEach(({ mname, mC, mD, mE, mS, evo }) => sumAoa.push([mname, mC, mD, mE, mS, evo]));
+    sumAoa.push(["TOTAL ANNUEL", allC, allD, allE, allC + allD - allE, ""]);
+    // blank + solde cumulé
+    sumAoa.push(["","","","","",""]);
+    sumAoa.push(["Solde cumulé fin d'année :", allC + allD - allE,"","","",""]);
+
+    // ── Section 2 : contributions par membre (lignes 22+) ──
+    const MBR_START_ROW = sumAoa.length + 2; // 1-based Excel row where member table starts
+    sumAoa.push(["","","","","",""]);
+    sumAoa.push([`👥  CONTRIBUTIONS PAR MEMBRE — ${EXPORT_YEAR}`,"","","","",""]);
+    const mbrHeaderCols = ["Membre", ...MONTHS_FR, "TOTAL (MRU)", "% du total"];
+    sumAoa.push(mbrHeaderCols);
+
+    const mbrRows = members.map(m => {
+      const monthlyContribs = MONTHS_FR.map((_, mi) => {
+        const mIdx = mi + 1;
+        return txsYear.filter(tx =>
+          tx.type === "contribution" &&
+          new Date(tx.date).getMonth()+1 === mIdx &&
+          (tx.memberName === m.name || tx.memberId === m.id)
+        ).reduce((a,tx)=>a+tx.amount, 0);
+      });
+      const total = monthlyContribs.reduce((a,v)=>a+v, 0);
+      const pct = allC > 0 ? total / allC : 0;
+      return [m.name, ...monthlyContribs, total, pct];
+    });
+    // Also add anonymous donors row if any
+    const anonContribs = MONTHS_FR.map((_, mi) => {
+      const mIdx = mi + 1;
+      return txsYear.filter(tx =>
+        tx.type === "contribution" &&
+        new Date(tx.date).getMonth()+1 === mIdx &&
+        !members.some(m => m.name === tx.memberName || m.id === tx.memberId)
+      ).reduce((a,tx)=>a+tx.amount, 0);
+    });
+    const anonTotal = anonContribs.reduce((a,v)=>a+v, 0);
+    if (anonTotal > 0) mbrRows.push(["(Autres / non identifiés)", ...anonContribs, anonTotal, allC > 0 ? anonTotal/allC : 0]);
+
+    // Total contributions row
+    const totalContribByMonth = MONTHS_FR.map((_, mi) => {
+      const mIdx = mi + 1;
+      return txsYear.filter(tx => tx.type === "contribution" && new Date(tx.date).getMonth()+1 === mIdx).reduce((a,tx)=>a+tx.amount,0);
+    });
+    mbrRows.push(["TOTAL", ...totalContribByMonth, allC, allC > 0 ? 1 : 0]);
+
+    mbrRows.forEach(row => sumAoa.push(row));
+
+    // ── Section 3 : récap dépenses par mois (lignes après membres) ──
+    const DEP_START_ROW = sumAoa.length + 2;
+    sumAoa.push(["","","","","",""]);
+    sumAoa.push([`📋  DÉPENSES PAR MOIS — ${EXPORT_YEAR}`,"","","","",""]);
+    sumAoa.push(["Mois","Nb opérations","Total Dépenses (MRU)","% des recettes",""," "]);
+    MONTHS_FR.forEach((mname, mi) => {
+      const mIdx = mi + 1;
+      const depTxs = txsYear.filter(tx => tx.type === "depense" && new Date(tx.date).getMonth()+1 === mIdx);
+      const mE = depTxs.reduce((a,tx)=>a+tx.amount,0);
+      const recettes = monthlyData[mi].mC + monthlyData[mi].mD;
+      const pct = recettes > 0 ? mE / recettes : 0;
+      sumAoa.push([mname, depTxs.length, mE, pct, "", ""]);
+    });
+    sumAoa.push(["TOTAL", txsYear.filter(tx=>tx.type==="depense").length, allE, (allC+allD)>0?allE/(allC+allD):0,"",""]);
+
+    // ── Build sheet ──
+    const wsS = XLSX.utils.aoa_to_sheet(sumAoa);
+    // Cols: A=Mois/Membre(24), B-M=months or values(12 each), N=Total(18), O=%(10)
+    const mbrTableCols = 14; // Membre + 12 mois + Total + %
+    wsS["!cols"] = [
+      {wch:26},{wch:12},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},
+      {wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:16},{wch:10},
+    ];
+    // Merges
+    const nCols = 5; // A-F for monthly summary (0-5)
+    const mbrNcols = mbrHeaderCols.length - 1; // B to last (0-indexed end)
+    wsS["!merges"] = [
+      {s:{r:0,c:0},e:{r:0,c:nCols}},   // banner
+      {s:{r:1,c:0},e:{r:1,c:nCols}},   // subtitle
+    ];
+
+    // Style banner row 1
+    const sA1 = wsS["A1"]; if (sA1) styled(sA1,{fill:solidFill(CLR.greenDark),fnt:font(true,13,CLR.white),aln:align("center","center")});
+    const sA2 = wsS["A2"]; if (sA2) styled(sA2,{fill:solidFill(CLR.greenMid),fnt:font(false,9,"FFAAAAAA"),aln:align("center","center")});
+
+    // Monthly table header (row 4)
+    ["A","B","C","D","E","F"].forEach(col => {
+      const c = wsS[`${col}4`];
+      if (c) styled(c,{fill:solidFill(CLR.greenMid),fnt:font(true,10,CLR.white),aln:align("center","center"),border:thinBorder()});
+    });
+    // Monthly data rows 5-16
+    monthlyData.forEach(({ mC, mD, mE, mS, evo }, mi) => {
+      const r = 5 + mi;
+      const isEven = mi % 2 === 1;
+      ["A","B","C","D","E","F"].forEach((col,ci) => {
+        const cell = wsS[`${col}${r}`]; if (!cell) return;
+        let rf = isEven ? solidFill(CLR.greenXl) : solidFill(CLR.white);
+        let cf = CLR.black; let nf;
+        if      (ci===0){cf=CLR.greenMid;}
+        else if (ci===1){rf=solidFill(CLR.greenPale);nf=fmtMoney;}
+        else if (ci===2){rf=solidFill(CLR.purplePale);nf=fmtMoney;}
+        else if (ci===3){rf=solidFill(CLR.redPale);nf=fmtMoney;}
+        else if (ci===4){cf=CLR.greenDark;nf=fmtMoney;}
+        else if (ci===5 && cell.t==="n"){nf=fmtPct;}
+        styled(cell,{fill:rf,fnt:font(ci===0,10,cf),aln:align(ci>=1&&ci<=4?"right":"center","center"),border:thinBorder(),numFmt:nf});
+      });
+    });
+    // Total annual row (row 17)
+    ["A","B","C","D","E","F"].forEach((col,ci)=>{
+      const cell=wsS[`${col}17`]; if(!cell)return;
+      styled(cell,{fill:solidFill(CLR.greenDark),fnt:font(true,10,CLR.white),aln:align(ci>=1?"right":"center","center"),border:thinBorder(),numFmt:ci>=1&&ci<=4?fmtMoney:undefined});
+    });
+    // Solde cumulé row (row 19)
+    const sCum=wsS["A19"]; if(sCum)styled(sCum,{fnt:font(true,10,CLR.greenDark),aln:align("right","center")});
+    const sCumV=wsS["B19"]; if(sCumV)styled(sCumV,{fill:solidFill(CLR.greenPale),fnt:font(true,11,CLR.greenDark),aln:align("right","center"),border:thinBorder(),numFmt:fmtMoney});
+
+    // Member section banner (MBR_START_ROW + 1 for the section title)
+    const mbrBannerRow = MBR_START_ROW + 1;
+    const mbrBannerCell = wsS[`A${mbrBannerRow}`];
+    if (mbrBannerCell) styled(mbrBannerCell,{fill:solidFill(CLR.greenMid),fnt:font(true,11,CLR.white),aln:align("left","center")});
+    // Member header row
+    const mbrHdrRow = mbrBannerRow + 1;
+    mbrHeaderCols.forEach((_, ci) => {
+      const col = String.fromCharCode(65+ci);
+      const cell = wsS[`${col}${mbrHdrRow}`];
+      if (cell) styled(cell,{fill:solidFill(CLR.primaryMid||CLR.greenMid),fnt:font(true,9,CLR.white),aln:align("center","center"),border:thinBorder()});
+    });
+    // Member data rows
+    mbrRows.forEach((row, ri) => {
+      const r = mbrHdrRow + 1 + ri;
+      const isTotal = ri === mbrRows.length - 1;
+      const isEven = ri % 2 === 1;
+      row.forEach((_, ci) => {
+        const col = String.fromCharCode(65+ci);
+        const cell = wsS[`${col}${r}`]; if (!cell) return;
+        const isAmt = ci >= 1 && ci < row.length - 1;
+        const isPct = ci === row.length - 1;
+        styled(cell,{
+          fill: isTotal ? solidFill(CLR.greenDark) : isEven ? solidFill(CLR.greenXl) : solidFill(CLR.white),
+          fnt: font(isTotal||ci===0, 9, isTotal?CLR.white:(ci===0?CLR.greenMid:(isAmt&&cell.v>0?CLR.greenLight:CLR.black))),
+          aln: align(ci===0?"left":"right","center"),
+          border: thinBorder(),
+          numFmt: isAmt ? fmtMoney : isPct ? fmtPct : undefined,
+        });
+      });
+    });
+
+    // Depense section banner
+    const depBannerRow = DEP_START_ROW + 1;
+    const depBannerCell = wsS[`A${depBannerRow}`];
+    if (depBannerCell) styled(depBannerCell,{fill:solidFill(CLR.red),fnt:font(true,11,CLR.white),aln:align("left","center")});
+    const depHdrRow = depBannerRow + 1;
+    ["A","B","C","D"].forEach(col => {
+      const cell=wsS[`${col}${depHdrRow}`]; if(!cell)return;
+      styled(cell,{fill:solidFill(CLR.greenMid),fnt:font(true,10,CLR.white),aln:align("center","center"),border:thinBorder()});
+    });
+    MONTHS_FR.forEach((_,mi)=>{
+      const r = depHdrRow+1+mi;
+      ["A","B","C","D"].forEach((col,ci)=>{
+        const cell=wsS[`${col}${r}`]; if(!cell)return;
+        const isEven=mi%2===1;
+        styled(cell,{
+          fill:ci===2?solidFill(CLR.redPale):(isEven?solidFill(CLR.greenXl):solidFill(CLR.white)),
+          fnt:font(false,10,ci===0?CLR.greenMid:(ci===2?CLR.red:CLR.black)),
+          aln:align(ci===0?"center":"right","center"),
+          border:thinBorder(),
+          numFmt:ci===2?fmtMoney:ci===3?fmtPct:undefined,
+        });
+      });
+    });
+    const depTotRow=depHdrRow+13;
+    ["A","B","C","D"].forEach((col,ci)=>{
+      const cell=wsS[`${col}${depTotRow}`]; if(!cell)return;
+      styled(cell,{fill:solidFill(CLR.red),fnt:font(true,10,CLR.white),aln:align(ci===0?"center":"right","center"),border:thinBorder(),numFmt:ci===2?fmtMoney:ci===3?fmtPct:undefined});
+    });
+
+    XLSX.utils.book_append_sheet(wb, wsS, "Récap. Mensuel");
+
+    // ════════════════════════════════════════════════════════════════
+    // FEUILLE 3 — MEMBRES
+    // ════════════════════════════════════════════════════════════════
+    const mbAoa = [
+      ["👥  REGISTRE DES MEMBRES — CAISSE COOPÉRATIVE","","","","","",""],
+      ["","","","","","",""],
+      ["#","Nom complet","Téléphone","Email","Date d'adhésion","Total Contributions (MRU)","Statut"],
+      ...members.map((m, i) => {
+        const mTotal = txs.filter(tx => tx.type === "contribution" && (tx.memberName === m.name || tx.memberId === m.id)).reduce((a, tx) => a + tx.amount, 0);
+        return [i + 1, m.name, m.phone || "", "", "", mTotal, "Actif"];
+      }),
+    ];
+    const wsM = XLSX.utils.aoa_to_sheet(mbAoa);
+    wsM["!cols"] = [{wch:5},{wch:28},{wch:16},{wch:26},{wch:16},{wch:26},{wch:12}];
+    wsM["!merges"] = [{s:{r:0,c:0},e:{r:0,c:6}}];
+
+    const mA1 = wsM["A1"];
+    if (mA1) styled(mA1, { fill: solidFill(CLR.greenDark), fnt: font(true, 13, CLR.white), aln: align("center","center") });
+    ["A","B","C","D","E","F","G"].forEach(col => {
+      const c = wsM[`${col}3`];
+      if (c) styled(c, { fill: solidFill(CLR.greenMid), fnt: font(true, 10, CLR.white), aln: align("center","center"), border: thinBorder() });
+    });
+    members.forEach((_, i) => {
+      const r = 4 + i;
+      const isEven = i % 2 === 1;
+      ["A","B","C","D","E","F","G"].forEach((col, ci) => {
+        const cell = wsM[`${col}${r}`];
+        if (!cell) return;
+        styled(cell, {
+          fill: isEven ? solidFill(CLR.greenXl) : solidFill(CLR.white),
+          fnt: font(false, 10, ci === 5 ? CLR.greenMid : CLR.black),
+          aln: align(ci === 5 ? "right" : ci === 0 || ci >= 4 ? "center" : "left","center"),
+          border: thinBorder(),
+          numFmt: ci === 5 ? fmtMoney : undefined,
+        });
+      });
+    });
+
+    XLSX.utils.book_append_sheet(wb, wsM, "Membres");
+
+    // ════════════════════════════════════════════════════════════════
+    // FEUILLE 4 — MODE D'EMPLOI
+    // ════════════════════════════════════════════════════════════════
+    const helpData = [
+      ["📖  MODE D'EMPLOI — CAISSE COOPÉRATIVE","","",""],
+      ["","","",""],
+      ["ONGLET : Transactions","","",""],
+      ["Date","Format JJ/MM/AAAA. Obligatoire.","",""],
+      ["Type","Contribution, Don ou Dépense.","",""],
+      ["Membre / Payeur","Nom du membre ou du donateur.","",""],
+      ["Montant (MRU)","Montant en Ouguiya. Toujours positif.","",""],
+      ["Description","Objet de la transaction (optionnel).","",""],
+      ["Mois / Année","Extraits automatiquement de la date.","",""],
+      ["Statut","En attente → Confirmé après validation.","",""],
+      ["","","",""],
+      ["ONGLET : Récap. Mensuel","","",""],
+      ["Totaux par mois","Contributions + Dons − Dépenses = Solde.","",""],
+      ["Évolution","Variation % du solde vs mois précédent.","",""],
+      ["","","",""],
+      ["CODES COULEUR","","",""],
+      ["Vert","Transaction de type Contribution.","",""],
+      ["Violet","Transaction de type Don.","",""],
+      ["Rouge","Transaction de type Dépense.","",""],
+      ["Texte bleu","Valeur à saisir manuellement (input).","",""],
+      ["Texte vert","Valeur calculée automatiquement.","",""],
+    ];
+    const wsH = XLSX.utils.aoa_to_sheet(helpData);
+    wsH["!cols"] = [{wch:5},{wch:28},{wch:48},{wch:18}];
+    wsH["!merges"] = [{s:{r:0,c:0},e:{r:0,c:3}}];
+    const hA1 = wsH["A1"];
+    if (hA1) styled(hA1, { fill: solidFill(CLR.greenDark), fnt: font(true, 13, CLR.white), aln: align("center","center") });
+    const sectionRows = [2,11,15];
+    const sectionColors = [CLR.greenMid, CLR.greenLight, CLR.purple];
+    sectionRows.forEach((ri, si) => {
+      const cell = wsH[`A${ri + 1}`];
+      if (cell) styled(cell, { fill: solidFill(sectionColors[si]), fnt: font(true, 11, CLR.white), aln: align("left","center") });
+    });
+
+    XLSX.utils.book_append_sheet(wb, wsH, "Mode d'emploi");
+
+    // ── Write file ──
+    const suffix = mode === "month" ? `_${year}-${String(month).padStart(2,"0")}` : `_${EXPORT_YEAR}`;
+    // Write with cellStyles support
+    const wbOut = XLSX.write(wb, { bookType: "xlsx", type: "binary", cellStyles: true });
+    const buf = new ArrayBuffer(wbOut.length);
+    const view = new Uint8Array(buf);
+    for (let i = 0; i < wbOut.length; i++) view[i] = wbOut.charCodeAt(i) & 0xFF;
+    const blob = new Blob([buf], { type: "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `CaisseCooperative${suffix}.xlsx`; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  const [showPdf, setShowPdf] = useState(false);
+  const [resetConfirm, setResetConfirm] = useState(false);
+  const [resetting, setResetting] = useState(false);
+
+  const doReset = async () => {
+    setResetting(true);
+    await onReset();
+    setResetting(false);
+    setResetConfirm(false);
   };
+
+
 
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
-      {/* EN-TÊTE */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 4, height: 20, background: "linear-gradient(180deg,#7C3AED,#C084FC)", borderRadius: 2 }} />
-          <span style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>
-            {lang === "ar" ? "\u0625\u062d\u0635\u0627\u0626\u064a\u0627\u062a " + YEAR_STATS : "Statistiques " + YEAR_STATS}
-          </span>
-        </div>
-        <div style={{ display: "flex", gap: 7 }}>
-          <input ref={importRef} type="file" accept=".xlsx,.xls" style={{ display: "none" }} onChange={doImport} />
-          <button className="tbtn"
-            title={lang === "ar" ? "\u0627\u0633\u062a\u064a\u0631\u0627\u062f Excel" : "Importer Excel"}
-            onClick={() => { if (importRef.current) importRef.current.click(); }}
-            disabled={importing || !xlsxReady}
-            style={{ background: (importing || !xlsxReady) ? C.bgLow : "rgba(37,99,235,0.10)", border: "1.5px solid " + ((importing || !xlsxReady) ? C.outline : "rgba(37,99,235,0.25)"), color: (importing || !xlsxReady) ? C.muted : "#2563eb", borderRadius: 12, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: (importing || !xlsxReady) ? "not-allowed" : "pointer", flexShrink: 0 }}>
-            {importing
-              ? <div style={{ width: 13, height: 13, border: "2px solid rgba(37,99,235,0.3)", borderTopColor: "#2563eb", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
-              : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            }
-          </button>
-          <button className="tbtn"
-            title={lang === "ar" ? "\u062a\u0635\u062f\u064a\u0631 Excel" : "Exporter Excel"}
-            onClick={doExport}
-            disabled={!xlsxReady}
-            style={{ background: xlsxReady ? "rgba(22,163,74,0.10)" : C.bgLow, border: "1.5px solid " + (xlsxReady ? "rgba(22,163,74,0.25)" : C.outline), color: xlsxReady ? "#16a34a" : C.muted, borderRadius: 12, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: xlsxReady ? "pointer" : "not-allowed", flexShrink: 0 }}>
-            {Ic.dl("currentColor", 15)}
-          </button>
-        </div>
+      {/* TITRE STATS */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+        <div style={{ width: 4, height: 20, background: "linear-gradient(180deg,#7C3AED,#C084FC)", borderRadius: 2 }} />
+        <span style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>{lang === "ar" ? `إحصائيات ${YEAR_STATS}` : `Statistiques ${YEAR_STATS}`}</span>
       </div>
 
-      {/* CARTES STATS */}
+      {/* BOUTON RAPPORT PDF */}
+      <button className="tbtn" onClick={() => setShowPdf(true)}
+        style={{ width: "100%", background: "linear-gradient(135deg,#1a2b2e,#2d9c8f)", border: "none", color: "#fff", borderRadius: 16, padding: "14px 18px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16, boxShadow: "0 6px 20px rgba(26,43,46,0.25)", letterSpacing: 0.2 }}>
+        <span style={{ fontSize: 18 }}>📄</span>
+        <span>{lang === "ar" ? "تقرير الوضعية المالية" : "Rapport de situation"}</span>
+        <span style={{ marginRight: "auto", background: "rgba(255,255,255,0.18)", borderRadius: 8, padding: "2px 8px", fontSize: 10, fontWeight: 600, letterSpacing: 0.5 }}>{lang === "ar" ? "عربي" : "AR"}</span>
+      </button>
+
+      {/* 3 CARTES STATS 2026 */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
         {[
-          { label: t.stats.contribution, value: yC, color: "#8B5CF6", bg: "rgba(139,92,246,0.08)", icon: Ic.up("#8B5CF6", 15) },
-          { label: t.stats.don,          value: yD, color: "#DB2777", bg: "rgba(219,39,119,0.08)", icon: Ic.heart("#DB2777", 15) },
-          { label: t.stats.depense,      value: yE, color: C.red,     bg: C.redLt,                icon: Ic.dn(C.red, 15) },
+          { label: t.stats.contribution, value: yC, color: "#8B5CF6", bg: "rgba(139,92,246,0.08)", icon: Ic.up("#8B5CF6", 15), sign: "" },
+          { label: t.stats.don,          value: yD, color: "#DB2777", bg: "rgba(219,39,119,0.08)", icon: Ic.heart("#DB2777", 15), sign: "" },
+          { label: t.stats.depense,      value: yE, color: C.red,     bg: C.redLt,                icon: Ic.dn(C.red, 15), sign: "" },
         ].map(s => (
           <Card key={s.label} sx={{ padding: "12px 10px" }}>
             <div style={{ width: 30, height: 30, borderRadius: 9, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>{s.icon}</div>
             <div style={{ color: C.muted, fontSize: 8, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 }}>{s.label}</div>
-            <div style={{ color: s.color, fontWeight: 700, fontSize: 13 }}>{fmtN(s.value)}</div>
+            <div style={{ color: s.color, fontWeight: 700, fontSize: 13 }}>{s.sign}{fmtN(s.value)}</div>
           </Card>
         ))}
       </div>
 
+      {/* DONUT + TOP 5 + LINE CHART (données année sélectionnée) */}
       <DonutChart contrib={yC} dons={yD} dep={yE} lang={lang} chartReady={chartReady} />
-      <TopMembers members={members} txs={txsYear} lang={lang} />
-      <FinChart txs={txsYear} lang={lang} chartReady={chartReady} />
+      <TopMembers members={members} txs={txs2026} lang={lang} />
+      <FinChart txs={txs2026} lang={lang} chartReady={chartReady} />
 
-      {/* SECTION EXCEL */}
-      <Card sx={{ padding: "18px 16px", marginTop: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(34,197,94,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
-              <line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>
-            </svg>
-          </div>
-          <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>
-            {lang === "ar" ? "\u0645\u0644\u0641 Excel" : "Fichier Excel"}
-          </span>
+      {/* RESET */}
+      <div style={{ marginTop: 20, borderTop: `1px solid ${C.outline}`, paddingTop: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: C.redLt, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🗑️</div>
+          <span style={{ color: C.red, fontWeight: 700, fontSize: 14 }}>{t.resetBtn}</span>
         </div>
-
-        <button className="tbtn eco-btn" onClick={doExport} disabled={!xlsxReady}
-          style={{ width: "100%", background: xlsxReady ? "linear-gradient(135deg,#166534,#16a34a)" : C.muted, border: "none", color: "#fff", borderRadius: 16, padding: "13px 16px", fontSize: 13, fontWeight: 700, cursor: xlsxReady ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 8, fontFamily: "inherit", boxShadow: xlsxReady ? "0 4px 16px rgba(22,163,74,0.25)" : "none" }}>
-          {Ic.dl("#fff", 15)}
-          {lang === "ar" ? "\u062a\u0635\u062f\u064a\u0631 \u0625\u0644\u0649 Excel" : "Exporter vers Excel"}
-        </button>
-        <div style={{ fontSize: 11, color: C.muted, marginBottom: 14, paddingLeft: 4, lineHeight: 1.5 }}>
-          {lang === "ar"
-            ? "\u064a\u064f\u0635\u062f\u0651\u0631 \u062c\u0645\u064a\u0639 \u0627\u0644\u0645\u0639\u0627\u0645\u0644\u0627\u062a \u0648\u0627\u0644\u0623\u0639\u0636\u0627\u0621 \u0641\u064a \u0645\u0644\u0641 .xlsx (3 \u0623\u0648\u0631\u0627\u0642)."
-            : "Exporte toutes les transactions et membres dans un .xlsx (3 feuilles)."}
-        </div>
-
-        <div style={{ height: 1, background: C.outline, marginBottom: 14 }} />
-
-        <button className="tbtn eco-btn"
-          onClick={() => { if (importRef.current) importRef.current.click(); }}
-          disabled={importing || !xlsxReady}
-          style={{ width: "100%", background: (importing || !xlsxReady) ? C.muted : "linear-gradient(135deg,#1e3a5f,#2563eb)", border: "none", color: "#fff", borderRadius: 16, padding: "13px 16px", fontSize: 13, fontWeight: 700, cursor: (importing || !xlsxReady) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 8, fontFamily: "inherit", boxShadow: (!importing && xlsxReady) ? "0 4px 16px rgba(37,99,235,0.25)" : "none" }}>
-          {importing
-            ? <div style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
-            : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          }
-          {lang === "ar" ? "\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0645\u0646 Excel" : "Importer depuis Excel"}
-        </button>
-        <div style={{ fontSize: 11, color: C.muted, paddingLeft: 4, lineHeight: 1.5 }}>
-          {lang === "ar"
-            ? "\u064a\u0633\u062a\u0648\u0631\u062f \u0645\u0646 .xlsx. \u064a\u062d\u062f\u0651\u062b \u0627\u0644\u0635\u0641\u0648\u0641 \u0627\u0644\u0645\u0648\u062c\u0648\u062f\u0629 \u0648\u064a\u0636\u064a\u0641 \u0627\u0644\u062c\u062f\u064a\u062f\u0629."
-            : "Importe depuis un .xlsx. Met a jour les lignes existantes, ajoute les nouvelles."}
-        </div>
-
-        {importMsg && (
-          <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 12, background: importMsg.slice(0,2) === "\u2705" ? "rgba(22,163,74,0.10)" : "rgba(192,57,43,0.10)", color: importMsg.slice(0,2) === "\u2705" ? "#16a34a" : C.red, fontSize: 12, fontWeight: 600, border: "1px solid " + (importMsg.slice(0,2) === "\u2705" ? "rgba(22,163,74,0.2)" : "rgba(192,57,43,0.2)") }}>
-            {importMsg}
+        {!resetConfirm ? (
+          <button className="tbtn" onClick={() => setResetConfirm(true)}
+            style={{ width: "100%", background: C.redLt, border: `1.5px solid rgba(224,82,82,0.3)`, borderRadius: 14, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: "inherit" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.red} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span style={{ fontSize: 13, fontWeight: 600, color: C.red }}>{t.resetBtn}</span>
+          </button>
+        ) : (
+          <div style={{ background: C.redLt, border: `1.5px solid rgba(224,82,82,0.3)`, borderRadius: 14, padding: "16px" }}>
+            <div style={{ color: C.red, fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{t.resetConfirmTitle}</div>
+            <div style={{ color: C.muted, fontSize: 12, marginBottom: 14, lineHeight: 1.5 }}>{t.resetConfirmMsg}</div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button className="tbtn" onClick={() => setResetConfirm(false)} style={{ flex: 1, background: C.card, border: `1.5px solid ${C.outline}`, borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 500, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>{t.cancel}</button>
+              <button className="tbtn" onClick={doReset} disabled={resetting} style={{ flex: 1, background: C.red, border: "none", borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 600, color: "#fff", cursor: resetting ? "not-allowed" : "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                {resetting ? <><div style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} />...</> : t.delete}
+              </button>
+            </div>
           </div>
         )}
-      </Card>
+      </div>
+
+      {/* EXPORT */}
+      <div style={{ marginTop: 6, borderTop: `1px solid ${C.outline}`, paddingTop: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 13, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: C.bgLow, display: "flex", alignItems: "center", justifyContent: "center" }}>{Ic.dl(C.primaryLt)}</div>
+          <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{t.exportBtn}</span>
+          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.bgLow, border: `1px solid ${C.outline}`, borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
+        </div>
+        {[
+          { mode: "month", label: t.exportMonth, sub: `${t.monthsFull[month - 1]} ${year}`, color: C.primaryLt, lt: C.bgLow, icon: "📊" },
+          { mode: "all",   label: lang === "ar" ? "كل السنوات" : "Toutes les années", sub: `${txs.length} op · ${[...new Set(txs.map(tx => new Date(tx.date).getFullYear()))].length} an(s)`, color: C.gold, lt: C.goldLt, icon: "📥" },
+        ].map((btn) => (
+          <button key={btn.mode} className="tbtn" onClick={() => doExport(btn.mode)} disabled={!xlsxReady}
+            style={{ width: "100%", background: xlsxReady ? btn.lt : C.bgLow, border: `1.5px solid ${xlsxReady ? C.outline : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: xlsxReady ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "inherit", marginBottom: 10, opacity: xlsxReady ? 1 : 0.5, boxShadow: xlsxReady ? C.shadow : "none" }}>
+            <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
+              <div style={{ color: xlsxReady ? btn.color : C.muted, fontWeight: 600, fontSize: 13 }}>{btn.label}</div>
+              <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{btn.sub}</div>
+            </div>
+            <span style={{ fontSize: 22 }}>{btn.icon}</span>
+          </button>
+        ))}
+      </div>
+      {/* IMPORT */}
+      <div style={{ marginTop: 6, borderTop: `1px solid ${C.outline}`, paddingTop: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 13, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: C.secondaryCnt, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.secondaryLt} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>{t.importBtn}</span>
+          {!xlsxReady && <span style={{ fontSize: 10, color: C.muted, background: C.bgLow, border: `1px solid ${C.outline}`, borderRadius: 7, padding: "2px 8px", animation: "blink 1.4s infinite" }}>{t.xlsxWait}</span>}
+        </div>
+
+        {/* feedback message */}
+        {importMsg && (
+          <div style={{ marginBottom: 12, padding: "10px 14px", borderRadius: 12, background: importMsg.ok ? C.goldLt : C.redLt, border: `1px solid ${importMsg.ok ? C.primaryLt : C.red}20`, fontSize: 12, fontWeight: 600, color: importMsg.ok ? C.primaryLt : C.red, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+            <span>{importMsg.text}</span>
+            <button onClick={() => setImportMsg(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", opacity: 0.6, fontSize: 16, lineHeight: 1, padding: "0 2px", flexShrink: 0 }}>✕</button>
+          </div>
+        )}
+
+        {/* hidden file input */}
+        <input
+          ref={importRef}
+          type="file"
+          accept=".xlsx,.xls"
+          style={{ display: "none" }}
+          onChange={e => { const f = e.target.files?.[0]; if (f) doImport(f); }}
+        />
+
+        <button
+          className="tbtn eco-btn"
+          onClick={() => { if (xlsxReady && !importing) importRef.current?.click(); }}
+          disabled={!xlsxReady || importing}
+          style={{ width: "100%", background: xlsxReady ? C.secondaryCnt : C.bgLow, border: `1.5px solid ${xlsxReady ? "rgba(113,46,221,0.25)" : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: xlsxReady && !importing ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "inherit", opacity: xlsxReady ? 1 : 0.5, boxShadow: xlsxReady ? C.shadow : "none" }}>
+          <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
+            <div style={{ color: xlsxReady ? C.secondaryLt : C.muted, fontWeight: 600, fontSize: 13 }}>
+              {importing ? t.importProcessing : t.importDesc}
+            </div>
+            <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>
+              {lang === "ar" ? "صيغة .xlsx · الأعمدة: Type, Montant, Date, Membre" : "Format .xlsx · Colonnes : Type, Montant, Date, Membre"}
+            </div>
+          </div>
+          {importing
+            ? <div style={{ width: 22, height: 22, border: `2.5px solid ${C.secondaryLt}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite", flexShrink: 0 }} />
+            : <span style={{ fontSize: 22, flexShrink: 0 }}>📂</span>
+          }
+        </button>
+
+        {/* format helper */}
+        <div style={{ marginTop: 10, padding: "10px 14px", borderRadius: 12, background: C.bgLow, border: `1px solid ${C.outline}`, fontSize: 11, color: C.muted, lineHeight: 1.6, direction: "ltr" }}>
+          <div style={{ fontWeight: 700, color: C.sub, marginBottom: 4 }}>📋 {lang === "ar" ? "مثال على بنية الملف:" : "Exemple de structure du fichier :"}</div>
+          <div style={{ fontFamily: "monospace", fontSize: 10, color: C.primaryLt }}>
+            Type &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Montant | Date &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Membre<br/>
+            contribution | 500 &nbsp;&nbsp;&nbsp;&nbsp;| 2026-01-15 | Ahmed<br/>
+            don &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| 200 &nbsp;&nbsp;&nbsp;&nbsp;| 15/01/2026 | —<br/>
+            depense &nbsp;&nbsp;| 150 &nbsp;&nbsp;&nbsp;&nbsp;| 2026-01-20 | —
+          </div>
+        </div>
+      </div>
+
+      {showPdf && <PdfReportModal txs={txs} members={members} onClose={() => setShowPdf(false)} year={YEAR_STATS} />}
     </div>
   );
 }
-
 // ─── SETTINGS ─────────────────────────────────────────────────────────────────
 const PROFILE_IMG = "data:image/png;base64,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";
 
@@ -2689,7 +3081,7 @@ export default function App() {
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
-        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} onUpdateTx={updateTx} onAddMember={addMember} />}
+        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "rgba(1,45,29,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 40px rgba(1,45,29,0.25)" }}>
