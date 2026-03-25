@@ -2180,8 +2180,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
         )}
       </Card>
 
-      {/* ── SECTION MOUTONS ── */}
-      <MoutonsExcel txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} />
+
     </div>
   );
 }
