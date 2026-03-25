@@ -1986,9 +1986,30 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
 
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-        <div style={{ width: 4, height: 20, background: "linear-gradient(180deg,#7C3AED,#C084FC)", borderRadius: 2 }} />
-        <span style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>{lang === "ar" ? `إحصائيات ${YEAR_STATS}` : `Statistiques ${YEAR_STATS}`}</span>
+      {/* ── EN-TÊTE : Titre + boutons Excel ── */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ width: 4, height: 20, background: "linear-gradient(180deg,#7C3AED,#C084FC)", borderRadius: 2 }} />
+          <span style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>{lang === "ar" ? `إحصائيات ${YEAR_STATS}` : `Statistiques ${YEAR_STATS}`}</span>
+        </div>
+        <div style={{ display: "flex", gap: 7, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+          <input ref={importRef} type="file" accept=".xlsx,.xls" style={{ display: "none" }} onChange={doImport} />
+          {/* Bouton Import */}
+          <button className="tbtn" title={lang === "ar" ? "استيراد Excel" : "Importer Excel"}
+            onClick={() => importRef.current?.click()} disabled={importing || !xlsxReady}
+            style={{ background: (importing || !xlsxReady) ? C.bgLow : "rgba(37,99,235,0.10)", border: `1.5px solid ${(importing || !xlsxReady) ? C.outline : "rgba(37,99,235,0.25)"}`, color: (importing || !xlsxReady) ? C.muted : "#2563eb", borderRadius: 12, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: (importing || !xlsxReady) ? "not-allowed" : "pointer", flexShrink: 0, transition: "all .18s" }}>
+            {importing
+              ? <div style={{ width: 13, height: 13, border: "2px solid rgba(37,99,235,0.3)", borderTopColor: "#2563eb", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+              : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            }
+          </button>
+          {/* Bouton Export */}
+          <button className="tbtn" title={lang === "ar" ? "تصدير Excel" : "Exporter Excel"}
+            onClick={doExport} disabled={!xlsxReady}
+            style={{ background: xlsxReady ? "rgba(22,163,74,0.10)" : C.bgLow, border: `1.5px solid ${xlsxReady ? "rgba(22,163,74,0.25)" : C.outline}`, color: xlsxReady ? "#16a34a" : C.muted, borderRadius: 12, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: xlsxReady ? "pointer" : "not-allowed", flexShrink: 0, transition: "all .18s" }}>
+            {Ic.dl("currentColor", 15)}
+          </button>
+        </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
         {[
@@ -2034,7 +2055,6 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
 
         <div style={{ height: 1, background: C.outline, marginBottom: 14 }} />
 
-        <input ref={importRef} type="file" accept=".xlsx,.xls" style={{ display: "none" }} onChange={doImport} />
         <button className="tbtn eco-btn" onClick={() => importRef.current?.click()} disabled={importing || !xlsxReady}
           style={{ width: "100%", background: (importing || !xlsxReady) ? C.muted : "linear-gradient(135deg,#1e3a5f,#2563eb)", border: "none", color: "#fff", borderRadius: 16, padding: "13px 16px", fontSize: 13, fontWeight: 700, cursor: (importing || !xlsxReady) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 8, fontFamily: "inherit", boxShadow: (!importing && xlsxReady) ? "0 4px 16px rgba(37,99,235,0.25)" : "none" }}>
           {importing ? (
@@ -2056,6 +2076,9 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
           </div>
         )}
       </Card>
+
+      {/* ── SECTION MOUTONS ── */}
+      <MoutonsExcel txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} />
     </div>
   );
 }
