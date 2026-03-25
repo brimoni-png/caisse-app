@@ -1915,41 +1915,126 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     try {
       const XLSX = window.XLSX;
       const data = await file.arrayBuffer();
-      const wb = XLSX.read(data, { type: "array" });
-      const wsTx = wb.Sheets["Transactions"];
+      // cellDates:true convertit automatiquement les dates sérielles Excel en objets Date
+      const wb = XLSX.read(data, { type: "array", cellDates: true, cellNF: false, cellText: false });
+
+      // Trouver la feuille Transactions : cherche d'abord par nom exact,
+      // puis insensible à la casse, puis prend la première feuille
+      const sheetNames = wb.SheetNames;
+      const txSheetName =
+        sheetNames.find(n => n === "Transactions") ||
+        sheetNames.find(n => n.toLowerCase().includes("transaction")) ||
+        sheetNames.find(n => n.toLowerCase().includes("معاملات")) ||
+        sheetNames[0];
+
+      const wsTx = wb.Sheets[txSheetName];
       if (!wsTx) { setImportMsg(t.importColsError); setImporting(false); return; }
-      const rows = XLSX.utils.sheet_to_json(wsTx, { defval: "" });
+
+      // raw:false pour obtenir les valeurs formatées (dates en string ISO)
+      const rows = XLSX.utils.sheet_to_json(wsTx, { defval: "", raw: false });
       if (!rows.length) { setImportMsg(t.importColsError); setImporting(false); return; }
+
+      // Normaliser les clés : supprimer espaces, accents, casse
+      const normalize = (s) => String(s || "").trim().toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      const findCol = (row, ...candidates) => {
+        const keys = Object.keys(row);
+        for (const cand of candidates) {
+          const n = normalize(cand);
+          const k = keys.find(k => normalize(k) === n);
+          if (k !== undefined) return k;
+        }
+        // fallback : contient
+        for (const cand of candidates) {
+          const n = normalize(cand);
+          const k = keys.find(k => normalize(k).includes(n));
+          if (k !== undefined) return k;
+        }
+        return null;
+      };
+
       const first = rows[0];
-      if (!("Type" in first) || !("Montant" in first) || !("Date" in first) || !("Membre" in first)) {
+      const colType    = findCol(first, "Type", "type", "نوع");
+      const colMontant = findCol(first, "Montant", "montant", "Amount", "amount", "مبلغ", "المبلغ");
+      const colDate    = findCol(first, "Date", "date", "تاريخ");
+      const colMembre  = findCol(first, "Membre", "membre", "Member", "عضو", "اسم العضو");
+
+      if (!colType || !colMontant || !colDate || !colMembre) {
         setImportMsg(t.importColsError); setImporting(false); return;
       }
+
+      const colDesc = findCol(first, "Description", "description", "Note", "وصف") || null;
+      const colId   = findCol(first, "ID", "id", "Id") || null;
+
       const typeMap = {
-        "Contribution": "contribution", "contribution": "contribution",
-        "Don": "don", "don": "don",
-        "Dépense": "depense", "Depense": "depense", "depense": "depense",
+        "contribution": "contribution", "Contribution": "contribution",
+        "don": "don", "Don": "don",
+        "depense": "depense", "Depense": "depense", "Dépense": "depense", "dépense": "depense",
         "مساهمة": "contribution", "تبرع": "don", "مصروف": "depense",
       };
+
+      // Convertir une valeur date en string YYYY-MM-DD
+      const toDateStr = (val) => {
+        if (!val) return null;
+        // Déjà un objet Date (cellDates:true)
+        if (val instanceof Date) {
+          if (isNaN(val.getTime())) return null;
+          const y = val.getFullYear();
+          const m = String(val.getMonth() + 1).padStart(2, "0");
+          const d = String(val.getDate()).padStart(2, "0");
+          return `${y}-${m}-${d}`;
+        }
+        const s = String(val).trim();
+        // YYYY-MM-DD
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+        // DD/MM/YYYY
+        if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+          const [d, mo, y] = s.split("/");
+          return `${y}-${mo.padStart(2,"0")}-${d.padStart(2,"0")}`;
+        }
+        // MM/DD/YYYY
+        if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)) {
+          const parts = s.split("/");
+          const y = parts[2].length === 2 ? "20" + parts[2] : parts[2];
+          return `${y}-${parts[0].padStart(2,"0")}-${parts[1].padStart(2,"0")}`;
+        }
+        // Nombre sériel Excel (fallback si cellDates n'a pas fonctionné)
+        const serial = parseFloat(s);
+        if (!isNaN(serial) && serial > 1000) {
+          const jsDate = new Date(Math.round((serial - 25569) * 86400 * 1000));
+          const y = jsDate.getUTCFullYear();
+          const m = String(jsDate.getUTCMonth() + 1).padStart(2, "0");
+          const d = String(jsDate.getUTCDate()).padStart(2, "0");
+          return `${y}-${m}-${d}`;
+        }
+        return null;
+      };
+
       const existingById = {};
       txs.forEach(tx => { existingById[String(tx.id)] = tx; });
-      let added = 0, updated = 0;
+      let added = 0, updated = 0, skipped = 0;
+
       for (const row of rows) {
-        const type = typeMap[String(row["Type"] || "").trim()];
-        if (!type) continue;
-        const amount = parseFloat(String(row["Montant"]).replace(/\s/g, "").replace(",", "."));
-        if (!amount || isNaN(amount) || amount <= 0) continue;
-        let date = String(row["Date"] || "").trim();
-        if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(date)) {
-          const [d, m, y] = date.split("/");
-          date = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-        }
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
-        const memberName = String(row["Membre"] || "").trim();
-        const note = String(row["Description"] || "").trim();
-        const rowId = String(row["ID"] || "").trim();
+        const rawType = String(row[colType] || "").trim();
+        const type = typeMap[rawType];
+        if (!type) { skipped++; continue; }
+
+        const rawAmount = String(row[colMontant] || "").replace(/[\s\u00a0]/g, "").replace(",", ".");
+        const amount = parseFloat(rawAmount);
+        if (!amount || isNaN(amount) || amount <= 0) { skipped++; continue; }
+
+        const date = toDateStr(row[colDate]);
+        if (!date) { skipped++; continue; }
+
+        const memberName = String(row[colMembre] || "").trim();
+        const note = colDesc ? String(row[colDesc] || "").trim() : "";
+        const rowId = colId ? String(row[colId] || "").trim() : "";
+
         const matchedMember = members.find(m => m.name.toLowerCase() === memberName.toLowerCase());
         const memberId = matchedMember?.id || null;
         const txData = { type, memberName, memberId, amount, date, note };
+
         if (rowId && existingById[rowId]) {
           const ex = existingById[rowId];
           if (ex.amount !== amount || ex.date !== date || ex.note !== note || ex.memberName !== memberName) {
@@ -1961,19 +2046,37 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
           added++;
         }
       }
-      const wsMem = wb.Sheets["Membres"];
-      if (wsMem) {
-        const memRows = XLSX.utils.sheet_to_json(wsMem, { defval: "" });
-        const existingNames = new Set(members.map(m => m.name.toLowerCase()));
-        for (const row of memRows) {
-          const name = String(row["Nom"] || "").trim();
-          const phone = String(row["Téléphone"] || "").trim();
-          if (name && !existingNames.has(name.toLowerCase())) {
-            await onAddMember({ name, phone });
-            existingNames.add(name.toLowerCase());
+
+      // Feuille Membres (optionnel)
+      const memSheetName =
+        sheetNames.find(n => n === "Membres") ||
+        sheetNames.find(n => n.toLowerCase().includes("membre")) ||
+        sheetNames.find(n => n.toLowerCase().includes("member")) ||
+        sheetNames.find(n => n.toLowerCase().includes("عضو"));
+
+      if (memSheetName) {
+        const wsMem = wb.Sheets[memSheetName];
+        if (wsMem) {
+          const memRows = XLSX.utils.sheet_to_json(wsMem, { defval: "", raw: false });
+          if (memRows.length) {
+            const firstMem = memRows[0];
+            const colNom   = findCol(firstMem, "Nom", "nom", "Name", "name", "اسم");
+            const colPhone = findCol(firstMem, "Téléphone", "telephone", "Phone", "هاتف");
+            if (colNom) {
+              const existingNames = new Set(members.map(m => m.name.toLowerCase()));
+              for (const row of memRows) {
+                const name = String(row[colNom] || "").trim();
+                const phone = colPhone ? String(row[colPhone] || "").trim() : "";
+                if (name && !existingNames.has(name.toLowerCase())) {
+                  await onAddMember({ name, phone });
+                  existingNames.add(name.toLowerCase());
+                }
+              }
+            }
           }
         }
       }
+
       await onRefresh();
       setImportMsg(t.importSuccess(added, updated));
     } catch (err) {
