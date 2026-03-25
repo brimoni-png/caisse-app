@@ -1807,236 +1807,146 @@ function PdfReportModal({ txs, members, onClose, year }) {
 // ─── REPORTS ──────────────────────────────────────────────────────────────────
 function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx, onUpdateTx, onAddMember }) {
   const t = T[lang];
-  const years = getYrs(txs);
-  const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [importMsg, setImportMsg] = useState(null);
   const [importing, setImporting] = useState(false);
   const importRef = useRef();
 
-  const all = txs.filter((tx) => { const d = new Date(tx.date); return d.getMonth() + 1 === month && d.getFullYear() === year; });
-
   const YEAR_STATS = year;
-  const txs2026 = txs.filter(tx => new Date(tx.date).getFullYear() === YEAR_STATS);
-  const yC = txs2026.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
-  const yD = txs2026.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
-  const yE = txs2026.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
-  const yB = yC + yD - yE;
+  const txsYear = txs.filter(tx => new Date(tx.date).getFullYear() === YEAR_STATS);
+  const yC = txsYear.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
+  const yD = txsYear.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
+  const yE = txsYear.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
 
-  // ── EXPORT EXCEL ─────────────────────────────────────────────────────────────
+  // ── EXPORT EXCEL ──────────────────────────────────────────────────────────
   const doExport = () => {
     if (!xlsxReady || !window.XLSX) return;
     const XLSX = window.XLSX;
-
+    const hStyle = { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "1B4332" } } };
+    // Feuille Transactions
     const txHeaders = ["ID", "Type", "Montant", "Date", "Membre", "Description"];
     const typeLabels = { contribution: "Contribution", don: "Don", depense: "Dépense" };
-    const txRows = [...txs]
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .map(tx => [
-        tx.id,
-        typeLabels[tx.type] || tx.type,
-        tx.amount,
-        tx.date,
-        tx.memberName || "",
-        tx.note || "",
-      ]);
-
-    const txData = [txHeaders, ...txRows];
-    const wsTx = XLSX.utils.aoa_to_sheet(txData);
+    const txRows = [...txs].sort((a, b) => new Date(b.date) - new Date(a.date))
+      .map(tx => [tx.id, typeLabels[tx.type] || tx.type, tx.amount, tx.date, tx.memberName || "", tx.note || ""]);
+    const wsTx = XLSX.utils.aoa_to_sheet([txHeaders, ...txRows]);
     wsTx["!cols"] = [{ wch: 36 }, { wch: 14 }, { wch: 12 }, { wch: 12 }, { wch: 30 }, { wch: 30 }];
-
-    const headerStyle = {
-      font: { bold: true, color: { rgb: "FFFFFF" } },
-      fill: { fgColor: { rgb: "1B4332" } },
-      alignment: { horizontal: "center" },
-    };
     txHeaders.forEach((_, ci) => {
       const cell = XLSX.utils.encode_cell({ r: 0, c: ci });
-      if (!wsTx[cell]) wsTx[cell] = { t: "s", v: txHeaders[ci] };
-      wsTx[cell].s = headerStyle;
+      if (wsTx[cell]) wsTx[cell].s = hStyle;
     });
-
-    txRows.forEach((row, ri) => {
-      row.forEach((val, ci) => {
-        const cell = XLSX.utils.encode_cell({ r: ri + 1, c: ci });
-        if (!wsTx[cell]) return;
-        const typeVal = row[1];
-        const rowBg = typeVal === "Contribution" ? "F0FDF4" : typeVal === "Don" ? "FAF5FF" : "FFF5F5";
-        wsTx[cell].s = { fill: { fgColor: { rgb: rowBg } } };
-      });
-    });
-
-    const memHeaders = ["ID", "Nom", "Téléphone", "Total Contributions", "Nombre de contributions"];
+    // Feuille Membres
+    const memHeaders = ["ID", "Nom", "Téléphone", "Total Contributions"];
     const memRows = members.map(m => {
-      const mTxs = txs.filter(tx => tx.memberId === m.id && tx.type === "contribution");
-      return [m.id, m.name, m.phone || "", mTxs.reduce((a, tx) => a + tx.amount, 0), mTxs.length];
+      const tot = txs.filter(tx => tx.memberId === m.id && tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
+      return [m.id, m.name, m.phone || "", tot];
     });
     const wsMem = XLSX.utils.aoa_to_sheet([memHeaders, ...memRows]);
-    wsMem["!cols"] = [{ wch: 36 }, { wch: 30 }, { wch: 16 }, { wch: 22 }, { wch: 26 }];
+    wsMem["!cols"] = [{ wch: 36 }, { wch: 30 }, { wch: 16 }, { wch: 22 }];
     memHeaders.forEach((_, ci) => {
       const cell = XLSX.utils.encode_cell({ r: 0, c: ci });
-      if (!wsMem[cell]) wsMem[cell] = { t: "s", v: memHeaders[ci] };
-      wsMem[cell].s = headerStyle;
+      if (wsMem[cell]) wsMem[cell].s = hStyle;
     });
-
+    // Feuille Résumé
     const totalC = txs.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
     const totalD = txs.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
     const totalE = txs.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
-    const summaryData = [
-      ["Caisse Communautaire — Résumé financier"],
+    const wsSummary = XLSX.utils.aoa_to_sheet([
+      ["Caisse Communautaire"],
       ["Exporté le", new Date().toLocaleDateString("fr-FR")],
       [],
       ["Indicateur", "Montant (MRU)"],
-      ["Total Contributions", totalC],
-      ["Total Dons", totalD],
-      ["Total Dépenses", totalE],
+      ["Contributions", totalC],
+      ["Dons", totalD],
+      ["Dépenses", totalE],
       ["Solde Net", totalC + totalD - totalE],
       [],
       ["Membres", members.length],
       ["Transactions", txs.length],
-    ];
-    const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-    wsSummary["!cols"] = [{ wch: 28 }, { wch: 18 }];
-
+    ]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, wsTx, "Transactions");
     XLSX.utils.book_append_sheet(wb, wsMem, "Membres");
     XLSX.utils.book_append_sheet(wb, wsSummary, "Résumé");
-    XLSX.writeFile(wb, `Caisse_${new Date().toISOString().split("T")[0]}.xlsx`);
+    XLSX.writeFile(wb, "Caisse_" + new Date().toISOString().slice(0, 10) + ".xlsx");
   };
 
-  // ── IMPORT EXCEL ─────────────────────────────────────────────────────────────
+  // ── IMPORT EXCEL ──────────────────────────────────────────────────────────
   const doImport = async (e) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files && e.target.files[0];
     if (!file || !xlsxReady || !window.XLSX) return;
     e.target.value = "";
     setImporting(true);
     setImportMsg(null);
     try {
       const XLSX = window.XLSX;
-      const data = await file.arrayBuffer();
-      // cellDates:true convertit automatiquement les dates sérielles Excel en objets Date
-      const wb = XLSX.read(data, { type: "array", cellDates: true, cellNF: false, cellText: false });
-
-      // Trouver la feuille Transactions : cherche d'abord par nom exact,
-      // puis insensible à la casse, puis prend la première feuille
-      const sheetNames = wb.SheetNames;
-      const txSheetName =
-        sheetNames.find(n => n === "Transactions") ||
-        sheetNames.find(n => n.toLowerCase().includes("transaction")) ||
-        sheetNames.find(n => n.toLowerCase().includes("معاملات")) ||
-        sheetNames[0];
-
-      const wsTx = wb.Sheets[txSheetName];
-      if (!wsTx) { setImportMsg(t.importColsError); setImporting(false); return; }
-
-      // raw:false pour obtenir les valeurs formatées (dates en string ISO)
-      const rows = XLSX.utils.sheet_to_json(wsTx, { defval: "", raw: false });
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array", cellDates: true });
+      // Trouver la bonne feuille
+      const names = wb.SheetNames;
+      const txSheet = names.find(n => n === "Transactions") ||
+                      names.find(n => n.toLowerCase().includes("transaction")) ||
+                      names[0];
+      const ws = wb.Sheets[txSheet];
+      if (!ws) { setImportMsg(t.importColsError); setImporting(false); return; }
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: "", raw: false });
       if (!rows.length) { setImportMsg(t.importColsError); setImporting(false); return; }
-
-      // Normaliser les clés : supprimer espaces, accents, casse
-      const normalize = (s) => String(s || "").trim().toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-      const findCol = (row, ...candidates) => {
-        const keys = Object.keys(row);
-        for (const cand of candidates) {
-          const n = normalize(cand);
-          const k = keys.find(k => normalize(k) === n);
-          if (k !== undefined) return k;
-        }
-        // fallback : contient
-        for (const cand of candidates) {
-          const n = normalize(cand);
-          const k = keys.find(k => normalize(k).includes(n));
-          if (k !== undefined) return k;
-        }
-        return null;
-      };
-
-      const first = rows[0];
-      const colType    = findCol(first, "Type", "type", "نوع");
-      const colMontant = findCol(first, "Montant", "montant", "Amount", "amount", "مبلغ", "المبلغ");
-      const colDate    = findCol(first, "Date", "date", "تاريخ");
-      const colMembre  = findCol(first, "Membre", "membre", "Member", "عضو", "اسم العضو");
-
+      // Détection souple des colonnes
+      const keys = Object.keys(rows[0]);
+      const norm = s => String(s).toLowerCase().trim().replace(/\s+/g, "");
+      const col = (...cands) => keys.find(k => cands.some(c => norm(k) === norm(c))) ||
+                               keys.find(k => cands.some(c => norm(k).includes(norm(c)))) || null;
+      const colType    = col("Type", "type", "نوع");
+      const colMontant = col("Montant", "montant", "Amount", "amount", "مبلغ");
+      const colDate    = col("Date", "date", "تاريخ");
+      const colMembre  = col("Membre", "membre", "Member", "عضو");
       if (!colType || !colMontant || !colDate || !colMembre) {
         setImportMsg(t.importColsError); setImporting(false); return;
       }
-
-      const colDesc = findCol(first, "Description", "description", "Note", "وصف") || null;
-      const colId   = findCol(first, "ID", "id", "Id") || null;
-
+      const colDesc = col("Description", "description", "Note", "وصف");
+      const colId   = col("ID", "id");
       const typeMap = {
-        "contribution": "contribution", "Contribution": "contribution",
-        "don": "don", "Don": "don",
-        "depense": "depense", "Depense": "depense", "Dépense": "depense", "dépense": "depense",
-        "مساهمة": "contribution", "تبرع": "don", "مصروف": "depense",
+        "Contribution": "contribution", "contribution": "contribution",
+        "Don": "don", "don": "don",
+        "Dépense": "depense", "Depense": "depense", "depense": "depense",
       };
-
-      // Convertir une valeur date en string YYYY-MM-DD
-      const toDateStr = (val) => {
-        if (!val) return null;
-        // Déjà un objet Date (cellDates:true)
-        if (val instanceof Date) {
-          if (isNaN(val.getTime())) return null;
-          const y = val.getFullYear();
-          const m = String(val.getMonth() + 1).padStart(2, "0");
-          const d = String(val.getDate()).padStart(2, "0");
-          return `${y}-${m}-${d}`;
+      // Convertir date
+      const toDate = (v) => {
+        if (!v) return null;
+        if (v instanceof Date && !isNaN(v)) {
+          const y = v.getFullYear(), mo = String(v.getMonth()+1).padStart(2,"0"), d = String(v.getDate()).padStart(2,"0");
+          return y + "-" + mo + "-" + d;
         }
-        const s = String(val).trim();
-        // YYYY-MM-DD
+        const s = String(v).trim();
         if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
-        // DD/MM/YYYY
         if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
-          const [d, mo, y] = s.split("/");
-          return `${y}-${mo.padStart(2,"0")}-${d.padStart(2,"0")}`;
+          const p = s.split("/");
+          return p[2] + "-" + p[1].padStart(2,"0") + "-" + p[0].padStart(2,"0");
         }
-        // MM/DD/YYYY
-        if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)) {
-          const parts = s.split("/");
-          const y = parts[2].length === 2 ? "20" + parts[2] : parts[2];
-          return `${y}-${parts[0].padStart(2,"0")}-${parts[1].padStart(2,"0")}`;
-        }
-        // Nombre sériel Excel (fallback si cellDates n'a pas fonctionné)
-        const serial = parseFloat(s);
-        if (!isNaN(serial) && serial > 1000) {
-          const jsDate = new Date(Math.round((serial - 25569) * 86400 * 1000));
-          const y = jsDate.getUTCFullYear();
-          const m = String(jsDate.getUTCMonth() + 1).padStart(2, "0");
-          const d = String(jsDate.getUTCDate()).padStart(2, "0");
-          return `${y}-${m}-${d}`;
+        const n = parseFloat(s);
+        if (!isNaN(n) && n > 1000) {
+          const d2 = new Date(Math.round((n - 25569) * 86400000));
+          return d2.getUTCFullYear() + "-" + String(d2.getUTCMonth()+1).padStart(2,"0") + "-" + String(d2.getUTCDate()).padStart(2,"0");
         }
         return null;
       };
-
-      const existingById = {};
-      txs.forEach(tx => { existingById[String(tx.id)] = tx; });
-      let added = 0, updated = 0, skipped = 0;
-
+      const byId = {};
+      txs.forEach(tx => { byId[String(tx.id)] = tx; });
+      let added = 0, updated = 0;
       for (const row of rows) {
-        const rawType = String(row[colType] || "").trim();
-        const type = typeMap[rawType];
-        if (!type) { skipped++; continue; }
-
-        const rawAmount = String(row[colMontant] || "").replace(/[\s\u00a0]/g, "").replace(",", ".");
-        const amount = parseFloat(rawAmount);
-        if (!amount || isNaN(amount) || amount <= 0) { skipped++; continue; }
-
-        const date = toDateStr(row[colDate]);
-        if (!date) { skipped++; continue; }
-
+        const type = typeMap[String(row[colType] || "").trim()];
+        if (!type) continue;
+        const amount = parseFloat(String(row[colMontant] || "").replace(/\s/g, "").replace(",", "."));
+        if (!amount || isNaN(amount) || amount <= 0) continue;
+        const date = toDate(row[colDate]);
+        if (!date) continue;
         const memberName = String(row[colMembre] || "").trim();
         const note = colDesc ? String(row[colDesc] || "").trim() : "";
         const rowId = colId ? String(row[colId] || "").trim() : "";
-
-        const matchedMember = members.find(m => m.name.toLowerCase() === memberName.toLowerCase());
-        const memberId = matchedMember?.id || null;
+        const match = members.find(m => m.name.toLowerCase() === memberName.toLowerCase());
+        const memberId = match ? match.id : null;
         const txData = { type, memberName, memberId, amount, date, note };
-
-        if (rowId && existingById[rowId]) {
-          const ex = existingById[rowId];
+        if (rowId && byId[rowId]) {
+          const ex = byId[rowId];
           if (ex.amount !== amount || ex.date !== date || ex.note !== note || ex.memberName !== memberName) {
             await onUpdateTx({ ...txData, id: ex.id });
             updated++;
@@ -2046,37 +1956,28 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
           added++;
         }
       }
-
-      // Feuille Membres (optionnel)
-      const memSheetName =
-        sheetNames.find(n => n === "Membres") ||
-        sheetNames.find(n => n.toLowerCase().includes("membre")) ||
-        sheetNames.find(n => n.toLowerCase().includes("member")) ||
-        sheetNames.find(n => n.toLowerCase().includes("عضو"));
-
-      if (memSheetName) {
-        const wsMem = wb.Sheets[memSheetName];
-        if (wsMem) {
-          const memRows = XLSX.utils.sheet_to_json(wsMem, { defval: "", raw: false });
-          if (memRows.length) {
-            const firstMem = memRows[0];
-            const colNom   = findCol(firstMem, "Nom", "nom", "Name", "name", "اسم");
-            const colPhone = findCol(firstMem, "Téléphone", "telephone", "Phone", "هاتف");
-            if (colNom) {
-              const existingNames = new Set(members.map(m => m.name.toLowerCase()));
-              for (const row of memRows) {
-                const name = String(row[colNom] || "").trim();
-                const phone = colPhone ? String(row[colPhone] || "").trim() : "";
-                if (name && !existingNames.has(name.toLowerCase())) {
-                  await onAddMember({ name, phone });
-                  existingNames.add(name.toLowerCase());
-                }
+      // Feuille Membres
+      const memSheet = names.find(n => n === "Membres") || names.find(n => n.toLowerCase().includes("membre"));
+      if (memSheet && wb.Sheets[memSheet]) {
+        const mRows = XLSX.utils.sheet_to_json(wb.Sheets[memSheet], { defval: "", raw: false });
+        if (mRows.length) {
+          const mKeys = Object.keys(mRows[0]);
+          const mCol = (...c) => mKeys.find(k => c.some(x => norm(k) === norm(x))) || null;
+          const cNom = mCol("Nom", "nom", "Name", "name");
+          const cPhone = mCol("Téléphone", "telephone", "Phone");
+          if (cNom) {
+            const existing = new Set(members.map(m => m.name.toLowerCase()));
+            for (const row of mRows) {
+              const name = String(row[cNom] || "").trim();
+              const phone = cPhone ? String(row[cPhone] || "").trim() : "";
+              if (name && !existing.has(name.toLowerCase())) {
+                await onAddMember({ name, phone });
+                existing.add(name.toLowerCase());
               }
             }
           }
         }
       }
-
       await onRefresh();
       setImportMsg(t.importSuccess(added, updated));
     } catch (err) {
@@ -2089,49 +1990,56 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
 
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
-      {/* ── EN-TÊTE : Titre + boutons Excel ── */}
+      {/* EN-TÊTE */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ width: 4, height: 20, background: "linear-gradient(180deg,#7C3AED,#C084FC)", borderRadius: 2 }} />
-          <span style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>{lang === "ar" ? `إحصائيات ${YEAR_STATS}` : `Statistiques ${YEAR_STATS}`}</span>
+          <span style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>
+            {lang === "ar" ? "\u0625\u062d\u0635\u0627\u0626\u064a\u0627\u062a " + YEAR_STATS : "Statistiques " + YEAR_STATS}
+          </span>
         </div>
-        <div style={{ display: "flex", gap: 7, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+        <div style={{ display: "flex", gap: 7 }}>
           <input ref={importRef} type="file" accept=".xlsx,.xls" style={{ display: "none" }} onChange={doImport} />
-          {/* Bouton Import */}
-          <button className="tbtn" title={lang === "ar" ? "استيراد Excel" : "Importer Excel"}
-            onClick={() => importRef.current?.click()} disabled={importing || !xlsxReady}
-            style={{ background: (importing || !xlsxReady) ? C.bgLow : "rgba(37,99,235,0.10)", border: `1.5px solid ${(importing || !xlsxReady) ? C.outline : "rgba(37,99,235,0.25)"}`, color: (importing || !xlsxReady) ? C.muted : "#2563eb", borderRadius: 12, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: (importing || !xlsxReady) ? "not-allowed" : "pointer", flexShrink: 0, transition: "all .18s" }}>
+          <button className="tbtn"
+            title={lang === "ar" ? "\u0627\u0633\u062a\u064a\u0631\u0627\u062f Excel" : "Importer Excel"}
+            onClick={() => { if (importRef.current) importRef.current.click(); }}
+            disabled={importing || !xlsxReady}
+            style={{ background: (importing || !xlsxReady) ? C.bgLow : "rgba(37,99,235,0.10)", border: "1.5px solid " + ((importing || !xlsxReady) ? C.outline : "rgba(37,99,235,0.25)"), color: (importing || !xlsxReady) ? C.muted : "#2563eb", borderRadius: 12, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: (importing || !xlsxReady) ? "not-allowed" : "pointer", flexShrink: 0 }}>
             {importing
               ? <div style={{ width: 13, height: 13, border: "2px solid rgba(37,99,235,0.3)", borderTopColor: "#2563eb", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
               : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             }
           </button>
-          {/* Bouton Export */}
-          <button className="tbtn" title={lang === "ar" ? "تصدير Excel" : "Exporter Excel"}
-            onClick={doExport} disabled={!xlsxReady}
-            style={{ background: xlsxReady ? "rgba(22,163,74,0.10)" : C.bgLow, border: `1.5px solid ${xlsxReady ? "rgba(22,163,74,0.25)" : C.outline}`, color: xlsxReady ? "#16a34a" : C.muted, borderRadius: 12, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: xlsxReady ? "pointer" : "not-allowed", flexShrink: 0, transition: "all .18s" }}>
+          <button className="tbtn"
+            title={lang === "ar" ? "\u062a\u0635\u062f\u064a\u0631 Excel" : "Exporter Excel"}
+            onClick={doExport}
+            disabled={!xlsxReady}
+            style={{ background: xlsxReady ? "rgba(22,163,74,0.10)" : C.bgLow, border: "1.5px solid " + (xlsxReady ? "rgba(22,163,74,0.25)" : C.outline), color: xlsxReady ? "#16a34a" : C.muted, borderRadius: 12, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: xlsxReady ? "pointer" : "not-allowed", flexShrink: 0 }}>
             {Ic.dl("currentColor", 15)}
           </button>
         </div>
       </div>
+
+      {/* CARTES STATS */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
         {[
-          { label: t.stats.contribution, value: yC, color: "#8B5CF6", bg: "rgba(139,92,246,0.08)", icon: Ic.up("#8B5CF6", 15), sign: "" },
-          { label: t.stats.don,          value: yD, color: "#DB2777", bg: "rgba(219,39,119,0.08)", icon: Ic.heart("#DB2777", 15), sign: "" },
-          { label: t.stats.depense,      value: yE, color: C.red,     bg: C.redLt,                icon: Ic.dn(C.red, 15), sign: "" },
+          { label: t.stats.contribution, value: yC, color: "#8B5CF6", bg: "rgba(139,92,246,0.08)", icon: Ic.up("#8B5CF6", 15) },
+          { label: t.stats.don,          value: yD, color: "#DB2777", bg: "rgba(219,39,119,0.08)", icon: Ic.heart("#DB2777", 15) },
+          { label: t.stats.depense,      value: yE, color: C.red,     bg: C.redLt,                icon: Ic.dn(C.red, 15) },
         ].map(s => (
           <Card key={s.label} sx={{ padding: "12px 10px" }}>
             <div style={{ width: 30, height: 30, borderRadius: 9, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>{s.icon}</div>
             <div style={{ color: C.muted, fontSize: 8, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 }}>{s.label}</div>
-            <div style={{ color: s.color, fontWeight: 700, fontSize: 13 }}>{s.sign}{fmtN(s.value)}</div>
+            <div style={{ color: s.color, fontWeight: 700, fontSize: 13 }}>{fmtN(s.value)}</div>
           </Card>
         ))}
       </div>
-      <DonutChart contrib={yC} dons={yD} dep={yE} lang={lang} chartReady={chartReady} />
-      <TopMembers members={members} txs={txs2026} lang={lang} />
-      <FinChart txs={txs2026} lang={lang} chartReady={chartReady} />
 
-      {/* ── SECTION EXCEL ── */}
+      <DonutChart contrib={yC} dons={yD} dep={yE} lang={lang} chartReady={chartReady} />
+      <TopMembers members={members} txs={txsYear} lang={lang} />
+      <FinChart txs={txsYear} lang={lang} chartReady={chartReady} />
+
+      {/* SECTION EXCEL */}
       <Card sx={{ padding: "18px 16px", marginTop: 8 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(34,197,94,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -2141,46 +2049,45 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
             </svg>
           </div>
           <span style={{ color: C.text, fontWeight: 700, fontSize: 14 }}>
-            {lang === "ar" ? "ملف Excel" : "Fichier Excel"}
+            {lang === "ar" ? "\u0645\u0644\u0641 Excel" : "Fichier Excel"}
           </span>
         </div>
 
         <button className="tbtn eco-btn" onClick={doExport} disabled={!xlsxReady}
           style={{ width: "100%", background: xlsxReady ? "linear-gradient(135deg,#166534,#16a34a)" : C.muted, border: "none", color: "#fff", borderRadius: 16, padding: "13px 16px", fontSize: 13, fontWeight: 700, cursor: xlsxReady ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 8, fontFamily: "inherit", boxShadow: xlsxReady ? "0 4px 16px rgba(22,163,74,0.25)" : "none" }}>
           {Ic.dl("#fff", 15)}
-          {lang === "ar" ? "تصدير إلى Excel" : "Exporter vers Excel"}
+          {lang === "ar" ? "\u062a\u0635\u062f\u064a\u0631 \u0625\u0644\u0649 Excel" : "Exporter vers Excel"}
         </button>
         <div style={{ fontSize: 11, color: C.muted, marginBottom: 14, paddingLeft: 4, lineHeight: 1.5 }}>
           {lang === "ar"
-            ? "يُصدِّر جميع المعاملات والأعضاء في ملف .xlsx (3 أوراق: معاملات، أعضاء، ملخص)."
-            : "Exporte toutes les transactions et membres dans un .xlsx (3 feuilles : Transactions, Membres, Résumé)."}
+            ? "\u064a\u064f\u0635\u062f\u0651\u0631 \u062c\u0645\u064a\u0639 \u0627\u0644\u0645\u0639\u0627\u0645\u0644\u0627\u062a \u0648\u0627\u0644\u0623\u0639\u0636\u0627\u0621 \u0641\u064a \u0645\u0644\u0641 .xlsx (3 \u0623\u0648\u0631\u0627\u0642)."
+            : "Exporte toutes les transactions et membres dans un .xlsx (3 feuilles)."}
         </div>
 
         <div style={{ height: 1, background: C.outline, marginBottom: 14 }} />
 
-        <button className="tbtn eco-btn" onClick={() => importRef.current?.click()} disabled={importing || !xlsxReady}
+        <button className="tbtn eco-btn"
+          onClick={() => { if (importRef.current) importRef.current.click(); }}
+          disabled={importing || !xlsxReady}
           style={{ width: "100%", background: (importing || !xlsxReady) ? C.muted : "linear-gradient(135deg,#1e3a5f,#2563eb)", border: "none", color: "#fff", borderRadius: 16, padding: "13px 16px", fontSize: 13, fontWeight: 700, cursor: (importing || !xlsxReady) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 8, fontFamily: "inherit", boxShadow: (!importing && xlsxReady) ? "0 4px 16px rgba(37,99,235,0.25)" : "none" }}>
-          {importing ? (
-            <><div style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} />{t.importProcessing}</>
-          ) : (
-            <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            {lang === "ar" ? "استيراد من Excel" : "Importer depuis Excel"}</>
-          )}
+          {importing
+            ? <div style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+            : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          }
+          {lang === "ar" ? "\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0645\u0646 Excel" : "Importer depuis Excel"}
         </button>
         <div style={{ fontSize: 11, color: C.muted, paddingLeft: 4, lineHeight: 1.5 }}>
           {lang === "ar"
-            ? "يستورد المعاملات والأعضاء من ملف .xlsx. يحدِّث الصفوف الموجودة ويضيف الجديدة تلقائياً."
-            : "Importe transactions et membres depuis un .xlsx. Met à jour les lignes existantes, ajoute les nouvelles."}
+            ? "\u064a\u0633\u062a\u0648\u0631\u062f \u0645\u0646 .xlsx. \u064a\u062d\u062f\u0651\u062b \u0627\u0644\u0635\u0641\u0648\u0641 \u0627\u0644\u0645\u0648\u062c\u0648\u062f\u0629 \u0648\u064a\u0636\u064a\u0641 \u0627\u0644\u062c\u062f\u064a\u062f\u0629."
+            : "Importe depuis un .xlsx. Met a jour les lignes existantes, ajoute les nouvelles."}
         </div>
 
         {importMsg && (
-          <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 12, background: importMsg.startsWith("✅") ? "rgba(22,163,74,0.10)" : "rgba(192,57,43,0.10)", color: importMsg.startsWith("✅") ? "#16a34a" : C.red, fontSize: 12, fontWeight: 600, border: `1px solid ${importMsg.startsWith("✅") ? "rgba(22,163,74,0.2)" : "rgba(192,57,43,0.2)"}` }}>
+          <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 12, background: importMsg.slice(0,2) === "\u2705" ? "rgba(22,163,74,0.10)" : "rgba(192,57,43,0.10)", color: importMsg.slice(0,2) === "\u2705" ? "#16a34a" : C.red, fontSize: 12, fontWeight: 600, border: "1px solid " + (importMsg.slice(0,2) === "\u2705" ? "rgba(22,163,74,0.2)" : "rgba(192,57,43,0.2)") }}>
             {importMsg}
           </div>
         )}
       </Card>
-
-
     </div>
   );
 }
