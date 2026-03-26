@@ -1700,6 +1700,107 @@ function PdfReportModal({ txs, members, onClose, year }) {
                 </table>
               </div>
 
+              {/* Top Contributors — section dédiée */}
+              {(() => {
+                const allContribMembers = members.map(m => {
+                  const total = contribs.filter(tx =>
+                    (tx.memberId && tx.memberId === m.id) ||
+                    (tx.memberName && tx.memberName.trim().toLowerCase() === m.name.trim().toLowerCase())
+                  ).reduce((a, tx) => a + tx.amount, 0);
+                  const nbTx = contribs.filter(tx =>
+                    (tx.memberId && tx.memberId === m.id) ||
+                    (tx.memberName && tx.memberName.trim().toLowerCase() === m.name.trim().toLowerCase())
+                  ).length;
+                  return { ...m, total, nbTx };
+                }).filter(m => m.total > 0).sort((a, b) => b.total - a.total);
+                const grandTotalC = allContribMembers.reduce((a, m) => a + m.total, 0);
+                const medals = ["🥇","🥈","🥉"];
+                const podiumColors = [["#FFD700","#FFF8DC"],["#C0C0C0","#F5F5F5"],["#CD7F32","#FDF0E0"]];
+                return (
+                  <div className="pdf-section">
+                    <div className="pdf-section-title">🏆 أكبر المساهمين</div>
+                    {allContribMembers.length === 0
+                      ? <div style={{ color: "#7a9ea2", fontSize: 12, textAlign: "center", padding: "16px 0" }}>لا توجد بيانات</div>
+                      : <>
+                          {/* Podium top 3 */}
+                          {allContribMembers.length >= 1 && (
+                            <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-end", gap: 10, marginBottom: 20, padding: "10px 0" }}>
+                              {/* 2nd place */}
+                              {allContribMembers[1] && (
+                                <div style={{ textAlign: "center", flex: 1 }}>
+                                  <div style={{ fontSize: 20, marginBottom: 4 }}>🥈</div>
+                                  <div style={{ fontSize: 10, fontWeight: 700, color: "#1a2b2e", marginBottom: 6, lineHeight: 1.3 }}>{allContribMembers[1].name}</div>
+                                  <div style={{ background: podiumColors[1][0], borderRadius: "8px 8px 0 0", height: 50, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <span style={{ fontSize: 10, fontWeight: 800, color: "#555" }}>{fmtAR(allContribMembers[1].total)}</span>
+                                  </div>
+                                </div>
+                              )}
+                              {/* 1st place */}
+                              <div style={{ textAlign: "center", flex: 1 }}>
+                                <div style={{ fontSize: 24, marginBottom: 4 }}>🥇</div>
+                                <div style={{ fontSize: 11, fontWeight: 800, color: "#1a2b2e", marginBottom: 6, lineHeight: 1.3 }}>{allContribMembers[0].name}</div>
+                                <div style={{ background: podiumColors[0][0], borderRadius: "8px 8px 0 0", height: 72, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  <span style={{ fontSize: 11, fontWeight: 800, color: "#7a4f00" }}>{fmtAR(allContribMembers[0].total)}</span>
+                                </div>
+                              </div>
+                              {/* 3rd place */}
+                              {allContribMembers[2] && (
+                                <div style={{ textAlign: "center", flex: 1 }}>
+                                  <div style={{ fontSize: 18, marginBottom: 4 }}>🥉</div>
+                                  <div style={{ fontSize: 10, fontWeight: 700, color: "#1a2b2e", marginBottom: 6, lineHeight: 1.3 }}>{allContribMembers[2].name}</div>
+                                  <div style={{ background: podiumColors[2][0], borderRadius: "8px 8px 0 0", height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <span style={{ fontSize: 10, fontWeight: 800, color: "#7a4000" }}>{fmtAR(allContribMembers[2].total)}</span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          {/* Full ranked list with bars */}
+                          <table className="pdf-table">
+                            <thead>
+                              <tr>
+                                <th style={{ width: 30 }}>#</th>
+                                <th>اسم العضو</th>
+                                <th>عدد الدفعات</th>
+                                <th>إجمالي المساهمات</th>
+                                <th>نسبة المشاركة</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {allContribMembers.map((m, i) => {
+                                const pct = grandTotalC > 0 ? (m.total / grandTotalC * 100) : 0;
+                                return (
+                                  <tr key={m.id}>
+                                    <td style={{ fontWeight: 700, textAlign: "center" }}>
+                                      {medals[i] || (i + 1)}
+                                    </td>
+                                    <td style={{ fontWeight: 700 }}>{m.name}</td>
+                                    <td style={{ textAlign: "center", color: "#7a9ea2", fontWeight: 600 }}>{m.nbTx}</td>
+                                    <td style={{ color: C.primaryLt, fontWeight: 800 }}>{fmtAR(m.total)}</td>
+                                    <td>
+                                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                        <div style={{ flex: 1, background: "#e0f5f3", borderRadius: 3, height: 7 }}>
+                                          <div style={{ width: `${pct}%`, height: "100%", background: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : C.primaryLt, borderRadius: 3 }} />
+                                        </div>
+                                        <span style={{ fontSize: 10, fontWeight: 700, color: C.primaryLt, minWidth: 32 }}>{pct.toFixed(1)}%</span>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                              <tr style={{ background: "#f0faf9" }}>
+                                <td colSpan={3} style={{ fontWeight: 800 }}>الإجمالي</td>
+                                <td style={{ color: C.primaryLt, fontWeight: 800 }}>{fmtAR(grandTotalC)}</td>
+                                <td style={{ color: C.primaryLt, fontWeight: 800 }}>100%</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </>
+                    }
+                  </div>
+                );
+              })()}
+
               {/* Members contributions summary table */}
               <div className="pdf-section">
                 <div className="pdf-section-title">👥 مساهمات جميع الأعضاء</div>
