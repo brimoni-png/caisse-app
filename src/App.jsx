@@ -134,7 +134,7 @@ const Ic = {
 const T = {
   fr: {
     dir: "ltr", font: "'Manrope','Segoe UI',sans-serif",
-    greeting: "Resp-Caisse", userName: "Cheikh Sidi", subtitle: "Caisse communautaire",
+    greeting: "Resp-Caisse", userName: "Cheikh Brahim", subtitle: "Caisse communautaire",
     balanceGlobal: "Solde Global",
     stats: { contribution: "Contributions", don: "Dons", depense: "Dépenses" },
     activity: "Activité financière", recentTx: "Transactions récentes", seeAll: "Voir tout →",
@@ -1710,16 +1710,30 @@ function PdfReportModal({ txs, members, onClose, year }) {
                       <th>اسم العضو</th>
                       <th>إجمالي المساهمات</th>
                       <th>نسبة المشاركة</th>
+                      <th>الرصيد الحالي</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(() => {
                       const memberContribs = members.map(m => {
-                        const mContribs = contribs.filter(tx => tx.memberId === m.id);
+                        // Match by memberId OR memberName (covers imported transactions)
+                        const mContribs = contribs.filter(tx =>
+                          (tx.memberId && tx.memberId === m.id) ||
+                          (tx.memberName && tx.memberName.trim().toLowerCase() === m.name.trim().toLowerCase())
+                        );
                         const total = mContribs.reduce((a, tx) => a + tx.amount, 0);
-                        return { ...m, total };
+                        // Solde = contributions - dépenses liées au membre
+                        const mDep = txs.filter(tx =>
+                          tx.type === "depense" && (
+                            (tx.memberId && tx.memberId === m.id) ||
+                            (tx.memberName && tx.memberName.trim().toLowerCase() === m.name.trim().toLowerCase())
+                          )
+                        ).reduce((a, tx) => a + tx.amount, 0);
+                        const solde = total - mDep;
+                        return { ...m, total, solde };
                       }).sort((a, b) => b.total - a.total);
                       const grandTotal = memberContribs.reduce((a, m) => a + m.total, 0);
+                      const grandSolde = memberContribs.reduce((a, m) => a + m.solde, 0);
                       return memberContribs.map((m, i) => {
                         const pct = grandTotal > 0 ? Math.round(m.total / grandTotal * 100) : 0;
                         return (
@@ -1727,7 +1741,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
                             <td style={{ color: "#7a9ea2", fontWeight: 600 }}>{i + 1}</td>
                             <td style={{ fontWeight: 600 }}>{m.name}</td>
                             <td style={{ color: m.total > 0 ? C.primaryLt : "#7a9ea2", fontWeight: 700 }}>
-                              {m.total > 0 ? `${fmtAR(m.total)}` : "—"}
+                              {m.total > 0 ? fmtAR(m.total) : "—"}
                             </td>
                             <td>
                               {m.total > 0 ? (
@@ -1739,15 +1753,20 @@ function PdfReportModal({ txs, members, onClose, year }) {
                                 </div>
                               ) : "—"}
                             </td>
+                            <td style={{ fontWeight: 700, color: m.solde > 0 ? C.primaryLt : m.solde < 0 ? C.red : "#7a9ea2" }}>
+                              {m.total > 0 ? fmtAR(m.solde) : "—"}
+                            </td>
                           </tr>
                         );
-                      });
+                      }).concat([
+                        <tr key="total" style={{ background: "#f0faf9", fontWeight: 700 }}>
+                          <td colSpan={2} style={{ fontWeight: 800 }}>الإجمالي</td>
+                          <td style={{ color: C.primaryLt, fontWeight: 800 }}>{fmtAR(grandTotal)}</td>
+                          <td style={{ color: C.primaryLt, fontWeight: 800 }}>100%</td>
+                          <td style={{ color: C.primaryLt, fontWeight: 800 }}>{fmtAR(grandSolde)}</td>
+                        </tr>
+                      ]);
                     })()}
-                    <tr style={{ background: "#f0faf9", fontWeight: 700 }}>
-                      <td colSpan={2} style={{ fontWeight: 800 }}>الإجمالي</td>
-                      <td style={{ color: C.primaryLt, fontWeight: 800 }}>{fmtAR(totalC)}</td>
-                      <td style={{ color: C.primaryLt, fontWeight: 800 }}>100%</td>
-                    </tr>
                   </tbody>
                 </table>
               </div>
