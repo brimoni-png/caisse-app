@@ -300,6 +300,22 @@ function useSupabaseData() {
     }
   };
 
+  const addTxBulk = async (rows) => {
+    if (!rows.length) return 0;
+    const payload = rows.map(d => ({
+      type: d.type,
+      member_id: d.memberId || null,
+      member_name: d.memberName,
+      amount: d.amount,
+      date: d.date,
+      note: d.note || "",
+    }));
+    const { data, error } = await supabase.from("transactions").insert(payload).select();
+    if (error) throw new Error(error.message);
+    if (data) setTxs(p => [...data.map(mapTx), ...p]);
+    return data?.length || 0;
+  };
+
   const updateTx = async (d) => {
     // Sauvegarde l'ancienne valeur pour rollback
     const prev = txs.find(tx => tx.id === d.id);
@@ -384,7 +400,7 @@ function useSupabaseData() {
     }
   };
 
-  return { members, txs, loading, netError, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll };
+  return { members, txs, loading, netError, addTx, addTxBulk, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll };
 }
 
 // ─── UI ATOMS ─────────────────────────────────────────────────────────────────
@@ -1776,7 +1792,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 }
 
 // ─── REPORTS ──────────────────────────────────────────────────────────────────
-function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx }) {
+function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx, onAddTxBulk }) {
   const t = T[lang];
   const years = getYrs(txs);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -1861,7 +1877,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
         return null;
       };
 
-      let count = 0;
+      const validRows = [];
       for (const row of dataRows) {
         const rawType = String(row[iType] || "").trim();
         const type = typeMap[rawType] || typeMap[rawType.toLowerCase()];
@@ -1876,9 +1892,19 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
         const memberName = iMember !== null ? (String(row[iMember] || "").trim() || "—") : "—";
         const note = iNote !== null ? String(row[iNote] || "").trim() : "";
 
-        await onAddTx({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note });
-        count++;
+        validRows.push({ type, memberName, memberId: null, amount: rawAmt, date: dateStr, note });
       }
+
+      if (!validRows.length) {
+        setImportMsg({ ok: false, text: t.importError });
+        setImporting(false);
+        return;
+      }
+
+      const count = onAddTxBulk
+        ? await onAddTxBulk(validRows)
+        : await (async () => { for (const r of validRows) await onAddTx(r); return validRows.length; })();
+
       setImportMsg({ ok: true, text: t.importSuccess(count) });
     } catch (e) {
       console.error("Import error:", e);
@@ -3039,7 +3065,7 @@ export default function App() {
   const [loggedIn, setLoggedIn] = useState(() => {
     try { return !!sessionStorage.getItem("cc_user"); } catch { return false; }
   });
-  const { members, txs, loading, netError, addTx, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll } = useSupabaseData();
+  const { members, txs, loading, netError, addTx, addTxBulk, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll } = useSupabaseData();
 
   const handleLogin = (name) => {
     try { sessionStorage.setItem("cc_user", name); } catch {}
@@ -3081,7 +3107,7 @@ export default function App() {
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
-        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} />}
+        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} onAddTxBulk={addTxBulk} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "rgba(1,45,29,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 40px rgba(1,45,29,0.25)" }}>
