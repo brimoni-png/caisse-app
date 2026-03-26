@@ -134,7 +134,7 @@ const Ic = {
 const T = {
   fr: {
     dir: "ltr", font: "'Manrope','Segoe UI',sans-serif",
-    greeting: "Resp-Caisse", userName: "Cheikh Brahim", subtitle: "Caisse communautaire",
+    greeting: "Resp-Caisse", userName: "Cheikh Sidi", subtitle: "Caisse communautaire",
     balanceGlobal: "Solde Global",
     stats: { contribution: "Contributions", don: "Dons", depense: "Dépenses" },
     activity: "Activité financière", recentTx: "Transactions récentes", seeAll: "Voir tout →",
