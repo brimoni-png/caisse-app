@@ -363,6 +363,19 @@ function useSupabaseData() {
     }
   };
 
+  const addMemberBulk = async (rows) => {
+    if (!rows.length) return 0;
+    // Filter out names that already exist
+    const existing = new Set(rows.filter(r => !r.name?.trim()).map(() => ""));
+    const newRows = rows.filter(r => r.name?.trim());
+    if (!newRows.length) return 0;
+    const payload = newRows.map(r => ({ name: r.name.trim(), phone: r.phone?.trim() || "" }));
+    const { data, error } = await supabase.from("members").insert(payload).select();
+    if (error) throw new Error(error.message);
+    if (data) setMembers(p => [...p, ...data.map(mapMember)]);
+    return data?.length || 0;
+  };
+
   const deleteMember = async (id) => {
     const prev = members.find(m => m.id === id);
     setMembers(p => p.filter(m => m.id !== id));
@@ -400,7 +413,7 @@ function useSupabaseData() {
     }
   };
 
-  return { members, txs, loading, netError, addTx, addTxBulk, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll };
+  return { members, txs, loading, netError, addTx, addTxBulk, updateTx, deleteTx, addMember, addMemberBulk, deleteMember, fetchAll, resetAll };
 }
 
 // ─── UI ATOMS ─────────────────────────────────────────────────────────────────
@@ -1792,7 +1805,7 @@ function PdfReportModal({ txs, members, onClose, year }) {
 }
 
 // ─── REPORTS ──────────────────────────────────────────────────────────────────
-function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx, onAddTxBulk }) {
+function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset, onAddTx, onAddTxBulk, onAddMemberBulk }) {
   const t = T[lang];
   const years = getYrs(txs);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -1812,6 +1825,27 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     try {
       const ab = await file.arrayBuffer();
       const wb = XLSX.read(ab, { type: "array", cellDates: true });
+
+      // ── Feuille Membres (optionnelle) ──
+      const membresSheetName = wb.SheetNames.find(n => n.toLowerCase().includes("membre") || n.toLowerCase().includes("member"));
+      if (membresSheetName && onAddMemberBulk) {
+        const wsM = wb.Sheets[membresSheetName];
+        const aoaM = XLSX.utils.sheet_to_json(wsM, { header: 1, defval: "" });
+        const hIdx = aoaM.findIndex(row => row.some(c => String(c).toLowerCase().includes("nom") || String(c).toLowerCase().includes("name")));
+        if (hIdx !== -1) {
+          const hdrs = aoaM[hIdx].map(h => String(h).trim().toLowerCase());
+          const iName  = hdrs.findIndex(h => h.includes("nom") || h.includes("name"));
+          const iPhone = hdrs.findIndex(h => h.includes("tel") || h.includes("phone") || h.includes("portable"));
+          const memberRows = aoaM.slice(hIdx + 1).filter(r => String(r[iName] || "").trim());
+          const existingNames = new Set(members.map(m => m.name?.trim().toLowerCase()));
+          const newMembers = memberRows
+            .map(r => ({ name: String(r[iName] || "").trim(), phone: iPhone !== -1 ? String(r[iPhone] || "").trim() : "" }))
+            .filter(m => m.name && !existingNames.has(m.name.toLowerCase()));
+          if (newMembers.length) await onAddMemberBulk(newMembers);
+        }
+      }
+
+      // ── Feuille Transactions ──
       const ws = wb.Sheets[wb.SheetNames[0]];
 
       // Convert to array-of-arrays to handle banner rows from our own export format
@@ -3065,7 +3099,7 @@ export default function App() {
   const [loggedIn, setLoggedIn] = useState(() => {
     try { return !!sessionStorage.getItem("cc_user"); } catch { return false; }
   });
-  const { members, txs, loading, netError, addTx, addTxBulk, updateTx, deleteTx, addMember, deleteMember, fetchAll, resetAll } = useSupabaseData();
+  const { members, txs, loading, netError, addTx, addTxBulk, updateTx, deleteTx, addMember, addMemberBulk, deleteMember, fetchAll, resetAll } = useSupabaseData();
 
   const handleLogin = (name) => {
     try { sessionStorage.setItem("cc_user", name); } catch {}
@@ -3107,7 +3141,7 @@ export default function App() {
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} />}
         {tab === "ops"      && <Operations txs={txs} onAdd={(tp) => setModal({ kind: "tx", txType: tp })} onDelete={deleteTx} onEdit={editTx} lang={lang} />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={() => setModal({ kind: "membre" })} onDeleteMember={deleteMember} lang={lang} />}
-        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} onAddTxBulk={addTxBulk} />}
+        {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={resetAll} onAddTx={addTx} onAddTxBulk={addTxBulk} onAddMemberBulk={addMemberBulk} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} onLogout={() => { try { sessionStorage.removeItem("cc_user"); } catch {} setLoggedIn(false); }} />}
       </div>
       <nav style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 398, background: "rgba(1,45,29,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 36, display: "flex", padding: "10px 12px", zIndex: 200, gap: 0, flexDirection: t.dir === "rtl" ? "row-reverse" : "row", boxShadow: "0 8px 40px rgba(1,45,29,0.25)" }}>
