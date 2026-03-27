@@ -607,40 +607,19 @@ function CatPills({ onAdd, lang, readOnly = false }) {
       type: "contribution",
       color: C.primaryLt,
       bg: "rgba(1,45,29,0.08)",
-      icon: (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Pièce de monnaie avec $ */}
-          <circle cx="12" cy="12" r="9" fill="rgba(1,45,29,0.12)" stroke={C.primaryLt} strokeWidth="1.7"/>
-          <path d="M12 7v10M9.5 9.5a2.5 2.5 0 015 0c0 1.4-1.2 2.2-2.5 2.5-1.3.3-2.5 1.1-2.5 2.5a2.5 2.5 0 005 0" stroke={C.primaryLt} strokeWidth="1.6"/>
-        </svg>
-      ),
+      icon: <img src={IMG_CONTRIBUTION} width="32" height="32" style={{objectFit:"contain"}} />,
     },
     {
       type: "don",
       color: C.secondary,
       bg: "rgba(113,46,221,0.10)",
-      icon: (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Mains ouvertes tendant un cœur */}
-          <path d="M12 6c0 0-1.5-2-3-2C7.5 4 6 5.3 6 6.8 6 8.6 8 10 12 12c4-2 6-3.4 6-5.2C18 5.3 16.5 4 15 4c-1.5 0-3 2-3 2z" fill="rgba(113,46,221,0.12)" stroke={C.secondary} strokeWidth="1.7"/>
-          <path d="M5 15c0-1 .7-1.5 1.5-1.5S8 14 8 15l.5 1h7l.5-1c0-1 .7-1.5 1.5-1.5S19 14 19 15v1.5c0 .8-.7 1.5-1.5 1.5h-11C5.7 18 5 17.3 5 16.5V15z" fill="rgba(113,46,221,0.12)" stroke={C.secondary} strokeWidth="1.7"/>
-        </svg>
-      ),
+      icon: <img src={IMG_DON} width="32" height="32" style={{objectFit:"contain"}} />,
     },
     {
       type: "depense",
       color: "#e05252",
       bg: "rgba(224,82,82,0.10)",
-      icon: (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          {/* Reçu / facture */}
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(224,82,82,0.15)" stroke="#e05252" strokeWidth="1.7"/>
-          <polyline points="14 2 14 8 20 8" stroke="#e05252" strokeWidth="1.7"/>
-          <line x1="16" y1="13" x2="8" y2="13" stroke="#e05252" strokeWidth="1.5"/>
-          <line x1="16" y1="17" x2="8" y2="17" stroke="#e05252" strokeWidth="1.5"/>
-          <line x1="10" y1="9" x2="8" y2="9" stroke="#e05252" strokeWidth="1.5"/>
-        </svg>
-      ),
+      icon: <img src={IMG_DEPENSE} width="32" height="32" style={{objectFit:"contain"}} />,
     },
   ];
   return (
@@ -840,8 +819,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
           <button className="tbtn" onClick={() => setStatModal(statsRow[0])}
             style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
             <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(1,45,29,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {/* Icône pièce/contribution */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.primaryLt} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M9.5 10.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5c0 1.5-2.5 3-2.5 3s-2.5-1.5-2.5-3z" fill="rgba(45,156,143,0.18)"/><path d="M9.5 13.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5"/></svg>
+              <img src={IMG_CONTRIBUTION} width="24" height="24" style={{objectFit:"contain"}} />
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.contribution}</div>
@@ -852,8 +830,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
           <button className="tbtn" onClick={() => setStatModal(statsRow[1])}
             style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
             <div style={{ width: 38, height: 38, borderRadius: 12, background: C.secondaryCnt, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {/* Icône mains offrantes / don */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.secondary} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 4.02 3.268 2 6 2c1.657 0 3.15.817 4 2.07C10.85 2.817 12.343 2 14 2c2.732 0 5 2.02 5 5.191 0 4.105-5.37 8.863-11 14.402z" fill="rgba(113,46,221,0.12)"/></svg>
+              <img src={IMG_DON} width="24" height="24" style={{objectFit:"contain"}} />
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.don}</div>
@@ -864,8 +841,7 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
           <button className="tbtn" onClick={() => setStatModal(statsRow[2])}
             style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
             <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(224,82,82,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {/* Icône facture / dépense */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e05252" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="rgba(224,82,82,0.12)"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              <img src={IMG_DEPENSE} width="24" height="24" style={{objectFit:"contain"}} />
             </div>
             <div>
               <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.depense}</div>
