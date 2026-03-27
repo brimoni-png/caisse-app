@@ -2558,16 +2558,19 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
         {[
           { mode: "month", label: t.exportMonth, sub: `${t.monthsFull[month - 1]} ${year}`, color: C.primaryLt, lt: C.bgLow, icon: "📊" },
           { mode: "all",   label: lang === "ar" ? "كل السنوات" : "Toutes les années", sub: `${txs.length} op · ${[...new Set(txs.map(tx => new Date(tx.date).getFullYear()))].length} an(s)`, color: C.gold, lt: C.goldLt, icon: "📥" },
-        ].map((btn) => (
-          <button key={btn.mode} className="tbtn" onClick={() => doExport(btn.mode)} disabled={!xlsxReady}
-            style={{ width: "100%", background: xlsxReady ? btn.lt : C.bgLow, border: `1.5px solid ${xlsxReady ? C.outline : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: xlsxReady ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "inherit", marginBottom: 10, opacity: xlsxReady ? 1 : 0.5, boxShadow: xlsxReady ? C.shadow : "none" }}>
-            <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
-              <div style={{ color: xlsxReady ? btn.color : C.muted, fontWeight: 600, fontSize: 13 }}>{btn.label}</div>
-              <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{btn.sub}</div>
-            </div>
-            <span style={{ fontSize: 22 }}>{btn.icon}</span>
-          </button>
-        ))}
+        ].map((btn) => {
+          const canExport = xlsxReady && !readOnly;
+          return (
+            <button key={btn.mode} className="tbtn" onClick={() => canExport && doExport(btn.mode)} disabled={!canExport}
+              style={{ width: "100%", background: canExport ? btn.lt : C.bgLow, border: `1.5px solid ${canExport ? C.outline : "transparent"}`, borderRadius: 14, padding: "14px 16px", cursor: canExport ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "space-between", flexDirection: t.dir === "rtl" ? "row-reverse" : "row", fontFamily: "inherit", marginBottom: 10, opacity: canExport ? 1 : 0.35, boxShadow: canExport ? C.shadow : "none" }}>
+              <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
+                <div style={{ color: canExport ? btn.color : C.muted, fontWeight: 600, fontSize: 13 }}>{btn.label}</div>
+                <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{btn.sub}</div>
+              </div>
+              <span style={{ fontSize: 22, opacity: canExport ? 1 : 0.3 }}>{btn.icon}</span>
+            </button>
+          );
+        })}
       </div>
       {/* IMPORT */}
       <div style={{ marginTop: 6, borderTop: `1px solid ${C.outline}`, paddingTop: 20 }}>
