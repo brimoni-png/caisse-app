@@ -1184,17 +1184,23 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang, readOnly = f
               <div style={{ display: "flex", alignItems: "center", gap: 12, flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
                 <div style={{ width: 46, height: 46, borderRadius: 14, background: bg, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: fg, fontSize: 15, fontWeight: 700 }}>{inits(m.name)}</div>
                 <div style={{ textAlign: t.dir === "rtl" ? "right" : "left" }}>
-                  <div style={{ color: C.text, fontWeight: 600, fontSize: 14 }}>{m.name}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap", flexDirection: t.dir === "rtl" ? "row-reverse" : "row" }}>
+                    <div style={{ color: C.text, fontWeight: 600, fontSize: 14 }}>{m.name}</div>
+                    <div style={{
+                      background: total > 0 ? C.goldLt : C.bgLow,
+                      color: total > 0 ? C.primaryLt : C.sub,
+                      fontWeight: 700,
+                      fontSize: 11,
+                      borderRadius: 8,
+                      padding: "2px 7px",
+                      letterSpacing: 0.1,
+                      whiteSpace: "nowrap",
+                    }}>{fmtN(total)} MRU</div>
+                  </div>
                   {m.phone && <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>{m.phone}</div>}
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {total > 0 && (
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ color: C.primaryLt, fontWeight: 700, fontSize: 12 }}>{fmtN(total)}</div>
-                    <div style={{ color: C.muted, fontSize: 9, textTransform: "uppercase", letterSpacing: 0.4 }}>{YEAR}</div>
-                  </div>
-                )}
                 <div style={{ color: C.muted, opacity: 0.5 }}>{Ic.fwd(C.muted, 14)}</div>
                 <button className="tbtn" onClick={e => { e.stopPropagation(); setConfDel(m); }}
                   style={{ background: C.redLt, border: "none", color: C.red, borderRadius: 10, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
