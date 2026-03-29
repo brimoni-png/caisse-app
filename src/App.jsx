@@ -1079,9 +1079,10 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang, readOnly = f
   const [search, setSearch] = useState("");
   const YEAR = 2026;
 
-  const getTotal2026 = (id) => txs.filter(tx =>
-    tx.memberId === id && tx.type === "contribution" &&
-    new Date(tx.date).getFullYear() === YEAR
+  const getTotal2026 = (id, name) => txs.filter(tx =>
+    tx.type === "contribution" &&
+    new Date(tx.date).getFullYear() === YEAR &&
+    ((tx.memberId && tx.memberId === id) || (!tx.memberId && tx.memberName && name && tx.memberName === name))
   ).reduce((a, tx) => a + tx.amount, 0);
 
   const isSearching = search.trim().length > 0;
@@ -1092,7 +1093,7 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang, readOnly = f
         return m.name?.toLowerCase().includes(q) || m.phone?.includes(q);
       })
     : [...members]
-        .sort((a, b) => getTotal2026(b.id) - getTotal2026(a.id))
+        .sort((a, b) => getTotal2026(b.id, b.name) - getTotal2026(a.id, a.name))
         .slice(0, 10);
 
   return (
@@ -1110,7 +1111,7 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang, readOnly = f
       {displayed.length === 0 && <Empty label={t.noMembers} />}
       {displayed.map((m, i) => {
         const [bg, fg] = AVC[i % AVC.length];
-        const total = getTotal2026(m.id);
+        const total = getTotal2026(m.id, m.name);
         return (
           <Card key={m.id} className="fin-in" sx={{ padding: "14px 15px", marginBottom: 10, animationDelay: `${i * 55}ms`, cursor: "pointer" }}
             onClick={() => setDetailMember(m)}>
