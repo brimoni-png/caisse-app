@@ -946,87 +946,21 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 // ─── OPERATIONS ───────────────────────────────────────────────────────────────
 function Operations({ txs, onAdd, onDelete, onEdit, lang, readOnly = false }) {
   const t = T[lang];
-  const allYears = getYrs(txs).filter(y => y !== 2025);
-  const [selYear, setSelYear] = useState("all");
-  const [selType, setSelType] = useState("all");
 
-  const sorted = [...txs]
-    .filter(tx => {
-      const d = new Date(tx.date);
-      if (selYear !== "all" && d.getFullYear() !== Number(selYear)) return false;
-      if (selType !== "all" && tx.type         !== selType)          return false;
-      return true;
-    })
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  const pillStyle = (active, color) => ({
-    background: active ? (color || C.primary) : C.card,
-    border: `1.5px solid ${active ? (color || C.primary) : C.outline}`,
-    color: active ? "#fff" : C.muted,
-    borderRadius: 20, padding: "7px 16px", fontSize: 11, fontWeight: 700,
-    cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit",
-    boxShadow: C.shadow, transition: "all .18s",
-  });
-
-  const activeLabel = [
-    selYear !== "all" ? selYear : null,
-    selType !== "all" ? CFG(lang)[selType]?.label : null,
-  ].filter(Boolean).join(" · ");
+  const last10 = [...txs]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 10);
 
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
       <CatPills onAdd={onAdd} lang={lang} readOnly={readOnly} />
 
-      {/* ─ ÉTAPE 1 : Année ─ */}
-      <div style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7, paddingLeft: 2 }}>
-          {lang === "ar" ? "① السنة" : "① Année"}
-        </div>
-        <div style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 4 }}>
-          <button className="tbtn" onClick={() => { setSelYear("all"); setSelType("all"); }} style={pillStyle(selYear === "all")}>
-            {lang === "ar" ? "الكل" : "Toutes"}
-          </button>
-          {allYears.map(y => (
-            <button key={y} className="tbtn" onClick={() => { setSelYear(String(y)); setSelType("all"); }}
-              style={pillStyle(selYear === String(y), C.primaryLt)}>
-              {y}
-            </button>
-          ))}
-        </div>
+      {/* Titre section */}
+      <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 10, paddingLeft: 2 }}>
+        {lang === "ar" ? "آخر ١٠ عمليات" : "10 dernières opérations"}
       </div>
 
-      {/* ─ ÉTAPE 2 : Type ─ */}
-      <div style={{ marginBottom: 14, opacity: selYear === "all" ? 0.4 : 1, pointerEvents: selYear === "all" ? "none" : "auto", transition: "opacity .2s" }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7, paddingLeft: 2 }}>
-          {lang === "ar" ? "② نوع العملية" : "② Type"}
-        </div>
-        <div style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 4 }}>
-          <button className="tbtn" onClick={() => setSelType("all")} style={pillStyle(selType === "all")}>
-            {lang === "ar" ? "الكل" : "Tous"}
-          </button>
-          {["contribution", "don", "depense"].map(tp => {
-            const cfg = CFG(lang)[tp];
-            return (
-              <button key={tp} className="tbtn" onClick={() => setSelType(tp)}
-                style={pillStyle(selType === tp, cfg.color)}>
-                {cfg.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Compteur + badge */}
-      <div style={{ fontSize: 11, color: C.muted, marginBottom: 10, paddingLeft: 2, display: "flex", alignItems: "center", gap: 8 }}>
-        <span>{sorted.length} {lang === "ar" ? "معاملة" : `transaction${sorted.length !== 1 ? "s" : ""}`}</span>
-        {activeLabel && (
-          <span style={{ background: C.bgLow, borderRadius: 6, padding: "2px 9px", border: `1px solid ${C.outline}`, color: C.primaryLt, fontWeight: 600 }}>
-            {activeLabel}
-          </span>
-        )}
-      </div>
-
-      {sorted.length === 0 ? <Empty label={t.noTx} /> : sorted.map((tx, i) => <TxRow key={tx.id} tx={tx} onDelete={onDelete} onEdit={onEdit} delay={i * 25} lang={lang} readOnly={readOnly} />)}
+      {last10.length === 0 ? <Empty label={t.noTx} /> : last10.map((tx, i) => <TxRow key={tx.id} tx={tx} onDelete={onDelete} onEdit={onEdit} delay={i * 25} lang={lang} readOnly={readOnly} />)}
     </div>
   );
 }
