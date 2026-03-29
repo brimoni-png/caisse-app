@@ -147,7 +147,7 @@ const T = {
     activity: "Activité financière", recentTx: "Transactions récentes", seeAll: "Voir tout →",
     activeMembers: "Membres actifs", seeMembers: "Voir tous →",
     tabs: { home: "Accueil", ops: "Transactions", members: "Membres", reports: "Statistiques", settings: "Paramètres" },
-    filters: { all: "Toutes", contribution: "Contributions", don: "Dons", depense: "Dépenses" }, filterMembers: { all: "Tous", hasContrib: "Avec contributions", noPay: "Sans paiement" },
+    filters: { all: "Toutes", contribution: "Contributions", don: "Dons", depense: "Dépenses", report: "Soldes reportés" }, filterMembers: { all: "Tous", hasContrib: "Avec contributions", noPay: "Sans paiement" },
     noTx: "Aucune transaction", noMembers: "Aucun membre", addMember: "+ Ajouter un membre",
     totalPaid: "Total versé", totalContrib: "Total contributions", totalDons: "Total dons",
     totalDep: "Total dépenses", monthlyEvo: "Bilan du mois",
@@ -160,7 +160,9 @@ const T = {
     deleteMsg: (l, a) => `Supprimer cette ${l} de ${a} ?`,
     delMemberTitle: "Retirer ?", delMemberMsg: (n) => `Retirer "${n}" ?`,
     alertAmount: "Montant invalide.", alertMember: "Sélectionnez un membre.", alertName: "Saisissez un nom.",
-    txTypes: { contribution: "Contribution", don: "Don", depense: "Dépense" }, donorDefault: "Donateur",
+    txTypes: { contribution: "Contribution", don: "Don", depense: "Dépense", report: "Solde reporté" }, donorDefault: "Donateur",
+    reportLabel: (yr) => `Solde reporté ${yr}`,
+    reportNote: (yr) => `Solde de clôture ${yr}`,
     newMember: "Nouveau membre", fullName: "Nom complet", fullNamePh: "Ex : Fatima Mint Ahmed",
     phone: "Téléphone", phonePh: "Ex : 22234567890", addMemberBtn: "Ajouter",
     exportBtn: "Exporter Excel", exportAll: "Toutes les transactions", exportMonth: "Ce mois", xlsxWait: "Chargement…", resetBtn: "Réinitialiser les données", resetConfirmTitle: "Tout supprimer ?", resetConfirmMsg: "Cette action supprimera TOUS les membres et TOUTES les transactions. Impossible d'annuler.", resetSuccess: "✅ Toutes les données ont été supprimées.",
@@ -183,7 +185,7 @@ const T = {
     activity: "النشاط المالي", recentTx: "آخر المعاملات", seeAll: "عرض الكل ←",
     activeMembers: "الأعضاء النشطون", seeMembers: "عرض الكل ←",
     tabs: { home: "الرئيسية", ops: "المعاملات", members: "الأعضاء", reports: "إحصائيات", settings: "الإعدادات" },
-    filters: { all: "الكل", contribution: "مساهمات", don: "تبرعات", depense: "مصروفات" }, filterMembers: { all: "الكل", hasContrib: "لديهم مساهمات", noPay: "بدون دفع" },
+    filters: { all: "الكل", contribution: "مساهمات", don: "تبرعات", depense: "مصروفات", report: "أرصدة منقولة" }, filterMembers: { all: "الكل", hasContrib: "لديهم مساهمات", noPay: "بدون دفع" },
     noTx: "لا توجد معاملات", noMembers: "لا يوجد أعضاء", addMember: "+ إضافة عضو",
     totalPaid: "إجمالي المدفوع", totalContrib: "إجمالي المساهمات", totalDons: "إجمالي التبرعات",
     totalDep: "إجمالي المصروفات", monthlyEvo: "ميزان الشهر",
@@ -196,7 +198,9 @@ const T = {
     deleteMsg: (l, a) => `هل تريد حذف هذه ${l} بقيمة ${a}؟`,
     delMemberTitle: "إزالة؟", delMemberMsg: (n) => `إزالة "${n}"؟`,
     alertAmount: "مبلغ غير صحيح.", alertMember: "اختر عضواً.", alertName: "أدخل الاسم.",
-    txTypes: { contribution: "مساهمة", don: "تبرع", depense: "مصروف" }, donorDefault: "متبرع",
+    txTypes: { contribution: "مساهمة", don: "تبرع", depense: "مصروف", report: "رصيد منقول" }, donorDefault: "متبرع",
+    reportLabel: (yr) => `رصيد منقول ${yr}`,
+    reportNote: (yr) => `رصيد إقفال ${yr}`,
     newMember: "عضو جديد", fullName: "الاسم الكامل", fullNamePh: "مثال: فاطمة بنت أحمد",
     phone: "الهاتف", phonePh: "مثال: 22234567890", addMemberBtn: "إضافة",
     exportBtn: "تصدير Excel", exportAll: "كل العمليات", exportMonth: "هذا الشهر", xlsxWait: "جارٍ التحميل…", resetBtn: "مسح جميع البيانات", resetConfirmTitle: "حذف الكل؟", resetConfirmMsg: "سيتم حذف جميع الأعضاء والمعاملات. لا يمكن التراجع.", resetSuccess: "✅ تم مسح جميع البيانات.",
@@ -229,6 +233,7 @@ const CFG = (lang) => ({
   contribution: { label: T[lang].txTypes.contribution, color: C.primaryLt,  lt: C.goldLt,         icon: () => <img src={IMG_CONTRIBUTION} width="22" height="22" style={{objectFit:"contain"}} />,  sign: "" },
   don:          { label: T[lang].txTypes.don,          color: C.secondary,   lt: C.secondaryCnt,   icon: () => <img src={IMG_DON}          width="22" height="22" style={{objectFit:"contain"}} />, sign: "" },
   depense:      { label: T[lang].txTypes.depense,      color: C.red,         lt: C.redLt,           icon: () => <img src={IMG_DEPENSE}      width="22" height="22" style={{objectFit:"contain"}} />, sign: "" },
+  report:       { label: T[lang].txTypes.report,       color: "#2563EB",     lt: "rgba(37,99,235,0.10)", icon: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>, sign: "" },
 });
 
 const AVC = [
@@ -726,18 +731,8 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 
   const curYear  = new Date().getFullYear();
   const prevYear = curYear - 1;
-  const txsPrev      = txs.filter(tx => new Date(tx.date).getFullYear() === prevYear);
-  const soldePrevAuto = txsPrev.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
-  const [soldePrevManual, setSoldePrevManual] = usePersisted(`cc_soldeprev_${prevYear}`, null);
-  const soldePrev = soldePrevManual !== null ? Number(soldePrevManual) : soldePrevAuto;
-  // 13ème mois — persisted separately, auto-updated on import
-  const [solde13, setSolde13] = usePersisted(`cc_solde13_${prevYear}`, 0);
-  // Solde global = transactions + solde année passée (manuel ou auto) + 13ème mois
-  const soldeAuto = txs.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
-  const soldeBase = soldePrevManual !== null
-    ? soldeAuto - soldePrevAuto + Number(soldePrevManual)
-    : soldeAuto;
-  const solde = soldeBase + Number(solde13 || 0);
+  // Solde global : toutes les transactions (contribution/don/report = +, depense = -)
+  const solde = txs.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
   const contrib = txs.filter((tx) => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
   const dons    = txs.filter((tx) => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
   const dep     = txs.filter((tx) => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
@@ -904,7 +899,33 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang, readOnly = false, memb
   const [contribForm, setContribForm] = useState({ memberId: "", amount: "", date: new Date().toISOString().slice(0, 10), note: "" });
   const [contribSaving, setContribSaving] = useState(false);
 
-  // ── 13ème mois form state ──
+  // ── Solde reporté : lire depuis les transactions de type "report" pour l'année courante ──
+  const curYear = new Date().getFullYear();
+  const reportTx = txs.find(tx => tx.type === "report" && new Date(tx.date).getFullYear() === curYear);
+  const soldePrevFromTx = reportTx ? reportTx.amount : null;
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [reportAmount, setReportAmount] = useState("");
+  const [savingReport, setSavingReport] = useState(false);
+
+  const handleReportSave = async () => {
+    const amt = parseFloat(reportAmount);
+    if (!amt || isNaN(amt) || amt <= 0) return alert(t.alertAmount);
+    setSavingReport(true);
+    // Si une transaction "report" existe déjà pour cette année, la supprimer d'abord
+    if (reportTx) await onDelete(reportTx.id);
+    const noteReport = t.reportNote ? t.reportNote(prevYear) : `Solde reporté ${prevYear}`;
+    await onAdd("contribution_inline", {
+      type: "report",
+      memberId: null,
+      memberName: lang === "ar" ? `رصيد منقول ${prevYear}` : `Solde reporté ${prevYear}`,
+      amount: amt,
+      date: `${curYear}-01-01`,
+      note: noteReport,
+    });
+    setReportAmount("");
+    setShowReportForm(false);
+    setSavingReport(false);
+  };
   const [show13Form, setShow13Form] = useState(false);
   const [form13, setForm13] = useState({ memberId: "", amount: "", date: new Date().toISOString().slice(0, 10) });
   const [saving13, setSaving13] = useState(false);
@@ -962,21 +983,40 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang, readOnly = false, memb
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
 
-      {/* ── KPI Cards : Solde année précédente + 13ème mois ── */}
+      {/* ── KPI Cards : Solde reporté + 13ème mois ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
-        {/* Solde année précédente */}
-        <div style={{ background: soldePrev >= 0 ? "linear-gradient(135deg,rgba(1,45,29,0.07),rgba(1,45,29,0.14))" : "rgba(254,226,226,0.7)", border: `1.5px solid ${soldePrev >= 0 ? "rgba(1,45,29,0.2)" : "#FECACA"}`, borderRadius: 18, padding: "14px 13px 12px", display: "flex", flexDirection: "column", gap: 7 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 10, background: soldePrev >= 0 ? "rgba(1,45,29,0.10)" : "rgba(239,68,68,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={soldePrev >= 0 ? C.primaryLt : "#EF4444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+        {/* Solde reporté (transaction de type "report") */}
+        <div style={{ background: soldePrevFromTx !== null ? "linear-gradient(135deg,rgba(37,99,235,0.07),rgba(37,99,235,0.14))" : "rgba(243,244,246,0.9)", border: `1.5px solid ${soldePrevFromTx !== null ? "rgba(37,99,235,0.25)" : "rgba(193,200,194,0.4)"}`, borderRadius: 18, padding: "14px 13px 12px", display: "flex", flexDirection: "column", gap: 7 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(37,99,235,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+            </div>
+            {!readOnly && (
+              <button className="tbtn" onClick={() => { setShowReportForm(v => !v); }} title={lang === "ar" ? "تعديل" : "Modifier"}
+                style={{ background: "rgba(37,99,235,0.10)", border: "none", color: "#2563EB", borderRadius: 8, width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 11, fontWeight: 700 }}>
+                {soldePrevFromTx !== null ? "✎" : "+"}
+              </button>
+            )}
           </div>
           <div>
             <div style={{ color: C.sub, fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 2 }}>
-              {lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}
+              {lang === "ar" ? `رصيد منقول ${prevYear}` : `Solde reporté ${prevYear}`}
             </div>
-            <div style={{ color: soldePrev >= 0 ? C.primaryLt : "#EF4444", fontSize: 14, fontWeight: 800, letterSpacing: -0.3 }}>
-              {fmtN(Math.abs(soldePrev))}
+            <div style={{ color: soldePrevFromTx !== null ? "#2563EB" : C.muted, fontSize: 14, fontWeight: 800, letterSpacing: -0.3 }}>
+              {soldePrevFromTx !== null ? fmtN(soldePrevFromTx) : (lang === "ar" ? "غير مُسجَّل" : "Non enregistré")}
             </div>
           </div>
+          {/* Formulaire inline pour saisir/modifier le solde reporté */}
+          {showReportForm && !readOnly && (
+            <div className="fin-in" style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 8 }}>
+              <input type="number" value={reportAmount} onChange={e => setReportAmount(e.target.value)} placeholder="0"
+                style={{ width: "100%", background: C.bgLow, border: "none", borderRadius: 10, padding: "9px 12px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
+              <button className="tbtn" onClick={handleReportSave} disabled={savingReport}
+                style={{ width: "100%", background: savingReport ? C.muted : "linear-gradient(135deg,#1d4ed8,#2563eb)", border: "none", color: "#fff", borderRadius: 10, padding: "9px", fontSize: 12, fontWeight: 700, cursor: savingReport ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
+                {savingReport ? "…" : t.save}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* 13ème mois */}
@@ -2130,7 +2170,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
       solde13 = raw13 ? Number(JSON.parse(raw13)) : 0;
     } catch { solde13 = 0; }
     const today = new Date().toLocaleDateString("fr-FR");
-    const typeLabels = { contribution: "Contribution", don: "Don", depense: "Dépense" };
+    const typeLabels = { contribution: "Contribution", don: "Don", depense: "Dépense", report: "Solde reporté" };
     const MONTHS_FR = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 
     // ── Palette couleurs (ARGB sans #) ──
@@ -2216,11 +2256,13 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     const totalC_tx = txsToExport.filter(tx => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
     const totalD_tx = txsToExport.filter(tx => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
     const totalE_tx = txsToExport.filter(tx => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
+    const totalR_tx = txsToExport.filter(tx => tx.type === "report").reduce((a, tx) => a + tx.amount, 0);
     txAoa.push(["","","","Total Contributions :","", totalC_tx,"","","",""]);
     txAoa.push(["","","","Total Dons :","",          totalD_tx,"","","",""]);
+    txAoa.push(["","","","Total Soldes reportés :","",totalR_tx,"","","",""]);
     txAoa.push(["","","","Total Dépenses :","",       totalE_tx,"","","",""]);
     txAoa.push(["","","","","","","","","",""]);
-    txAoa.push(["","","","SOLDE NET :","",            totalC_tx + totalD_tx - totalE_tx,"","","",""]);
+    txAoa.push(["","","","SOLDE NET :","",            totalC_tx + totalD_tx + totalR_tx - totalE_tx,"","","",""]);
 
     const wsT = XLSX.utils.aoa_to_sheet(txAoa);
     wsT["!cols"] = [{wch:5},{wch:14},{wch:16},{wch:22},{wch:18},{wch:32},{wch:10},{wch:9},{wch:13},{wch:14}];
@@ -2233,7 +2275,8 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
       {s:{r:totRow-1,c:3},e:{r:totRow-1,c:4}},
       {s:{r:totRow  ,c:3},e:{r:totRow  ,c:4}},
       {s:{r:totRow+1,c:3},e:{r:totRow+1,c:4}},
-      {s:{r:totRow+3,c:3},e:{r:totRow+3,c:4}},
+      {s:{r:totRow+2,c:3},e:{r:totRow+2,c:4}},
+      {s:{r:totRow+4,c:3},e:{r:totRow+4,c:4}},
     ];
 
     // Style banner row 1
@@ -2265,6 +2308,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
       if (tx.type === "contribution") { typeFill = solidFill(CLR.greenPale);  typeFnt = font(false, 10, CLR.greenLight); }
       if (tx.type === "don")          { typeFill = solidFill(CLR.purplePale); typeFnt = font(false, 10, CLR.purple); }
       if (tx.type === "depense")      { typeFill = solidFill(CLR.redPale);    typeFnt = font(false, 10, CLR.red); }
+      if (tx.type === "report")       { typeFill = solidFill("FFE8F0FE");     typeFnt = font(false, 10, "FF2563EB"); }
 
       txHdrs.forEach((col, ci) => {
         const addr = `${col}${r}`;
@@ -3368,13 +3412,12 @@ export default function App() {
         if (!XLSX) return;
         const EXPORT_YEAR = new Date().getFullYear();
         const today = new Date().toLocaleDateString("fr-FR");
-        const typeLabels = { contribution: "Contribution", don: "Don", depense: "Dépense" };
+        const typeLabels = { contribution: "Contribution", don: "Don", depense: "Dépense", report: "Solde reporté" };
         const MONTHS_FR = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-
-        const txsToExport = [...txs].sort((a, b) => new Date(a.date) - new Date(b.date));
+        const txsToExport = [...txs].filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR).sort((a, b) => new Date(a.date) - new Date(b.date));
 
         const txAoa = [
-          [`🌿  CAISSE COOPÉRATIVE — REGISTRE DES TRANSACTIONS (Auto-sync ${today})`,\`\`,\`\`,\`\`,\`\`,\`\`,\`\`,\`\`,\`\`,\`\`],
+          [`🌿  CAISSE COOPÉRATIVE — REGISTRE DES TRANSACTIONS (Auto-sync ${today})`,"","","","","","","","",""],
           ["#","Date","Type","Membre / Payeur","Montant (MRU)","Description / Note","Mois","Année","Statut","Réf."],
           ...txsToExport.map((tx, i) => {
             const d = new Date(tx.date);
@@ -3455,17 +3498,6 @@ export default function App() {
             else { setModal({ kind: "tx", txType: tp }); }
           }}
           onDelete={readOnly ? null : deleteTx} onEdit={readOnly ? null : editTx} lang={lang} readOnly={readOnly}
-          soldePrev={(() => {
-            const prevYear = new Date().getFullYear() - 1;
-            const txsPrev = txs.filter(tx => new Date(tx.date).getFullYear() === prevYear);
-            const soldePrevAuto = txsPrev.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
-            try { const raw = localStorage.getItem(`cc_soldeprev_${prevYear}`); const manual = raw ? JSON.parse(raw) : null; return manual !== null ? Number(manual) : soldePrevAuto; } catch { return soldePrevAuto; }
-          })()}
-          solde13={(() => {
-            const prevYear = new Date().getFullYear() - 1;
-            try { const raw = localStorage.getItem(`cc_solde13_${prevYear}`); return raw ? Number(JSON.parse(raw)) : 0; } catch { return 0; }
-          })()}
-          prevYear={new Date().getFullYear() - 1}
         />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={readOnly ? null : () => setModal({ kind: "membre" })} onDeleteMember={readOnly ? null : deleteMember} lang={lang} readOnly={readOnly} />}
         {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={readOnly ? null : resetAll} onAddTx={readOnly ? null : addTx} onAddTxBulk={readOnly ? null : addTxBulk} onAddMemberBulk={readOnly ? null : addMemberBulk} readOnly={readOnly} />}
