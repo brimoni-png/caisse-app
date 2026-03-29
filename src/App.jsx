@@ -170,6 +170,10 @@ const T = {
     changePin: "Changer le PIN", aboutApp: "Caisse Coopérative · Gestion communautaire", logout: "Se déconnecter",
     exportSummaryRows: (s,c,d,dep,n) => [["Solde",s],["Contributions",c],["Dons",d],["Dépenses",dep],["Membres",n]],
     categories: "Actions rapides", apercu: "Aperçu du mois",
+    solde13Label: (yr) => `Solde ${yr} + 13ème mois`,
+    solde13Sheet: "13ème Mois",
+    solde13ColMembre: "Membre", solde13ColMontant: "Montant (MRU)", solde13ColStatut: "Statut",
+    solde13Banner: (yr) => `🌿  CONTRIBUTIONS 13ÈME MOIS — ${yr}`,
   },
   ar: {
     dir: "rtl", font: "'Manrope','Segoe UI',sans-serif",
@@ -202,6 +206,10 @@ const T = {
     changePin: "تغيير رمز PIN", aboutApp: "الصندوق التعاوني · إدارة مجتمعية", logout: "تسجيل الخروج",
     exportSummaryRows: (s,c,d,dep,n) => [["الرصيد",s],["المساهمات",c],["التبرعات",d],["المصروفات",dep],["الأعضاء",n]],
     categories: "إجراءات سريعة", apercu: "نظرة عامة على الشهر",
+    solde13Label: (yr) => `رصيد ${yr} + الشهر الثالث عشر`,
+    solde13Sheet: "13ème Mois",
+    solde13ColMembre: "العضو", solde13ColMontant: "المبلغ (MRU)", solde13ColStatut: "الحالة",
+    solde13Banner: (yr) => `🌿  مساهمات الشهر الثالث عشر — ${yr}`,
   },
 };
 
@@ -723,6 +731,8 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
   const soldePrevAuto = txsPrev.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
   const [soldePrevManual, setSoldePrevManual] = usePersisted(`cc_soldeprev_${prevYear}`, null);
   const soldePrev = soldePrevManual !== null ? Number(soldePrevManual) : soldePrevAuto;
+  // 13ème mois — persisted separately, auto-updated on import
+  const [solde13, setSolde13] = usePersisted(`cc_solde13_${prevYear}`, 0);
   // Solde global = transactions + solde année passée manuel (si modifié)
   const soldeAuto = txs.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
   const solde = soldePrevManual !== null
@@ -859,10 +869,10 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
             </div>
             <div>
               <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>
-                {lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}
+                {t.solde13Label(prevYear)}
               </div>
-              <div style={{ color: soldePrev >= 0 ? C.primaryLt : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>
-                {fmtN(Math.abs(soldePrev))}
+              <div style={{ color: (soldePrev + solde13) >= 0 ? C.primaryLt : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>
+                {fmtN(Math.abs(soldePrev + solde13))}
               </div>
               {soldePrevManual !== null && <div style={{ fontSize: 8, color: C.sub, marginTop: 2 }}>✏️ {lang === "ar" ? "معدّل" : "modifié"}</div>}
             </div>
@@ -879,17 +889,26 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.primaryLt} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </div>
                 <div style={{ color: C.text, fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
-                  {lang === "ar" ? `تعديل رصيد ${prevYear}` : `Modifier le solde ${prevYear}`}
+                  {lang === "ar" ? `تعديل رصيد ${prevYear} + الشهر 13` : `Modifier le solde ${prevYear} + 13ème mois`}
                 </div>
                 <div style={{ color: C.muted, fontSize: 12 }}>{lang === "ar" ? "سيُضاف إلى الرصيد الإجمالي" : "Sera ajouté au solde global"}</div>
               </div>
-              <div style={{ marginBottom: 16 }}>
+              <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 10, fontWeight: 600, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7 }}>{lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}</div>
                 <input type="number" value={editPrevVal} onChange={e => setEditPrevVal(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") { setSoldePrevManual(Number(editPrevVal)); setEditPrevModal(false); } }}
                   placeholder="0" autoFocus
                   style={{ width: "100%", background: C.outline, border: `1.5px solid ${C.outline}`, borderRadius: 12, padding: "12px 14px", fontSize: 18, color: C.text, outline: "none", fontFamily: "inherit", textAlign: "center", fontWeight: 700, transition: "border-color .2s" }}
                   onFocus={e => e.target.style.borderColor = C.primaryLt}
+                  onBlur={e => e.target.style.borderColor = C.outline}
+                />
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7 }}>{lang === "ar" ? "الشهر الثالث عشر" : "13ème mois"}</div>
+                <input type="number" value={solde13 || 0} onChange={e => setSolde13(Number(e.target.value))}
+                  placeholder="0"
+                  style={{ width: "100%", background: C.outline, border: `1.5px solid ${C.outline}`, borderRadius: 12, padding: "12px 14px", fontSize: 18, color: C.text, outline: "none", fontFamily: "inherit", textAlign: "center", fontWeight: 700, transition: "border-color .2s" }}
+                  onFocus={e => e.target.style.borderColor = C.secondary}
                   onBlur={e => e.target.style.borderColor = C.outline}
                 />
               </div>
@@ -1817,6 +1836,38 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
         }
       }
 
+      // ── Feuille 13ème Mois (optionnelle) ──
+      const sheet13Name = wb.SheetNames.find(n =>
+        n.toLowerCase().replace(/\s/g,"").includes("13") ||
+        n.toLowerCase().includes("treizieme") ||
+        n.toLowerCase().includes("troisième") ||
+        n.toLowerCase().includes("13eme") ||
+        n.toLowerCase().includes("13ème")
+      );
+      if (sheet13Name) {
+        const ws13 = wb.Sheets[sheet13Name];
+        const aoa13 = XLSX.utils.sheet_to_json(ws13, { header: 1, defval: "" });
+        // Sum all numeric values in the "Montant" column
+        const hIdx13 = aoa13.findIndex(row => row.some(c => String(c).toLowerCase().includes("montant") || String(c).toLowerCase().includes("مبلغ")));
+        if (hIdx13 !== -1) {
+          const hdrs13 = aoa13[hIdx13].map(h => String(h).trim().toLowerCase());
+          const iAmt13 = hdrs13.findIndex(h => h.includes("montant") || h.includes("مبلغ") || h.includes("amount"));
+          if (iAmt13 !== -1) {
+            const total13 = aoa13.slice(hIdx13 + 1)
+              .map(r => parseFloat(String(r[iAmt13] || "0").replace(/[^0-9.,-]/g, "").replace(",", ".")))
+              .filter(v => !isNaN(v) && v > 0)
+              .reduce((a, v) => a + v, 0);
+            if (total13 > 0) {
+              // Write directly to localStorage so Dashboard picks it up on next render
+              try {
+                const prevYr = new Date().getFullYear() - 1;
+                localStorage.setItem(`cc_solde13_${prevYr}`, JSON.stringify(total13));
+              } catch {}
+            }
+          }
+        }
+      }
+
       // ── Feuille Transactions ──
       const ws = wb.Sheets[wb.SheetNames[0]];
 
@@ -1934,6 +1985,12 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     if (!XLSX) return alert(t.xlsxWait);
 
     const EXPORT_YEAR = year;
+    // Read 13th month persisted value from localStorage
+    let solde13 = 0;
+    try {
+      const raw13 = localStorage.getItem(`cc_solde13_${year - 1}`);
+      solde13 = raw13 ? Number(JSON.parse(raw13)) : 0;
+    } catch { solde13 = 0; }
     const today = new Date().toLocaleDateString("fr-FR");
     const typeLabels = { contribution: "Contribution", don: "Don", depense: "Dépense" };
     const MONTHS_FR = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
@@ -2351,7 +2408,57 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     XLSX.utils.book_append_sheet(wb, wsM, "Membres");
 
     // ════════════════════════════════════════════════════════════════
-    // FEUILLE 4 — MODE D'EMPLOI
+    // FEUILLE 4 — 13ÈME MOIS
+    // ════════════════════════════════════════════════════════════════
+    const txs13 = txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR);
+    // Group members who contributed to 13th month (contributions tagged in note or member-by-member)
+    // We build one row per member with their total contributions (as a 13th month reference sheet)
+    const mois13Banner = t.solde13Banner(EXPORT_YEAR);
+    const m13Aoa = [
+      [mois13Banner, "", "", "", ""],
+      [lang === "ar" ? `إجمالي الشهر الثالث عشر: ${fmtN(solde13)}` : `Total 13ème mois : ${fmtN(solde13)} MRU`, "", "", "", ""],
+      [""],
+      [t.solde13ColMembre, t.solde13ColMontant, t.solde13ColStatut, "", ""],
+      ...members.map((m, i) => {
+        const mTotal = txs13.filter(tx => tx.type === "contribution" && (tx.memberName === m.name || tx.memberId === m.id)).reduce((a, tx) => a + tx.amount, 0);
+        const status = mTotal > 0 ? (lang === "ar" ? "مشارك" : "Contribuant") : (lang === "ar" ? "غير مشارك" : "Non contribuant");
+        return [m.name, mTotal, status, "", ""];
+      }),
+      [""],
+      [lang === "ar" ? "المجموع" : "TOTAL", members.reduce((a, m) => a + txs13.filter(tx => tx.type === "contribution" && (tx.memberName === m.name || tx.memberId === m.id)).reduce((s, tx) => s + tx.amount, 0), 0), "", "", ""],
+    ];
+    const ws13e = XLSX.utils.aoa_to_sheet(m13Aoa);
+    ws13e["!cols"] = [{wch:28},{wch:18},{wch:18},{wch:12},{wch:12}];
+    ws13e["!merges"] = [
+      {s:{r:0,c:0},e:{r:0,c:4}},
+      {s:{r:1,c:0},e:{r:1,c:4}},
+    ];
+    const m13A1 = ws13e["A1"]; if (m13A1) styled(m13A1, { fill: solidFill(CLR.greenDark), fnt: font(true, 13, CLR.white), aln: align("center","center") });
+    const m13A2 = ws13e["A2"]; if (m13A2) styled(m13A2, { fill: solidFill(CLR.greenMid), fnt: font(true, 11, CLR.white), aln: align("center","center") });
+    ["A","B","C"].forEach(col => {
+      const c = ws13e[`${col}4`];
+      if (c) styled(c, { fill: solidFill(CLR.greenMid), fnt: font(true, 10, CLR.white), aln: align("center","center"), border: thinBorder() });
+    });
+    members.forEach((_, i) => {
+      const r = 5 + i;
+      const isEven = i % 2 === 1;
+      const row = m13Aoa[4 + i];
+      ["A","B","C"].forEach((col, ci) => {
+        const cell = ws13e[`${col}${r}`]; if (!cell) return;
+        const hasAmt = cell.v > 0;
+        styled(cell, {
+          fill: ci === 1 && hasAmt ? solidFill(CLR.greenPale) : isEven ? solidFill(CLR.greenXl) : solidFill(CLR.white),
+          fnt: font(false, 10, ci === 0 ? CLR.greenMid : ci === 1 && hasAmt ? CLR.greenLight : ci === 2 && !hasAmt ? CLR.red : CLR.black),
+          aln: align(ci === 0 ? "left" : "center", "center"),
+          border: thinBorder(),
+          numFmt: ci === 1 ? fmtMoney : undefined,
+        });
+      });
+    });
+    XLSX.utils.book_append_sheet(wb, ws13e, t.solde13Sheet);
+
+    // ════════════════════════════════════════════════════════════════
+    // FEUILLE 5 — MODE D'EMPLOI
     // ════════════════════════════════════════════════════════════════
     const helpData = [
       ["📖  MODE D'EMPLOI — CAISSE COOPÉRATIVE","","",""],
@@ -2364,6 +2471,11 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
       ["Description","Objet de la transaction (optionnel).","",""],
       ["Mois / Année","Extraits automatiquement de la date.","",""],
       ["Statut","En attente → Confirmé après validation.","",""],
+      ["","","",""],
+      ["ONGLET : 13ème Mois","","",""],
+      ["Membres","Liste des membres et leur participation au 13ème mois.","",""],
+      ["Montant (MRU)","Montant total des contributions de chaque membre.","",""],
+      ["Statut","Contribuant (mTotal > 0) ou Non contribuant.","",""],
       ["","","",""],
       ["ONGLET : Récap. Mensuel","","",""],
       ["Totaux par mois","Contributions + Dons − Dépenses = Solde.","",""],
@@ -2381,7 +2493,7 @@ function Reports({ txs, members, lang, xlsxReady, chartReady, onRefresh, onReset
     wsH["!merges"] = [{s:{r:0,c:0},e:{r:0,c:3}}];
     const hA1 = wsH["A1"];
     if (hA1) styled(hA1, { fill: solidFill(CLR.greenDark), fnt: font(true, 13, CLR.white), aln: align("center","center") });
-    const sectionRows = [2,11,15];
+    const sectionRows = [2,15,19];
     const sectionColors = [CLR.greenMid, CLR.greenLight, CLR.purple];
     sectionRows.forEach((ri, si) => {
       const cell = wsH[`A${ri + 1}`];
