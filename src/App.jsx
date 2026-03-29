@@ -946,21 +946,87 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 // ─── OPERATIONS ───────────────────────────────────────────────────────────────
 function Operations({ txs, onAdd, onDelete, onEdit, lang, readOnly = false }) {
   const t = T[lang];
+  const allYears = getYrs(txs).filter(y => y !== 2025);
+  const [selYear, setSelYear] = useState("all");
+  const [selType, setSelType] = useState("all");
 
-  const last10 = [...txs]
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 10);
+  const sorted = [...txs]
+    .filter(tx => {
+      const d = new Date(tx.date);
+      if (selYear !== "all" && d.getFullYear() !== Number(selYear)) return false;
+      if (selType !== "all" && tx.type         !== selType)          return false;
+      return true;
+    })
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const pillStyle = (active, color) => ({
+    background: active ? (color || C.primary) : C.card,
+    border: `1.5px solid ${active ? (color || C.primary) : C.outline}`,
+    color: active ? "#fff" : C.muted,
+    borderRadius: 20, padding: "7px 16px", fontSize: 11, fontWeight: 700,
+    cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit",
+    boxShadow: C.shadow, transition: "all .18s",
+  });
+
+  const activeLabel = [
+    selYear !== "all" ? selYear : null,
+    selType !== "all" ? CFG(lang)[selType]?.label : null,
+  ].filter(Boolean).join(" · ");
 
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
       <CatPills onAdd={onAdd} lang={lang} readOnly={readOnly} />
 
-      {/* Titre section */}
-      <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 10, paddingLeft: 2 }}>
-        {lang === "ar" ? "آخر ١٠ عمليات" : "10 dernières opérations"}
+      {/* ─ ÉTAPE 1 : Année ─ */}
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7, paddingLeft: 2 }}>
+          {lang === "ar" ? "① السنة" : "① Année"}
+        </div>
+        <div style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 4 }}>
+          <button className="tbtn" onClick={() => { setSelYear("all"); setSelType("all"); }} style={pillStyle(selYear === "all")}>
+            {lang === "ar" ? "الكل" : "Toutes"}
+          </button>
+          {allYears.map(y => (
+            <button key={y} className="tbtn" onClick={() => { setSelYear(String(y)); setSelType("all"); }}
+              style={pillStyle(selYear === String(y), C.primaryLt)}>
+              {y}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {last10.length === 0 ? <Empty label={t.noTx} /> : last10.map((tx, i) => <TxRow key={tx.id} tx={tx} onDelete={onDelete} onEdit={onEdit} delay={i * 25} lang={lang} readOnly={readOnly} />)}
+      {/* ─ ÉTAPE 2 : Type ─ */}
+      <div style={{ marginBottom: 14, opacity: selYear === "all" ? 0.4 : 1, pointerEvents: selYear === "all" ? "none" : "auto", transition: "opacity .2s" }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7, paddingLeft: 2 }}>
+          {lang === "ar" ? "② نوع العملية" : "② Type"}
+        </div>
+        <div style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 4 }}>
+          <button className="tbtn" onClick={() => setSelType("all")} style={pillStyle(selType === "all")}>
+            {lang === "ar" ? "الكل" : "Tous"}
+          </button>
+          {["contribution", "don", "depense"].map(tp => {
+            const cfg = CFG(lang)[tp];
+            return (
+              <button key={tp} className="tbtn" onClick={() => setSelType(tp)}
+                style={pillStyle(selType === tp, cfg.color)}>
+                {cfg.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Compteur + badge */}
+      <div style={{ fontSize: 11, color: C.muted, marginBottom: 10, paddingLeft: 2, display: "flex", alignItems: "center", gap: 8 }}>
+        <span>{sorted.length} {lang === "ar" ? "معاملة" : `transaction${sorted.length !== 1 ? "s" : ""}`}</span>
+        {activeLabel && (
+          <span style={{ background: C.bgLow, borderRadius: 6, padding: "2px 9px", border: `1px solid ${C.outline}`, color: C.primaryLt, fontWeight: 600 }}>
+            {activeLabel}
+          </span>
+        )}
+      </div>
+
+      {sorted.length === 0 ? <Empty label={t.noTx} /> : sorted.map((tx, i) => <TxRow key={tx.id} tx={tx} onDelete={onDelete} onEdit={onEdit} delay={i * 25} lang={lang} readOnly={readOnly} />)}
     </div>
   );
 }
@@ -1084,11 +1150,16 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang, readOnly = f
     new Date(tx.date).getFullYear() === YEAR
   ).reduce((a, tx) => a + tx.amount, 0);
 
-  const filtered = members.filter(m => {
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
-    return m.name?.toLowerCase().includes(q) || m.phone?.includes(q);
-  });
+  const isSearching = search.trim().length > 0;
+
+  const displayed = isSearching
+    ? members.filter(m => {
+        const q = search.toLowerCase();
+        return m.name?.toLowerCase().includes(q) || m.phone?.includes(q);
+      })
+    : [...members]
+        .sort((a, b) => getTotal2026(b.id) - getTotal2026(a.id))
+        .slice(0, 10);
 
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
@@ -1097,11 +1168,13 @@ function Members({ members, txs, onAddMember, onDeleteMember, lang, readOnly = f
       </PBtn>
       <SearchBar value={search} onChange={setSearch} placeholder={lang === "ar" ? "بحث في الأعضاء..." : "Rechercher un membre…"} dir={t.dir} />
       <div style={{ fontSize: 11, color: C.muted, marginBottom: 12, paddingLeft: 2 }}>
-        {filtered.length} {lang === "ar" ? "عضو" : `membre${filtered.length !== 1 ? "s" : ""}`}
-        {search && filtered.length !== members.length && <span style={{ marginLeft: 6, color: C.primaryLt, fontWeight: 600 }}>/ {members.length} total</span>}
+        {isSearching
+          ? <>{displayed.length} {lang === "ar" ? "عضو" : `membre${displayed.length !== 1 ? "s" : ""}`}{displayed.length !== members.length && <span style={{ marginLeft: 6, color: C.primaryLt, fontWeight: 600 }}>/ {members.length} total</span>}</>
+          : <>{lang === "ar" ? `أكبر ١٠ مساهمين (${YEAR})` : `Top 10 contributeurs (${YEAR})`}</>
+        }
       </div>
-      {filtered.length === 0 && <Empty label={t.noMembers} />}
-      {filtered.map((m, i) => {
+      {displayed.length === 0 && <Empty label={t.noMembers} />}
+      {displayed.map((m, i) => {
         const [bg, fg] = AVC[i % AVC.length];
         const total = getTotal2026(m.id);
         return (
