@@ -723,8 +723,7 @@ function CaisseLogo() {
 function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, setLang, chartReady, readOnly = false }) {
   const t = T[lang];
   const [statModal, setStatModal] = useState(null);
-  const [editPrevModal, setEditPrevModal] = useState(false);
-  const [editPrevVal,   setEditPrevVal]   = useState("");
+
   const curYear  = new Date().getFullYear();
   const prevYear = curYear - 1;
   const txsPrev      = txs.filter(tx => new Date(tx.date).getFullYear() === prevYear);
@@ -733,11 +732,12 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
   const soldePrev = soldePrevManual !== null ? Number(soldePrevManual) : soldePrevAuto;
   // 13ème mois — persisted separately, auto-updated on import
   const [solde13, setSolde13] = usePersisted(`cc_solde13_${prevYear}`, 0);
-  // Solde global = transactions + solde année passée manuel (si modifié)
+  // Solde global = transactions + solde année passée (manuel ou auto) + 13ème mois
   const soldeAuto = txs.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
-  const solde = soldePrevManual !== null
+  const soldeBase = soldePrevManual !== null
     ? soldeAuto - soldePrevAuto + Number(soldePrevManual)
     : soldeAuto;
+  const solde = soldeBase + Number(solde13 || 0);
   const contrib = txs.filter((tx) => tx.type === "contribution").reduce((a, tx) => a + tx.amount, 0);
   const dons    = txs.filter((tx) => tx.type === "don").reduce((a, tx) => a + tx.amount, 0);
   const dep     = txs.filter((tx) => tx.type === "depense").reduce((a, tx) => a + tx.amount, 0);
@@ -858,14 +858,11 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
               <div style={{ color: "#e05252", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(dep)}</div>
             </div>
           </button>
-          {/* Solde année passée — cliquable */}
-          <button className="tbtn" onClick={() => { setEditPrevVal(String(soldePrev)); setEditPrevModal(true); }}
-            style={{ background: soldePrev >= 0 ? "linear-gradient(135deg, rgba(1,45,29,0.06), rgba(1,45,29,0.12))" : "rgba(254,226,226,0.6)", border: `1.5px solid ${soldePrev >= 0 ? "rgba(1,45,29,0.2)" : "#FECACA"}`, borderRadius: 18, padding: "16px 14px 14px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, cursor: "pointer", width: "100%" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: soldePrev >= 0 ? "rgba(1,45,29,0.10)" : "rgba(239,68,68,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={soldePrev >= 0 ? C.primaryLt : "#EF4444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
-              </div>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.sub} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6, marginTop: 2 }}><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          {/* Solde année passée — lecture seule */}
+          <div
+            style={{ background: (soldePrev + solde13) >= 0 ? "linear-gradient(135deg, rgba(1,45,29,0.06), rgba(1,45,29,0.12))" : "rgba(254,226,226,0.6)", border: `1.5px solid ${(soldePrev + solde13) >= 0 ? "rgba(1,45,29,0.2)" : "#FECACA"}`, borderRadius: 18, padding: "16px 14px 14px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, width: "100%" }}>
+            <div style={{ width: 34, height: 34, borderRadius: 10, background: (soldePrev + solde13) >= 0 ? "rgba(1,45,29,0.10)" : "rgba(239,68,68,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={(soldePrev + solde13) >= 0 ? C.primaryLt : "#EF4444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
             </div>
             <div>
               <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>
@@ -874,57 +871,10 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
               <div style={{ color: (soldePrev + solde13) >= 0 ? C.primaryLt : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>
                 {fmtN(Math.abs(soldePrev + solde13))}
               </div>
-              {soldePrevManual !== null && <div style={{ fontSize: 8, color: C.sub, marginTop: 2 }}>✏️ {lang === "ar" ? "معدّل" : "modifié"}</div>}
-            </div>
-          </button>
-        </div>
-
-        {/* ── Modal édition Solde année passée ── */}
-        {editPrevModal && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(1,45,29,0.50)", backdropFilter: "blur(14px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
-            onClick={e => e.target === e.currentTarget && setEditPrevModal(false)}>
-            <div style={{ background: C.card, borderRadius: 22, padding: "26px 22px", width: "100%", maxWidth: 320, boxShadow: C.shadowLg, animation: "pop .2s ease both", border: `1px solid ${C.outline}` }}>
-              <div style={{ textAlign: "center", marginBottom: 18 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: C.outline, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.primaryLt} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                </div>
-                <div style={{ color: C.text, fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
-                  {lang === "ar" ? `تعديل رصيد ${prevYear} + الشهر 13` : `Modifier le solde ${prevYear} + 13ème mois`}
-                </div>
-                <div style={{ color: C.muted, fontSize: 12 }}>{lang === "ar" ? "سيُضاف إلى الرصيد الإجمالي" : "Sera ajouté au solde global"}</div>
-              </div>
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7 }}>{lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}</div>
-                <input type="number" value={editPrevVal} onChange={e => setEditPrevVal(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter") { setSoldePrevManual(Number(editPrevVal)); setEditPrevModal(false); } }}
-                  placeholder="0" autoFocus
-                  style={{ width: "100%", background: C.outline, border: `1.5px solid ${C.outline}`, borderRadius: 12, padding: "12px 14px", fontSize: 18, color: C.text, outline: "none", fontFamily: "inherit", textAlign: "center", fontWeight: 700, transition: "border-color .2s" }}
-                  onFocus={e => e.target.style.borderColor = C.primaryLt}
-                  onBlur={e => e.target.style.borderColor = C.outline}
-                />
-              </div>
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: C.muted, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 7 }}>{lang === "ar" ? "الشهر الثالث عشر" : "13ème mois"}</div>
-                <input type="number" value={solde13 || 0} onChange={e => setSolde13(Number(e.target.value))}
-                  placeholder="0"
-                  style={{ width: "100%", background: C.outline, border: `1.5px solid ${C.outline}`, borderRadius: 12, padding: "12px 14px", fontSize: 18, color: C.text, outline: "none", fontFamily: "inherit", textAlign: "center", fontWeight: 700, transition: "border-color .2s" }}
-                  onFocus={e => e.target.style.borderColor = C.secondary}
-                  onBlur={e => e.target.style.borderColor = C.outline}
-                />
-              </div>
-              <div style={{ display: "flex", gap: 10 }}>
-                <button className="tbtn" onClick={() => { setSoldePrevManual(null); setEditPrevModal(false); }}
-                  style={{ flex: 1, background: C.outline, border: "none", borderRadius: 12, padding: "11px", fontSize: 12, fontWeight: 600, color: C.muted, cursor: "pointer", fontFamily: "inherit" }}>
-                  {lang === "ar" ? "إعادة ضبط" : "Réinitialiser"}
-                </button>
-                <button className="tbtn" onClick={() => { setSoldePrevManual(Number(editPrevVal)); setEditPrevModal(false); }}
-                  style={{ flex: 2, background: C.primaryLt, border: "none", borderRadius: 12, padding: "11px", fontSize: 13, fontWeight: 700, color: "#fff", cursor: "pointer", fontFamily: "inherit", boxShadow: `0 4px 14px rgba(45,156,143,0.35)` }}>
-                  {lang === "ar" ? "حفظ" : "Enregistrer"}
-                </button>
-              </div>
             </div>
           </div>
-        )}
+        </div>
+
       </div>
 
       {/* ── BODY */}
