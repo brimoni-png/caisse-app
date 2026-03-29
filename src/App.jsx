@@ -904,6 +904,11 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang, readOnly = false, memb
   const [contribForm, setContribForm] = useState({ memberId: "", amount: "", date: new Date().toISOString().slice(0, 10), note: "" });
   const [contribSaving, setContribSaving] = useState(false);
 
+  // ── 13ème mois form state ──
+  const [show13Form, setShow13Form] = useState(false);
+  const [form13, setForm13] = useState({ memberId: "", amount: "", date: new Date().toISOString().slice(0, 10) });
+  const [saving13, setSaving13] = useState(false);
+
   const last10 = [...txs]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 10);
@@ -925,6 +930,33 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang, readOnly = false, memb
     setContribForm({ memberId: "", amount: "", date: new Date().toISOString().slice(0, 10), note: "" });
     setShowContribForm(false);
     setContribSaving(false);
+  };
+
+  // ── Handler: save 13ème mois contribution ──
+  const handle13Save = async () => {
+    if (!form13.memberId) return alert(t.alertMember);
+    const amt = parseFloat(form13.amount);
+    if (!amt || isNaN(amt) || amt <= 0) return alert(t.alertAmount);
+    const member = members.find(m => m.id === form13.memberId);
+    setSaving13(true);
+    const note13 = lang === "ar" ? "مساهمة الشهر الثالث عشر" : "13ème mois";
+    await onAdd("contribution_inline", {
+      type: "contribution",
+      memberId: form13.memberId,
+      memberName: member ? member.name : "",
+      amount: amt,
+      date: form13.date,
+      note: note13,
+    });
+    // Update solde13 in localStorage
+    try {
+      const raw = localStorage.getItem(`cc_solde13_${prevYear}`);
+      const prev13 = raw ? Number(JSON.parse(raw)) : 0;
+      localStorage.setItem(`cc_solde13_${prevYear}`, JSON.stringify(prev13 + amt));
+    } catch {}
+    setForm13({ memberId: "", amount: "", date: new Date().toISOString().slice(0, 10) });
+    setShow13Form(false);
+    setSaving13(false);
   };
 
   return (
@@ -966,7 +998,7 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang, readOnly = false, memb
       {/* ── Bouton Ajouter Contribution rapide ── */}
       {!readOnly && (
         <div style={{ marginBottom: 16 }}>
-          <button className="tbtn" onClick={() => setShowContribForm(v => !v)}
+          <button className="tbtn" onClick={() => { setShowContribForm(v => !v); setShow13Form(false); }}
             style={{ width: "100%", background: showContribForm ? C.bgLow : "linear-gradient(135deg,#012d1d,#1b4332)", border: "none", color: showContribForm ? C.muted : "#fff", borderRadius: 16, padding: "13px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: showContribForm ? "none" : "0 4px 16px rgba(1,45,29,0.22)", transition: "all .2s", fontFamily: "inherit" }}>
             <img src={IMG_CONTRIBUTION} width="18" height="18" style={{ objectFit: "contain", filter: showContribForm ? "none" : "brightness(2)" }} />
             {showContribForm
@@ -1018,6 +1050,60 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang, readOnly = false, memb
               <button className="tbtn" onClick={handleContribSave} disabled={contribSaving}
                 style={{ width: "100%", background: contribSaving ? C.muted : C.heroGrad, border: "none", color: "#fff", borderRadius: 14, padding: "13px", fontSize: 13, fontWeight: 700, cursor: contribSaving ? "not-allowed" : "pointer", fontFamily: "inherit", boxShadow: contribSaving ? "none" : "0 6px 20px rgba(1,45,29,0.22)" }}>
                 {contribSaving ? "…" : t.save}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Bouton Ajouter Contribution 13ème mois ── */}
+      {!readOnly && (
+        <div style={{ marginBottom: 16 }}>
+          <button className="tbtn" onClick={() => { setShow13Form(v => !v); setShowContribForm(false); }}
+            style={{ width: "100%", background: show13Form ? C.bgLow : "linear-gradient(135deg,#5b21b6,#7c3aed)", border: "none", color: show13Form ? C.muted : "#fff", borderRadius: 16, padding: "13px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: show13Form ? "none" : "0 4px 16px rgba(113,46,221,0.30)", transition: "all .2s", fontFamily: "inherit" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={show13Form ? C.muted : "#fff"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            {show13Form
+              ? (lang === "ar" ? "إغلاق" : "Fermer")
+              : (lang === "ar" ? "+ مساهمة الشهر الثالث عشر" : "+ Contribution 13ème mois")}
+          </button>
+
+          {show13Form && (
+            <div className="fin-in" style={{ background: C.card, borderRadius: 18, padding: "16px", marginTop: 10, boxShadow: C.shadowMd, border: "1.5px solid rgba(113,46,221,0.20)" }}>
+              <div style={{ marginBottom: 14, fontSize: 12, fontWeight: 700, color: C.secondary, display: "flex", alignItems: "center", gap: 6 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.secondary} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                {lang === "ar" ? "مساهمة الشهر الثالث عشر" : "Contribution 13ème mois"}
+              </div>
+
+              {/* Membre */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: 1, textTransform: "uppercase", marginBottom: 5 }}>{t.flds.member}</div>
+                <div style={{ position: "relative" }}>
+                  <select value={form13.memberId} onChange={e => setForm13(f => ({ ...f, memberId: e.target.value }))}
+                    style={{ width: "100%", background: C.bgLow, border: "none", borderRadius: 10, padding: "11px 28px 11px 14px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit", appearance: "none", cursor: "pointer" }}>
+                    <option value="">{t.flds.memberPh}</option>
+                    {members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                  </select>
+                  <div style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
+                </div>
+              </div>
+
+              {/* Montant */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: 1, textTransform: "uppercase", marginBottom: 5 }}>{t.flds.amount}</div>
+                <input type="number" value={form13.amount} onChange={e => setForm13(f => ({ ...f, amount: e.target.value }))} placeholder="0"
+                  style={{ width: "100%", background: C.bgLow, border: "none", borderRadius: 10, padding: "11px 14px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit" }} />
+              </div>
+
+              {/* Date */}
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: 1, textTransform: "uppercase", marginBottom: 5 }}>{t.flds.date}</div>
+                <input type="date" value={form13.date} onChange={e => setForm13(f => ({ ...f, date: e.target.value }))}
+                  style={{ width: "100%", background: C.bgLow, border: "none", borderRadius: 10, padding: "11px 14px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit" }} />
+              </div>
+
+              <button className="tbtn" onClick={handle13Save} disabled={saving13}
+                style={{ width: "100%", background: saving13 ? C.muted : "linear-gradient(135deg,#5b21b6,#7c3aed)", border: "none", color: "#fff", borderRadius: 14, padding: "13px", fontSize: 13, fontWeight: 700, cursor: saving13 ? "not-allowed" : "pointer", fontFamily: "inherit", boxShadow: saving13 ? "none" : "0 6px 20px rgba(113,46,221,0.30)" }}>
+                {saving13 ? "…" : t.save}
               </button>
             </div>
           )}
