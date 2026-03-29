@@ -823,56 +823,41 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
           </div>
         )}
 
-        {/* 4 CARTES STATS (2x2) */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 4 }}>
+        {/* 3 CARTES STATS (1x3) */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 4 }}>
           {/* Contributions */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[0])}
-            style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
-            <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(1,45,29,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <img src={IMG_CONTRIBUTION} width="24" height="24" style={{objectFit:"contain"}} />
+            style={{ background: C.card, border: "none", borderRadius: 20, padding: "14px 10px 12px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 7, boxShadow: C.shadow, transition: "all .2s" }}>
+            <div style={{ width: 34, height: 34, borderRadius: 11, background: "rgba(1,45,29,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img src={IMG_CONTRIBUTION} width="20" height="20" style={{objectFit:"contain"}} />
             </div>
             <div>
-              <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.contribution}</div>
-              <div style={{ color: C.primaryLt, fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(contrib)}</div>
+              <div style={{ color: C.sub, fontSize: 8, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 2 }}>{t.stats.contribution}</div>
+              <div style={{ color: C.primaryLt, fontSize: 13, fontWeight: 800, letterSpacing: -0.2 }}>{fmtN(contrib)}</div>
             </div>
           </button>
           {/* Dons */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[1])}
-            style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
-            <div style={{ width: 38, height: 38, borderRadius: 12, background: C.secondaryCnt, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <img src={IMG_DON} width="24" height="24" style={{objectFit:"contain"}} />
+            style={{ background: C.card, border: "none", borderRadius: 20, padding: "14px 10px 12px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 7, boxShadow: C.shadow, transition: "all .2s" }}>
+            <div style={{ width: 34, height: 34, borderRadius: 11, background: C.secondaryCnt, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img src={IMG_DON} width="20" height="20" style={{objectFit:"contain"}} />
             </div>
             <div>
-              <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.don}</div>
-              <div style={{ color: C.secondary, fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(dons)}</div>
+              <div style={{ color: C.sub, fontSize: 8, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 2 }}>{t.stats.don}</div>
+              <div style={{ color: C.secondary, fontSize: 13, fontWeight: 800, letterSpacing: -0.2 }}>{fmtN(dons)}</div>
             </div>
           </button>
           {/* Dépenses */}
           <button className="tbtn" onClick={() => setStatModal(statsRow[2])}
-            style={{ background: C.card, border: "none", borderRadius: 20, padding: "16px 14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, boxShadow: C.shadow, transition: "all .2s" }}>
-            <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(224,82,82,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <img src={IMG_DEPENSE} width="24" height="24" style={{objectFit:"contain"}} />
+            style={{ background: C.card, border: "none", borderRadius: 20, padding: "14px 10px 12px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 7, boxShadow: C.shadow, transition: "all .2s" }}>
+            <div style={{ width: 34, height: 34, borderRadius: 11, background: "rgba(224,82,82,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img src={IMG_DEPENSE} width="20" height="20" style={{objectFit:"contain"}} />
             </div>
             <div>
-              <div style={{ color: C.sub, fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>{t.stats.depense}</div>
-              <div style={{ color: "#e05252", fontSize: 15, fontWeight: 800, letterSpacing: -0.3 }}>{fmtN(dep)}</div>
+              <div style={{ color: C.sub, fontSize: 8, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 2 }}>{t.stats.depense}</div>
+              <div style={{ color: "#e05252", fontSize: 13, fontWeight: 800, letterSpacing: -0.2 }}>{fmtN(dep)}</div>
             </div>
           </button>
-          {/* Solde année passée — lecture seule */}
-          <div
-            style={{ background: (soldePrev + solde13) >= 0 ? "linear-gradient(135deg, rgba(1,45,29,0.06), rgba(1,45,29,0.12))" : "rgba(254,226,226,0.6)", border: `1.5px solid ${(soldePrev + solde13) >= 0 ? "rgba(1,45,29,0.2)" : "#FECACA"}`, borderRadius: 18, padding: "16px 14px 14px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8, width: "100%" }}>
-            <div style={{ width: 34, height: 34, borderRadius: 10, background: (soldePrev + solde13) >= 0 ? "rgba(1,45,29,0.10)" : "rgba(239,68,68,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={(soldePrev + solde13) >= 0 ? C.primaryLt : "#EF4444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
-            </div>
-            <div>
-              <div style={{ color: "#A0A0B8", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 3 }}>
-                {t.solde13Label(prevYear)}
-              </div>
-              <div style={{ color: (soldePrev + solde13) >= 0 ? C.primaryLt : "#EF4444", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>
-                {fmtN(Math.abs(soldePrev + solde13))}
-              </div>
-            </div>
-          </div>
         </div>
 
       </div>
@@ -913,15 +898,132 @@ function Dashboard({ txs, members, onAdd, onDelete, onEdit, onTabChange, lang, s
 }
 
 // ─── OPERATIONS ───────────────────────────────────────────────────────────────
-function Operations({ txs, onAdd, onDelete, onEdit, lang, readOnly = false }) {
+function Operations({ txs, onAdd, onDelete, onEdit, lang, readOnly = false, members = [], soldePrev = 0, solde13 = 0, prevYear = new Date().getFullYear() - 1 }) {
   const t = T[lang];
+  const [showContribForm, setShowContribForm] = useState(false);
+  const [contribForm, setContribForm] = useState({ memberId: "", amount: "", date: new Date().toISOString().slice(0, 10), note: "" });
+  const [contribSaving, setContribSaving] = useState(false);
 
   const last10 = [...txs]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 10);
 
+  const handleContribSave = async () => {
+    if (!contribForm.memberId) return alert(t.alertMember);
+    const amt = parseFloat(contribForm.amount);
+    if (!amt || isNaN(amt) || amt <= 0) return alert(t.alertAmount);
+    const member = members.find(m => m.id === contribForm.memberId);
+    setContribSaving(true);
+    await onAdd("contribution_inline", {
+      type: "contribution",
+      memberId: contribForm.memberId,
+      memberName: member ? member.name : "",
+      amount: amt,
+      date: contribForm.date,
+      note: contribForm.note,
+    });
+    setContribForm({ memberId: "", amount: "", date: new Date().toISOString().slice(0, 10), note: "" });
+    setShowContribForm(false);
+    setContribSaving(false);
+  };
+
   return (
     <div style={{ direction: t.dir, padding: "10px 0" }}>
+
+      {/* ── KPI Cards : Solde année précédente + 13ème mois ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
+        {/* Solde année précédente */}
+        <div style={{ background: soldePrev >= 0 ? "linear-gradient(135deg,rgba(1,45,29,0.07),rgba(1,45,29,0.14))" : "rgba(254,226,226,0.7)", border: `1.5px solid ${soldePrev >= 0 ? "rgba(1,45,29,0.2)" : "#FECACA"}`, borderRadius: 18, padding: "14px 13px 12px", display: "flex", flexDirection: "column", gap: 7 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: soldePrev >= 0 ? "rgba(1,45,29,0.10)" : "rgba(239,68,68,0.08)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={soldePrev >= 0 ? C.primaryLt : "#EF4444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+          </div>
+          <div>
+            <div style={{ color: C.sub, fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 2 }}>
+              {lang === "ar" ? `رصيد ${prevYear}` : `Solde ${prevYear}`}
+            </div>
+            <div style={{ color: soldePrev >= 0 ? C.primaryLt : "#EF4444", fontSize: 14, fontWeight: 800, letterSpacing: -0.3 }}>
+              {fmtN(Math.abs(soldePrev))}
+            </div>
+          </div>
+        </div>
+
+        {/* 13ème mois */}
+        <div style={{ background: solde13 >= 0 ? "linear-gradient(135deg,rgba(113,46,221,0.07),rgba(113,46,221,0.14))" : "rgba(254,226,226,0.7)", border: `1.5px solid ${solde13 >= 0 ? "rgba(113,46,221,0.25)" : "#FECACA"}`, borderRadius: 18, padding: "14px 13px 12px", display: "flex", flexDirection: "column", gap: 7 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(113,46,221,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.secondary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div>
+            <div style={{ color: C.sub, fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 2 }}>
+              {lang === "ar" ? "الشهر الثالث عشر" : "13ème mois"}
+            </div>
+            <div style={{ color: C.secondary, fontSize: 14, fontWeight: 800, letterSpacing: -0.3 }}>
+              {fmtN(Math.abs(solde13))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Bouton Ajouter Contribution rapide ── */}
+      {!readOnly && (
+        <div style={{ marginBottom: 16 }}>
+          <button className="tbtn" onClick={() => setShowContribForm(v => !v)}
+            style={{ width: "100%", background: showContribForm ? C.bgLow : "linear-gradient(135deg,#012d1d,#1b4332)", border: "none", color: showContribForm ? C.muted : "#fff", borderRadius: 16, padding: "13px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: showContribForm ? "none" : "0 4px 16px rgba(1,45,29,0.22)", transition: "all .2s", fontFamily: "inherit" }}>
+            <img src={IMG_CONTRIBUTION} width="18" height="18" style={{ objectFit: "contain", filter: showContribForm ? "none" : "brightness(2)" }} />
+            {showContribForm
+              ? (lang === "ar" ? "إغلاق" : "Fermer")
+              : (lang === "ar" ? "+ إضافة مساهمة" : "+ Ajouter une contribution")}
+          </button>
+
+          {showContribForm && (
+            <div className="fin-in" style={{ background: C.card, borderRadius: 18, padding: "16px", marginTop: 10, boxShadow: C.shadowMd, border: `1px solid ${C.outline}` }}>
+              <div style={{ marginBottom: 14, fontSize: 12, fontWeight: 700, color: C.primaryLt, display: "flex", alignItems: "center", gap: 6 }}>
+                <img src={IMG_CONTRIBUTION} width="16" height="16" style={{ objectFit: "contain" }} />
+                {lang === "ar" ? "مساهمة جديدة" : "Nouvelle Contribution"}
+              </div>
+
+              {/* Membre */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: 1, textTransform: "uppercase", marginBottom: 5 }}>{t.flds.member}</div>
+                <div style={{ position: "relative" }}>
+                  <select value={contribForm.memberId} onChange={e => setContribForm(f => ({ ...f, memberId: e.target.value }))}
+                    style={{ width: "100%", background: C.bgLow, border: "none", borderRadius: 10, padding: "11px 28px 11px 14px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit", appearance: "none", cursor: "pointer" }}>
+                    <option value="">{t.flds.memberPh}</option>
+                    {members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                  </select>
+                  <div style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>{Ic.chev(C.muted)}</div>
+                </div>
+              </div>
+
+              {/* Montant */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: 1, textTransform: "uppercase", marginBottom: 5 }}>{t.flds.amount}</div>
+                <input type="number" value={contribForm.amount} onChange={e => setContribForm(f => ({ ...f, amount: e.target.value }))} placeholder="0"
+                  style={{ width: "100%", background: C.bgLow, border: "none", borderRadius: 10, padding: "11px 14px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit" }} />
+              </div>
+
+              {/* Date */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: 1, textTransform: "uppercase", marginBottom: 5 }}>{t.flds.date}</div>
+                <input type="date" value={contribForm.date} onChange={e => setContribForm(f => ({ ...f, date: e.target.value }))}
+                  style={{ width: "100%", background: C.bgLow, border: "none", borderRadius: 10, padding: "11px 14px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit" }} />
+              </div>
+
+              {/* Note */}
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: 1, textTransform: "uppercase", marginBottom: 5 }}>{t.flds.desc}</div>
+                <input value={contribForm.note} onChange={e => setContribForm(f => ({ ...f, note: e.target.value }))} placeholder={t.flds.notePh}
+                  style={{ width: "100%", background: C.bgLow, border: "none", borderRadius: 10, padding: "11px 14px", color: C.text, fontSize: 13, outline: "none", fontFamily: "inherit" }} />
+              </div>
+
+              <button className="tbtn" onClick={handleContribSave} disabled={contribSaving}
+                style={{ width: "100%", background: contribSaving ? C.muted : C.heroGrad, border: "none", color: "#fff", borderRadius: 14, padding: "13px", fontSize: 13, fontWeight: 700, cursor: contribSaving ? "not-allowed" : "pointer", fontFamily: "inherit", boxShadow: contribSaving ? "none" : "0 6px 20px rgba(1,45,29,0.22)" }}>
+                {contribSaving ? "…" : t.save}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       <CatPills onAdd={onAdd} lang={lang} readOnly={readOnly} />
 
       {/* Libellé */}
@@ -3170,6 +3272,56 @@ export default function App() {
   const saveTx = (d) => { if (modal?.editTx) updateTx(d); else addTx(d); };
   const editTx = (tx) => setModal({ kind: "tx", txType: tx.type, editTx: tx });
 
+  // ── Auto-sync Excel : regénère et stocke le fichier xlsx dès que les transactions changent ──
+  const [xlsxSyncUrl, setXlsxSyncUrl] = useState(null);
+  useEffect(() => {
+    if (!xlsxReady || txs.length === 0) return;
+    const timer = setTimeout(() => {
+      try {
+        const XLSX = window.XLSX;
+        if (!XLSX) return;
+        const EXPORT_YEAR = new Date().getFullYear();
+        const today = new Date().toLocaleDateString("fr-FR");
+        const typeLabels = { contribution: "Contribution", don: "Don", depense: "Dépense" };
+        const MONTHS_FR = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+
+        const txsToExport = [...txs].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        const txAoa = [
+          [`🌿  CAISSE COOPÉRATIVE — REGISTRE DES TRANSACTIONS (Auto-sync ${today})`,\`\`,\`\`,\`\`,\`\`,\`\`,\`\`,\`\`,\`\`,\`\`],
+          ["#","Date","Type","Membre / Payeur","Montant (MRU)","Description / Note","Mois","Année","Statut","Réf."],
+          ...txsToExport.map((tx, i) => {
+            const d = new Date(tx.date);
+            return [i + 1, tx.date, typeLabels[tx.type] || tx.type, tx.memberName || "—", tx.amount, tx.note || "", isNaN(d) ? "" : d.getMonth() + 1, isNaN(d) ? "" : d.getFullYear(), "Confirmé", `TXN-${String(i+1).padStart(3,"0")}`];
+          }),
+        ];
+        const wsT = XLSX.utils.aoa_to_sheet(txAoa);
+        wsT["!cols"] = [{wch:5},{wch:14},{wch:16},{wch:22},{wch:18},{wch:32},{wch:10},{wch:9},{wch:13},{wch:14}];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, wsT, "Transactions");
+
+        // Feuille membres
+        if (members.length > 0) {
+          const mbrAoa = [["Nom","Téléphone",...MONTHS_FR,"TOTAL (MRU)"]];
+          const txsYear = txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR);
+          members.forEach(m => {
+            const monthlyC = MONTHS_FR.map((_, mi) => txsYear.filter(tx => tx.type === "contribution" && new Date(tx.date).getMonth() === mi && (tx.memberName === m.name || tx.memberId === m.id)).reduce((a,tx)=>a+tx.amount,0));
+            const total = monthlyC.reduce((a,v)=>a+v,0);
+            mbrAoa.push([m.name, m.phone || "", ...monthlyC, total]);
+          });
+          const wsM = XLSX.utils.aoa_to_sheet(mbrAoa);
+          XLSX.utils.book_append_sheet(wb, wsM, "Membres");
+        }
+
+        const wbOut = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+        const blob = new Blob([wbOut], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        const url = URL.createObjectURL(blob);
+        setXlsxSyncUrl(prev => { if (prev) URL.revokeObjectURL(prev); return url; });
+      } catch(e) { console.error("Auto-sync Excel error:", e); }
+    }, 1500); // debounce 1.5s
+    return () => clearTimeout(timer);
+  }, [txs, members, xlsxReady]);
+
   const nC = "rgba(255,255,255,0.35)";
   const TABS = [
     { id: "home",     label: t.tabs.home,     icon: Ic.home(nC),   aicon: Ic.home(C.secondaryLt)  },
@@ -3195,6 +3347,14 @@ export default function App() {
           {netError}
         </div>
       )}
+      {xlsxSyncUrl && !readOnly && (
+        <a href={xlsxSyncUrl} download={`caisse-${new Date().getFullYear()}.xlsx`}
+          title={lang === "ar" ? "تنزيل ملف Excel محدّث" : "Télécharger Excel synchronisé"}
+          style={{ position: "fixed", bottom: 100, right: 14, zIndex: 500, background: C.primaryLt, color: "#fff", borderRadius: 14, padding: "9px 14px", fontSize: 11, fontWeight: 700, textDecoration: "none", boxShadow: "0 4px 18px rgba(1,45,29,0.30)", display: "flex", alignItems: "center", gap: 6, letterSpacing: 0.2, animation: "pop .25s ease both" }}>
+          {Ic.dl("#fff", 14)}
+          <span>Excel</span>
+        </a>
+      )}
       <div style={{ padding: "20px 16px" }}>
         {readOnly && (
           <div style={{ background: "rgba(113,46,221,0.10)", border: "1.5px solid rgba(113,46,221,0.25)", borderRadius: 12, padding: "8px 14px", marginBottom: 12, display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: C.secondary, fontWeight: 600 }}>
@@ -3203,7 +3363,24 @@ export default function App() {
           </div>
         )}
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={readOnly ? null : (tp) => setModal({ kind: "tx", txType: tp })} onDelete={readOnly ? null : deleteTx} onEdit={readOnly ? null : editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} readOnly={readOnly} />}
-        {tab === "ops"      && <Operations txs={txs} onAdd={readOnly ? null : (tp) => setModal({ kind: "tx", txType: tp })} onDelete={readOnly ? null : deleteTx} onEdit={readOnly ? null : editTx} lang={lang} readOnly={readOnly} />}
+        {tab === "ops"      && <Operations txs={txs} members={members}
+          onAdd={readOnly ? null : (tp, inlineData) => {
+            if (inlineData) { addTx(inlineData); }
+            else { setModal({ kind: "tx", txType: tp }); }
+          }}
+          onDelete={readOnly ? null : deleteTx} onEdit={readOnly ? null : editTx} lang={lang} readOnly={readOnly}
+          soldePrev={(() => {
+            const prevYear = new Date().getFullYear() - 1;
+            const txsPrev = txs.filter(tx => new Date(tx.date).getFullYear() === prevYear);
+            const soldePrevAuto = txsPrev.reduce((a, tx) => tx.type === "depense" ? a - tx.amount : a + tx.amount, 0);
+            try { const raw = localStorage.getItem(`cc_soldeprev_${prevYear}`); const manual = raw ? JSON.parse(raw) : null; return manual !== null ? Number(manual) : soldePrevAuto; } catch { return soldePrevAuto; }
+          })()}
+          solde13={(() => {
+            const prevYear = new Date().getFullYear() - 1;
+            try { const raw = localStorage.getItem(`cc_solde13_${prevYear}`); return raw ? Number(JSON.parse(raw)) : 0; } catch { return 0; }
+          })()}
+          prevYear={new Date().getFullYear() - 1}
+        />}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={readOnly ? null : () => setModal({ kind: "membre" })} onDeleteMember={readOnly ? null : deleteMember} lang={lang} readOnly={readOnly} />}
         {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={readOnly ? null : resetAll} onAddTx={readOnly ? null : addTx} onAddTxBulk={readOnly ? null : addTxBulk} onAddMemberBulk={readOnly ? null : addMemberBulk} readOnly={readOnly} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} readOnly={readOnly} onLogout={() => { try { sessionStorage.removeItem("cc_user"); sessionStorage.removeItem("cc_readonly"); } catch {} setLoggedIn(false); setReadOnly(false); }} />}
