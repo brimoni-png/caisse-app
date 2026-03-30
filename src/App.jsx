@@ -969,12 +969,6 @@ function Operations({ txs, onAdd, onDelete, onEdit, lang, readOnly = false, memb
       date: form13.date,
       note: note13,
     });
-    // Update solde13 in localStorage
-    try {
-      const raw = localStorage.getItem(`cc_solde13_${prevYear}`);
-      const prev13 = raw ? Number(JSON.parse(raw)) : 0;
-      localStorage.setItem(`cc_solde13_${prevYear}`, JSON.stringify(prev13 + amt));
-    } catch {}
     setForm13({ memberId: "", amount: "", date: new Date().toISOString().slice(0, 10) });
     setShow13Form(false);
     setSaving13(false);
@@ -3431,12 +3425,15 @@ export default function App() {
 
         // Feuille membres
         if (members.length > 0) {
-          const mbrAoa = [["Nom","Téléphone",...MONTHS_FR,"TOTAL (MRU)"]];
+          const NOTE_13 = ["13ème mois", "مساهمة الشهر الثالث عشر"];
+          const mbrAoa = [["Nom","Téléphone",...MONTHS_FR,"13ème Mois","TOTAL (MRU)"]];
           const txsYear = txs.filter(tx => new Date(tx.date).getFullYear() === EXPORT_YEAR);
           members.forEach(m => {
-            const monthlyC = MONTHS_FR.map((_, mi) => txsYear.filter(tx => tx.type === "contribution" && new Date(tx.date).getMonth() === mi && (tx.memberName === m.name || tx.memberId === m.id)).reduce((a,tx)=>a+tx.amount,0));
-            const total = monthlyC.reduce((a,v)=>a+v,0);
-            mbrAoa.push([m.name, m.phone || "", ...monthlyC, total]);
+            const memberTxs = txsYear.filter(tx => tx.type === "contribution" && (tx.memberName === m.name || tx.memberId === m.id));
+            const monthlyC = MONTHS_FR.map((_, mi) => memberTxs.filter(tx => !NOTE_13.includes(tx.note) && new Date(tx.date).getMonth() === mi).reduce((a,tx)=>a+tx.amount,0));
+            const contrib13 = memberTxs.filter(tx => NOTE_13.includes(tx.note)).reduce((a,tx)=>a+tx.amount,0);
+            const total = monthlyC.reduce((a,v)=>a+v,0) + contrib13;
+            mbrAoa.push([m.name, m.phone || "", ...monthlyC, contrib13, total]);
           });
           const wsM = XLSX.utils.aoa_to_sheet(mbrAoa);
           XLSX.utils.book_append_sheet(wb, wsM, "Membres");
@@ -3492,13 +3489,20 @@ export default function App() {
           </div>
         )}
         {tab === "home"     && <Dashboard txs={txs} members={members} onAdd={readOnly ? null : (tp) => setModal({ kind: "tx", txType: tp })} onDelete={readOnly ? null : deleteTx} onEdit={readOnly ? null : editTx} onTabChange={setTab} lang={lang} setLang={setLang} chartReady={chartReady} readOnly={readOnly} />}
-        {tab === "ops"      && <Operations txs={txs} members={members}
-          onAdd={readOnly ? null : (tp, inlineData) => {
-            if (inlineData) { addTx(inlineData); }
-            else { setModal({ kind: "tx", txType: tp }); }
-          }}
-          onDelete={readOnly ? null : deleteTx} onEdit={readOnly ? null : editTx} lang={lang} readOnly={readOnly}
-        />}
+        {tab === "ops"      && (() => {
+          const NOTE_13 = ["13ème mois", "مساهمة الشهر الثالث عشر"];
+          const curY = new Date().getFullYear();
+          const solde13Computed = txs
+            .filter(tx => tx.type === "contribution" && NOTE_13.includes(tx.note) && new Date(tx.date).getFullYear() === curY)
+            .reduce((a, tx) => a + tx.amount, 0);
+          return <Operations txs={txs} members={members} solde13={solde13Computed}
+            onAdd={readOnly ? null : (tp, inlineData) => {
+              if (inlineData) { addTx(inlineData); }
+              else { setModal({ kind: "tx", txType: tp }); }
+            }}
+            onDelete={readOnly ? null : deleteTx} onEdit={readOnly ? null : editTx} lang={lang} readOnly={readOnly}
+          />;
+        })()}
         {tab === "members"  && <Members members={members} txs={txs} onAddMember={readOnly ? null : () => setModal({ kind: "membre" })} onDeleteMember={readOnly ? null : deleteMember} lang={lang} readOnly={readOnly} />}
         {tab === "reports"  && <Reports key="reports-tab" txs={txs} members={members} lang={lang} xlsxReady={xlsxReady} chartReady={chartReady} onRefresh={fetchAll} onReset={readOnly ? null : resetAll} onAddTx={readOnly ? null : addTx} onAddTxBulk={readOnly ? null : addTxBulk} onAddMemberBulk={readOnly ? null : addMemberBulk} readOnly={readOnly} />}
         {tab === "settings" && <Settings lang={lang} setLang={setLang} t={t} readOnly={readOnly} onLogout={() => { try { sessionStorage.removeItem("cc_user"); sessionStorage.removeItem("cc_readonly"); } catch {} setLoggedIn(false); setReadOnly(false); }} />}
